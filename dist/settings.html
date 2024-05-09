@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<style>
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<head>
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/settings.css" />
+  <script>
+    // Why not?
+    window.on = window.addEventListener;
+    window.$ = qs => document.querySelector(qs);
+    window.$$ = qs => document.querySelectorAll(qs);
+    Element.prototype.on = Element.prototype.addEventListener;
+    Element.prototype.$ = Element.prototype.querySelector;
+    Element.prototype.$$ = Element.prototype.querySelectorAll;
+  </script>
+</head>
+
+<body>
+  <div id="wrapper">
+    <div id="data">
+      <div class="row">
+        <label for="volume">Bacground music volume: </label>
+        <input id="volume" type="range" min="0" max="100" />
+      </div>
+      <div class="row">
+        <label for="updch">Update channel: </label>
+        <select id="updch">
+          <option>Release</option>
+          <option>Nightly</option>
+          <option>Disabled</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="currusr">Current user: </label>
+        <select id="currusr">
+          <option data-uid="1">Anon #1</option>
+          <option data-uid="2">Anon #2</option>
+          <option data-uid="3">Anon #3</option>
+          <option data-uid="4">Anon #4</option>
+        </select>
+      </div>
+    </div>
+    <div id="buttons">
+      <input type="button" value="Save and apply" />
+      <input type="button" value="Close" onclick="window.close();" />
+    </div>
+  </div>
+</body>
+
+</html>

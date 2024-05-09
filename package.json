@@ -1,0 +1,21 @@
+{
+	"name": "adv-launch",
+	"description": "PS4 Emulator launcher",
+	"version": "1.0.0",
+	"main": "main.js",
+	"devDependencies": {
+		"electron": "^30.0.2"
+	},
+	"scripts": {
+		"start": "electron ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/igor725/adv-launch.git"
+	},
+	"keywords": [
+		"ps4",
+		"emulator",
+		"launcher"
+	]
+}
