@@ -176,3 +176,33 @@
   grid-template-rows: 1fr 64px;
   overflow: hidden;
 }
+
+#warnmsg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+#warnmsg[data-active="0"] {
+  display: none;
+}
+
+#warnmsg p {
+  margin-bottom: 15px;
+}
+
+#warnmsg progress {
+  margin-bottom: 15px;
+}
+
+#warnmsg input[type="button"] {
+  margin-right: 10px;
+}

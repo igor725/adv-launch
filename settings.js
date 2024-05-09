@@ -48,4 +48,8 @@ config.getVolume = () => {
   return Math.max(0, Math.min(100, config.getValue('bg_volume')));
 };
 
+config.getBranch = () => {
+  return config.getValue('update_channel');
+};
+
 module.exports = config;

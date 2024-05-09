@@ -6,6 +6,12 @@
   scrollbar-color: rgb(15, 15, 15) #00000000;
 }
 
+select,
+option,
+input {
+  color: black;
+}
+
 html,
 body {
   width: 100%;

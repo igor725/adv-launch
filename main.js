@@ -6,13 +6,16 @@ const path = require('node:path');
 const fs = require('fs');
 const config = require('./settings.js');
 
-// const emupath = path.join(__dirname, '/bin/emulator');
-const emupath = 'C:/Users/igorg/Documents/GitHub/psOff_public/_build/_Install';
+const emupath = path.join(__dirname, '/bin/emulator');
+fs.mkdirSync(emupath, { recursive: true });
+// const emupath = 'C:/Users/igorg/Documents/GitHub/psOff_public/_build/_Install';
 
 let win = null;
 let player = null;
 let settwin = null;
 let gameproc = null;
+let updateWorker = null;
+let binname = 'psoff.exe';
 
 const converter = new Convert({
   newline: true
@@ -24,7 +27,10 @@ const terminalListener = (msg) => {
 
 const scanGameDir = (scanpath) => {
   const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
-  dirworker.on('message', (msg) => win.send('add-game', msg));
+  dirworker.on('message', (msg) => {
+    if (win.isDestroyed()) return;
+    win.send('add-game', msg);
+  });
   dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: 3 });
 };
 
@@ -94,14 +100,35 @@ const commandHandler = (channel, cmd, info) => {
         return;
       }
       win.send('ingame', true);
-      gameproc = spawn(path.join(emupath, '/psoff.exe'), [`--file=${info}\\eboot.bin`], { cwd: emupath });
+      gameproc = spawn(path.join(emupath, binname), [`--file=${info}\\eboot.bin`], { cwd: emupath });
       gameproc.stdout.on('data', terminalListener);
       gameproc.stderr.on('data', terminalListener);
+      gameproc.on('error', (err) => {
+        win.send('alert', err.toString());
+        win.send('ingame', false);
+        gameproc = null;
+      })
       gameproc.on('close', (code) => {
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
         gameproc = null;
       });
+      break;
+    case 'warnresp':
+      if (info.id === 'upd-nobin') {
+        if (info.resp === 0) {
+          win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading emulator binaries, hang tight...', buttons: ['Cancel'] });
+          updateWorker.postMessage({ act: 'download' });
+        } else if (info.resp === 2) {
+          app.quit();
+        } else {
+          win.send('warnmsg', { hidden: true, id: 'upd-nobin' });
+        }
+      } else if (info.id === 'upd-progr') {
+        if (info.resp === 0) {
+          app.quit();
+        }
+      }
       break;
 
     default:
@@ -126,5 +153,32 @@ app.whenReady().then(() => {
   });
 
   win.setAspectRatio(16 / 9);
+
+  win.webContents.once('did-finish-load', () => {
+    updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
+
+    updateWorker.on('message', (msg) => {
+      if (win.isDestroyed()) return;
+
+      switch (msg.resp) {
+        case 'nobinary':
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: 'Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release?', buttons: ['Yes', 'Ignore', 'Close the launcher'] });
+          break;
+
+        case 'progress':
+          win.send('warnmsg-upd', { id: 'upd-progr', progress: msg.value });
+          break;
+
+        case 'done':
+          binname = msg.executable ?? binname;
+          win.send('warnmsg', { id: 'upd-progr', hidden: true });
+          break;
+      }
+    });
+
+    updateWorker.postMessage({ act: 'set-branch', branch: config.getBranch(), path: emupath });
+    updateWorker.postMessage({ act: 'run-check' });
+  });
+
   win.loadFile('webroot/index.html');
 });
