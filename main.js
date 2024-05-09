@@ -4,6 +4,7 @@ const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('child_process');
 const path = require('node:path');
 const fs = require('fs');
+const config = require('./settings.js');
 
 // const emupath = path.join(__dirname, '/bin/emulator');
 const emupath = 'C:/Users/igorg/Documents/GitHub/psOff_public/_build/_Install';
@@ -21,17 +22,19 @@ const terminalListener = (msg) => {
   win.send('term-data', converter.toHtml(msg.toString()));
 };
 
+const scanGameDir = (scanpath) => {
+  const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
+  dirworker.on('message', (msg) => win.send('add-game', msg));
+  dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: 3 });
+};
+
 const commandHandler = (channel, cmd, info) => {
   switch (cmd) {
     case 'quit':
       app.quit();
       break;
     case 'getgames':
-      const dirworker = new Worker(path.join(__dirname, 'gamescanner.js'));
-      dirworker.on('message', (msg) => {
-        win.send('add-game', msg);
-      });
-      dirworker.postMessage({ act: 'scangdir', path: 'D:\\ps4\\games\\' });
+      scanGameDir('D:\\ps4\\games\\');
       break;
     case 'getbgaudio':
       if (player != null) {
@@ -50,7 +53,7 @@ const commandHandler = (channel, cmd, info) => {
       try {
         const apath = path.join(info, '/sce_sys/snd0.at9');
         if (fs.lstatSync(apath).isFile()) {
-          player = spawn('ffplay', ['-nodisp', '-volume', '20', '-vn', '-loglevel', 'quiet', '-loop', '0', '-i', apath]);
+          player = spawn(path.join(__dirname, '/bin/ffplay.exe'), ['-nodisp', '-volume', '20', '-vn', '-loglevel', 'quiet', '-loop', '0', '-i', apath]);
         }
       } catch (e) { }
       break;
@@ -74,14 +77,18 @@ const commandHandler = (channel, cmd, info) => {
         win.send('input', true);
         settwin = null;
       });
-      settwin.loadFile('dist/settings.html');
+      settwin.loadFile('webroot/settings.html');
       break;
     case 'openfolder':
       exec(`explorer "${info}"`);
       break;
     case 'rungame':
+      if (gameproc != null) {
+        win.send('alert', 'You should close your previous game first!');
+        return;
+      }
       win.send('ingame', true);
-      gameproc = spawn(path.join(emupath, 'psoff.exe'), [`--file=${info}\\eboot.bin`], { cwd: emupath });
+      gameproc = spawn(path.join(emupath, '/psoff.exe'), [`--file=${info}\\eboot.bin`], { cwd: emupath });
       gameproc.stdout.on('data', terminalListener);
       gameproc.stderr.on('data', terminalListener);
       gameproc.on('close', (code) => {
@@ -113,5 +120,5 @@ app.whenReady().then(() => {
   });
 
   win.setAspectRatio(16 / 9);
-  win.loadFile('dist/index.html');
+  win.loadFile('webroot/index.html');
 });

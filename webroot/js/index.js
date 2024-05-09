@@ -118,6 +118,8 @@
 
   window.electronAPI.addEventListener('ingame', (enabled) => {
     if (selectedGame != null) {
+      terminal.style.opacity = enabled ? 1 : null;
+
       if (enabled) {
         preventFetching();
         terminal.innerHTML = '';
@@ -125,6 +127,10 @@
         fetchGame(getSelectedGame(), true);
       }
     }
+  });
+
+  window.electronAPI.addEventListener('alert', (msg) => {
+    alert(msg);
   });
 
   window.electronAPI.addEventListener('term-data', (code) => {

@@ -19,6 +19,7 @@ input {
 
 #data {
   padding-left: 10px;
+  padding-right: 10px;
 }
 
 #buttons {
@@ -40,4 +41,12 @@ input {
   content: '';
   flex: 1;
   border-bottom: 1px solid #303030;
+}
+
+#gsd {
+  width: 100%;
+}
+
+#gsd-path {
+  width: 179px;
 }

@@ -38,6 +38,27 @@
           <option>Disabled</option>
         </select>
       </div>
+      <label for="gsd">Game scan directories: </label>
+      <div class="row">
+        <select id="gsd" size="4">
+          <option data-uid="1">D:\ps4\games | depth: 3</option>
+        </select>
+      </div>
+      <div class="row">
+        <input id="gsd-path" type="text" value="" />
+        <input id="gsd-dialog" type="button" value="..." />
+        <select id="gsd-depth">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+        </select>
+        <input id="gsd-add" type="button" value="Add" />
+        <input id="gsd-remove" type="button" value="Remove" />
+      </div>
+      <div class="separator">Emulator settings</div>
       <div class="row">
         <label for="currusr">Current user: </label>
         <select id="currusr">
@@ -47,7 +68,6 @@
           <option data-uid="4">Anon #4</option>
         </select>
       </div>
-      <div class="separator">Emulator settings</div>
       <div class="row">
         <label for="mavolume">Master volume: </label>
         <input id="mavolume" type="range" min="0" max="100" />

@@ -1,24 +1,35 @@
 {
-	"name": "adv-launch",
-	"description": "PS4 Emulator launcher",
-	"version": "1.0.0",
-	"main": "main.js",
-	"devDependencies": {
-		"electron": "^30.0.2"
-	},
-	"scripts": {
-		"start": "electron ."
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/igor725/adv-launch.git"
-	},
-	"keywords": [
-		"ps4",
-		"emulator",
-		"launcher"
-	],
-	"dependencies": {
-		"ansi-to-html": "^0.7.2"
-	}
+  "name": "adv-launch",
+  "author": {
+    "name": "igor725",
+    "email": "support@igvx.ru"
+  },
+  "description": "PS4 Emulator launcher",
+  "version": "1.0.0",
+  "main": "main.js",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^30.0.2"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igor725/adv-launch.git"
+  },
+  "keywords": [
+    "ps4",
+    "emulator",
+    "launcher"
+  ],
+  "dependencies": {
+    "ansi-to-html": "^0.7.2",
+    "electron-squirrel-startup": "^1.0.0"
+  }
 }

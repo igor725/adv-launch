@@ -54,15 +54,15 @@ const readSFO = (buffer) => {
   return paramsList;
 };
 
-const walker = (wpath, ents, depth = 0) => {
-  if (depth > 3) return;
+const walker = (wpath, ents, depth = 0, maxdepth = 3) => {
+  if (depth > maxdepth) return;
 
   ents.forEach(async (name) => {
     const fullpath = path.join(wpath, name);
     const stat = await fs.lstat(fullpath);
     if (stat.isDirectory()) {
       fs.readdir(fullpath).then((ents) => {
-        walker(fullpath, ents, depth + 1);
+        walker(fullpath, ents, depth + 1, maxdepth);
       });
     } else if (stat.isFile()) {
       if (name == 'eboot.bin') {
@@ -78,7 +78,6 @@ const walker = (wpath, ents, depth = 0) => {
           fs.readFile(paramsfopath).then(async (buff) => {
             const sfo_data = readSFO(buff);
             let icon = null;
-            let snd = null;
             let ispatch = false;
 
             try {
@@ -108,10 +107,8 @@ parentPort.on('message', (msg) => {
   switch (msg.act) {
     case 'scangdir':
       fs.readdir(msg.path).then((ents) => {
-        walker(msg.path, ents, 0);
+        walker(msg.path, ents, 0, msg.depth);
       });
       break;
   }
 });
-
-

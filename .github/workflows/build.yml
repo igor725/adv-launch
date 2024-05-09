@@ -1,0 +1,23 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create package
+        run: |
+          npm install
+          npm run package -- --platform win32
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: psOff-adv-launch
+          path: out/adv-launch-win32-x64/*
