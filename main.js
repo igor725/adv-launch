@@ -34,6 +34,11 @@ const scanGameDir = (scanpath) => {
   dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: 3 });
 };
 
+const _runDownloadingProcess = () => {
+  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading emulator binaries, hang tight...', buttons: ['Cancel'] });
+  updateWorker.postMessage({ act: 'download' });
+}
+
 const commandHandler = (channel, cmd, info) => {
   switch (cmd) {
     case 'quit':
@@ -115,19 +120,31 @@ const commandHandler = (channel, cmd, info) => {
       });
       break;
     case 'warnresp':
-      if (info.id === 'upd-nobin') {
-        if (info.resp === 0) {
-          win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading emulator binaries, hang tight...', buttons: ['Cancel'] });
-          updateWorker.postMessage({ act: 'download' });
-        } else if (info.resp === 2) {
-          app.quit();
-        } else {
-          win.send('warnmsg', { hidden: true, id: 'upd-nobin' });
-        }
-      } else if (info.id === 'upd-progr') {
-        if (info.resp === 0) {
-          app.quit();
-        }
+      switch (info.id) {
+        case 'upd-nobin':
+          if (info.resp === 0) {
+            _runDownloadingProcess();
+          } else if (info.resp === 2) {
+            app.quit();
+          } else {
+            win.send('warnmsg', { hidden: true, id: 'upd-nobin' });
+          }
+          break;
+
+        case 'upd-progr':
+          if (info.resp === 0) {
+            app.quit();
+          }
+          break;
+
+        case 'upd-newver':
+          if (info.resp === 0) {
+            _runDownloadingProcess();
+          } else if (info.resp === 1) {
+            win.send('warnmsg', { hidden: true, id: 'upd-newver' });
+          }
+          break;
+
       }
       break;
 
@@ -172,6 +189,15 @@ app.whenReady().then(() => {
         case 'done':
           binname = msg.executable ?? binname;
           win.send('warnmsg', { id: 'upd-progr', hidden: true });
+          break;
+
+        case 'available':
+          binname = msg.executable;
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: `New version of psOff emulator is available! Do you want to download it? (Installed: ${msg.currver}, New: ${msg.newver})`, buttons: ['Yes', 'No'] });
+          break;
+
+        case 'error':
+          win.send('alert', 'Failed to check for updates!');
           break;
       }
     });

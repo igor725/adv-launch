@@ -8,6 +8,11 @@ let update_channel = null;
 let emupath = null;
 let verfile = null;
 
+const newverinfo = {
+  url: '',
+  tag: ''
+};
+
 const searchBinary = () => {
   let binpath = null;
 
@@ -24,14 +29,70 @@ const searchBinary = () => {
   return null;
 };
 
-const triggerCheck = () => {
+const addDefaultHeaders = (headers) => Object.assign({ 'User-Agent': 'ADVL psOff/1.0', 'Accept': ['application/json'] }, headers);
+
+const loadJSON = (url, headers = undefined) =>
+  new Promise((resolve, reject) => {
+
+    https.get(url, { headers: addDefaultHeaders(headers) }, (resp) => {
+      let data = '';
+
+      if (resp.headers['content-type'].indexOf('application/json') == -1) {
+        resp.destroy('Not a josn response');
+        return;
+      }
+
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      resp.on('end', () => {
+        resolve(JSON.parse(data));
+      });
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+
+const triggerCheck = async () => {
   const binpath = searchBinary();
   if (binpath == null) {
     parentPort.postMessage({ resp: 'nobinary' });
     return;
   }
 
-  parentPort.postMessage({ resp: 'done', executable: path.basename(binpath) });
+  let currver = 'v.0.0';
+
+  try {
+    currver = fs.readFileSync(verfile);
+  } catch (e) { }
+
+  try {
+    switch (update_channel) {
+      case 'release': {
+        const resp = await loadJSON('https://api.github.com/repos/SysRay/psOff_public/releases?count=1');
+        if (resp[0] !== undefined) {
+          const newver = resp[0].tag_name;
+
+          if (newver != currver) {
+            if (resp[0].assets && resp[0].assets[0]) {
+              parentPort.postMessage({ resp: 'available', currver, newver, executable: path.basename(binpath) });
+              newverinfo.url = resp[0].assets[0].browser_download_url;
+              newverinfo.tag = newver;
+              return;
+            } else {
+              console.error('No assets in the latest release!');
+            }
+          }
+
+          parentPort.postMessage({ resp: 'done', executable: path.basename(binpath) });
+          return;
+        }
+      } break;
+    }
+  } catch (e) { }
+
+  parentPort.postMessage({ resp: 'error' });
 };
 
 const download = (url, version, headers = undefined) => {
@@ -45,7 +106,7 @@ const download = (url, version, headers = undefined) => {
     parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
   });
 
-  https.get(url, headers, (resp) => {
+  https.get(url, { headers: addDefaultHeaders(headers) }, (resp) => {
     const need = resp.headers['content-length'] ?? -1;
     let down = 0;
 
@@ -63,7 +124,7 @@ const download = (url, version, headers = undefined) => {
   });
 };
 
-parentPort.on('message', (msg) => {
+parentPort.on('message', async (msg) => {
   switch (msg.act) {
     case 'set-branch':
       verfile = path.join(msg.path, '/version.adv');
@@ -72,12 +133,11 @@ parentPort.on('message', (msg) => {
       break;
 
     case 'run-check':
-      triggerCheck();
+      await triggerCheck();
       break;
 
     case 'download':
-      // todo resolve these
-      download('https://github.com/SysRay/psOff_public/releases/download/v.0.4-beta/psOff-artifact.zip', 'v.0.4-beta');
+      download(newverinfo.url, newverinfo.tag);
       break;
   }
 });

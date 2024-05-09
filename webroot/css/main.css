@@ -166,6 +166,10 @@
   height: 98%;
 }
 
+#terminal:empty {
+  display: none;
+}
+
 #terminal:hover {
   opacity: 1;
 }

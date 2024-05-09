@@ -1,4 +1,5 @@
 package-lock.json
 node_modules/
 config.json
+bin/emulator/
 out/
