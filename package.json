@@ -4,7 +4,7 @@
     "name": "igor725",
     "email": "support@igvx.ru"
   },
-  "description": "PS4 Emulator launcher",
+  "description": "psOff PS4 emulator launcher",
   "version": "1.0.0",
   "main": "main.js",
   "devDependencies": {
