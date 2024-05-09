@@ -9,30 +9,55 @@
 
   const bgimage = $('#bgimage');
   const gamelist = $('#gamelist');
+  const terminal = $('#terminal');
+
   let loadBGandSound = null;
   let selectedGame = null;
   let playingAmbientFor = null;
 
-  const fetchGame = (node) => {
+  const getSelectedGame = () => selectedGame != null ? $(`.gamebadge[data-gid="${selectedGame}"]`) : null;
+
+  const fetchGame = (node, force = false) => {
     if (loadBGandSound != null) {
       clearTimeout(loadBGandSound);
       loadBGandSound = null;
     }
 
     const { gpath, gid } = node.dataset;
-    if (playingAmbientFor == gid) return;
+    if (playingAmbientFor == gid && !force) return;
 
     loadBGandSound = setTimeout(() => {
       window.electronAPI.sendCommand('getbgaudio', gpath);
-      playingAmbientFor = gpath;
+      playingAmbientFor = gid;
     }, 1200);
   };
+
+  const preventFetching = () => {
+    window.electronAPI.sendCommand('stopaudio');
+
+    if (loadBGandSound != null) {
+      clearTimeout(loadBGandSound);
+      loadBGandSound = null;
+    }
+  };
+
+  $('#gamebuttons').on('click', ({ target }) => {
+    if (!target.classList.contains('gbutton')) return;
+    const sg = getSelectedGame();
+    if (sg == null) return alert('You should select the game first!');
+
+    if (target.classList.contains('ofolder')) {
+      window.electronAPI.sendCommand('openfolder', sg.dataset.gpath);
+    } else if (target.classList.contains('rgame')) {
+      window.electronAPI.sendCommand('rungame', sg.dataset.gpath);
+    }
+  }, true);
 
   gamelist.on('click', ({ target }) => {
     if (!target.classList.contains('gb-info')) return;
     const gbadge = target.parentNode;
     if (selectedGame != null) {
-      $(`.gamebadge[data-gid="${selectedGame}"]`).classList.remove('selected');
+      getSelectedGame().classList.remove('selected');
     }
     gbadge.classList.add('selected');
     selectedGame = gbadge.dataset.gid;
@@ -48,10 +73,10 @@
     const gbadge = target.parentNode;
 
     if (selectedGame != null) {
-      fetchGame($(`.gamebadge[data-gid="${selectedGame}"]`));
+      fetchGame(getSelectedGame());
     } else {
       bgimage.style.backgroundImage = '';
-      window.electronAPI.sendCommand('stopaudio');
+      preventFetching();
     }
   }, true);
 
@@ -89,6 +114,22 @@
 
   window.electronAPI.addEventListener('input', (state) => {
     document.body.style.pointerEvents = state == false ? 'none' : null;
+  });
+
+  window.electronAPI.addEventListener('ingame', (enabled) => {
+    if (selectedGame != null) {
+      if (enabled) {
+        preventFetching();
+        terminal.innerHTML = '';
+      } else {
+        fetchGame(getSelectedGame(), true);
+      }
+    }
+  });
+
+  window.electronAPI.addEventListener('term-data', (code) => {
+    terminal.innerHTML += code;
+    terminal.scrollTop = terminal.scrollHeight;
   });
 
   window.electronAPI.sendCommand('getgames');

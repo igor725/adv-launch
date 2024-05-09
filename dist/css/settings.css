@@ -26,3 +26,18 @@ input {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
 }
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #303030;
+}

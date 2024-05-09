@@ -17,5 +17,8 @@
 		"ps4",
 		"emulator",
 		"launcher"
-	]
+	],
+	"dependencies": {
+		"ansi-to-html": "^0.7.2"
+	}
 }

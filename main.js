@@ -1,12 +1,25 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('node:path');
 const fs = require('fs');
+
+// const emupath = path.join(__dirname, '/bin/emulator');
+const emupath = 'C:/Users/igorg/Documents/GitHub/psOff_public/_build/_Install';
 
 let win = null;
 let player = null;
 let settwin = null;
+let gameproc = null;
+
+const converter = new Convert({
+  newline: true
+});
+
+const terminalListener = (msg) => {
+  win.send('term-data', converter.toHtml(msg.toString()));
+};
 
 const commandHandler = (channel, cmd, info) => {
   switch (cmd) {
@@ -31,6 +44,8 @@ const commandHandler = (channel, cmd, info) => {
       } catch (e) {
         win.send('set-bg-image', null);
       }
+
+      if (gameproc != null) return;
 
       try {
         const apath = path.join(info, '/sce_sys/snd0.at9');
@@ -60,6 +75,24 @@ const commandHandler = (channel, cmd, info) => {
         settwin = null;
       });
       settwin.loadFile('dist/settings.html');
+      break;
+    case 'openfolder':
+      exec(`explorer "${info}"`);
+      break;
+    case 'rungame':
+      win.send('ingame', true);
+      gameproc = spawn(path.join(emupath, 'psoff.exe'), [`--file=${info}\\eboot.bin`], { cwd: emupath });
+      gameproc.stdout.on('data', terminalListener);
+      gameproc.stderr.on('data', terminalListener);
+      gameproc.on('close', (code) => {
+        win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
+        win.send('ingame', false);
+        gameproc = null;
+      });
+      break;
+
+    default:
+      console.error('Unhandled command: ', cmd);
       break;
   }
 };

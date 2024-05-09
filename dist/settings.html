@@ -25,9 +25,10 @@
 <body>
   <div id="wrapper">
     <div id="data">
+      <div class="separator">Launcher settings</div>
       <div class="row">
-        <label for="volume">Bacground music volume: </label>
-        <input id="volume" type="range" min="0" max="100" />
+        <label for="bgvolume">Bacground music volume: </label>
+        <input id="bgvolume" type="range" min="0" max="100" />
       </div>
       <div class="row">
         <label for="updch">Update channel: </label>
@@ -45,6 +46,50 @@
           <option data-uid="3">Anon #3</option>
           <option data-uid="4">Anon #4</option>
         </select>
+      </div>
+      <div class="separator">Emulator settings</div>
+      <div class="row">
+        <label for="mavolume">Master volume: </label>
+        <input id="mavolume" type="range" min="0" max="100" />
+      </div>
+      <div class="row">
+        <label for="syslang">System language: </label>
+        <select id="syslang">
+          <option data-lid="0">Japanese</option>
+          <option data-lid="1">EnglishUS</option>
+          <option data-lid="2">French</option>
+          <option data-lid="3">Spanish</option>
+          <option data-lid="4">German</option>
+          <option data-lid="5">Italian</option>
+          <option data-lid="6">Dutch</option>
+          <option data-lid="7">PortuguesePT</option>
+          <option data-lid="8">Russian</option>
+          <option data-lid="9">Korean</option>
+          <option data-lid="10">ChineseTraditional</option>
+          <option data-lid="11">ChineseSimplified</option>
+          <option data-lid="12">Finnish</option>
+          <option data-lid="13">Swedish</option>
+          <option data-lid="14">Danish</option>
+          <option data-lid="15">Norwegian</option>
+          <option data-lid="16">Polish</option>
+          <option data-lid="17">PortugueseBR</option>
+          <option data-lid="18">EnglishUK</option>
+          <option data-lid="19">Turkish</option>
+          <option data-lid="20">SpanishLA</option>
+          <option data-lid="21">Arabic</option>
+          <option data-lid="22">FrenchCA</option>
+          <option data-lid="23">Czech</option>
+          <option data-lid="24">Hungarian</option>
+          <option data-lid="25">Greek</option>
+          <option data-lid="26">Romanian</option>
+          <option data-lid="27">Thai</option>
+          <option data-lid="28">Vietnamese</option>
+          <option data-lid="29">Indonesian</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="fullscreen">Enable fullscreen: </label>
+        <input id="fullscreen" type="checkbox" />
       </div>
     </div>
     <div id="buttons">
