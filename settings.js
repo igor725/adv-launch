@@ -4,6 +4,8 @@ const path = require('path');
 const cfgfile = path.join(__dirname, '/config.json');
 
 const config = {
+  unsaved: false,
+  callbacks: [],
   default: {
     update_channel: 'release',
     bg_volume: 30,
@@ -16,18 +18,34 @@ try {
   config.json = JSON.parse(data);
 } catch (e) {
   console.error('Failed to load the default config: ', e.toString());
-  const data = JSON.stringify(config.data);
+  const data = JSON.stringify(config.default);
   config.json = JSON.parse(data);
   fs.writeFileSync(cfgfile, data);
 }
 
 config.getValue = (name) => {
   if (!config.default[name]) {
-    console.error('Attempt to get ')
+    console.error('Attempt to get invalid config entry: ', name);
     return null;
+  }
+
+  return typeof config.json[name] !== 'undefined' ? config.json[name] : config.default[name];
+};
+
+config.setValue = (name, value) => {
+  if (!config.default[name]) {
+    console.error('Attempt to set invalid config entry: ', name);
+    return null;
+  }
+
+  if (value === null) {
+    config.json[name] = config.default[name];
+    config.unsaved = true;
   }
 };
 
-config.getVolume = () => { };
+config.getVolume = () => {
+  return Math.max(0, Math.min(100, config.getValue('bg_volume')));
+};
 
 module.exports = config;

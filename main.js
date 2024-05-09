@@ -48,12 +48,18 @@ const commandHandler = (channel, cmd, info) => {
         win.send('set-bg-image', null);
       }
 
-      if (gameproc != null) return;
+      const volume = config.getVolume();
+
+      if (gameproc != null || volume == 0) return;
 
       try {
         const apath = path.join(info, '/sce_sys/snd0.at9');
         if (fs.lstatSync(apath).isFile()) {
-          player = spawn(path.join(__dirname, '/bin/ffplay.exe'), ['-nodisp', '-volume', '20', '-vn', '-loglevel', 'quiet', '-loop', '0', '-i', apath]);
+          player = spawn(path.join(__dirname, '/bin/ffplay.exe'), [
+            '-nodisp', '-volume', volume,
+            '-vn', '-loglevel', 'quiet',
+            '-loop', '0', '-i', apath
+          ]);
         }
       } catch (e) { }
       break;
