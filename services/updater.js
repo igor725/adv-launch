@@ -56,16 +56,14 @@ const loadJSON = (url, headers = undefined) =>
 
 const triggerCheck = async () => {
   const binpath = searchBinary();
-  if (binpath == null) {
-    parentPort.postMessage({ resp: 'nobinary' });
-    return;
-  }
 
   let currver = 'v.0.0';
 
-  try {
-    currver = fs.readFileSync(verfile);
-  } catch (e) { }
+  if (binpath !== null) {
+    try {
+      currver = fs.readFileSync(verfile);
+    } catch (e) { }
+  }
 
   try {
     switch (update_channel) {
@@ -76,13 +74,20 @@ const triggerCheck = async () => {
 
           if (newver != currver) {
             if (resp[0].assets && resp[0].assets[0]) {
-              parentPort.postMessage({ resp: 'available', currver, newver, executable: path.basename(binpath) });
               newverinfo.url = resp[0].assets[0].browser_download_url;
               newverinfo.tag = newver;
-              return;
+              if (binpath !== null) {
+                parentPort.postMessage({ resp: 'available', currver, newver, executable: path.basename(binpath) });
+                return;
+              }
             } else {
               console.error('No assets in the latest release!');
             }
+          }
+
+          if (binpath === null) {
+            parentPort.postMessage({ resp: 'nobinary', latest: newver });
+            return;
           }
 
           parentPort.postMessage({ resp: 'done', executable: path.basename(binpath) });

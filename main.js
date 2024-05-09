@@ -179,7 +179,7 @@ app.whenReady().then(() => {
 
       switch (msg.resp) {
         case 'nobinary':
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: 'Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release?', buttons: ['Yes', 'Ignore', 'Close the launcher'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: `Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release (${msg.latest})?`, buttons: ['Yes', 'Ignore', 'Close the launcher'] });
           break;
 
         case 'progress':
