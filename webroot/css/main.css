@@ -19,6 +19,13 @@
   flex: 1;
 }
 
+#titlebar .title {
+  position: absolute;
+  top: 2px;
+  left: 8px;
+  pointer-events: none;
+}
+
 .tb-button {
   width: 25px;
   height: 100%;

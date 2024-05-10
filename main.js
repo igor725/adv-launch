@@ -254,6 +254,7 @@ const commandHandler = (channel, cmd, info) => {
       exec(`start https://github.com/settings/personal-access-tokens/new`);
       break;
     case 'sett-update':
+      // todo: actually save the config
       settwin.close();
       break;
 
