@@ -98,8 +98,20 @@
     return true;
   };
 
+  const refillScanDirs = (cfg = saved_cfg) => {
+    const dirs = cfg[1].scan_dirs;
+    const opts = [];
+
+    for (const [path, depth] of Object.entries(dirs)) {
+      opts.push(`<option data-folder="${path}">${path} | depth: ${depth}</option>`);
+    }
+
+    $('#gsd').innerHTML = opts.join('');
+  };
+
   window.electronAPI.addEventListener('sett-values', (msg) => {
     saved_cfg = msg;
+    refillScanDirs(saved_cfg);
 
     {
       const uselect = $('select[data-cfgkey="userIndex"]');
@@ -112,19 +124,6 @@
         uselect.innerHTML = opts.join('');
         uselect.disabled = '';
       }
-    }
-
-    {
-      const scan = $('select[data-cfgkey="scan_dirs"]');
-      const dirs = msg[1].scan_dirs;
-      const opts = [];
-
-      for (let i = 0; i < dirs.length; ++i) {
-        const dir = dirs[i];
-        opts.push(`<option data-cfgpath="${dir.path}">${dir.path} | depth: ${dir.depth}</option>`);
-      }
-
-      scan.innerHTML = opts.join('');
     }
 
     const htels = $$('*[data-cfgfacility]');
@@ -226,6 +225,38 @@
           wrapper.dataset.ready = 0;
         break;
     }
+  });
+
+  $('#gsd-dialog').on('click', () => {
+    window.electronAPI.sendCommand('sett-requestdialog');
+  });
+
+  $('#gsd-add').on('click', () => {
+    const path = $('#gsd-path').value;
+    if (!path) return;
+
+    if (modified_cfg[1].scan_dirs === undefined) {
+      modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
+    }
+
+    modified_cfg[1].scan_dirs[path] = ($('#gsd-depth').selectedIndex + 1);
+    refillScanDirs(modified_cfg);
+  });
+
+  $('#gsd-remove').on('click', () => {
+    const path = $('#gsd-path').value;
+    if (!path) return;
+
+    if (modified_cfg[1].scan_dirs === undefined) {
+      modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
+    }
+
+    delete modified_cfg[1].scan_dirs[path];
+    refillScanDirs(modified_cfg);
+  });
+
+  $('#gsd').on('change', ({ target }) => {
+    $('#gsd-path').value = target.options[target.selectedIndex].dataset.folder;
   });
 
   {

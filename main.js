@@ -112,8 +112,8 @@ const commandHandler = (channel, cmd, info) => {
       win.minimize();
       break;
     case 'getgames':
-      for (const dir of config.getScanDirectories()) {
-        scanGameDir(dir.path, dir.depth);
+      for (const [path, depth] of config.getScanDirectories()) {
+        scanGameDir(path, depth);
       }
       break;
     case 'getgamesum':

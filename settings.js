@@ -7,7 +7,7 @@ module.exports.Config = class Config {
     update_channel: 'release',
     github_token: '',
     bg_volume: 30,
-    scan_dirs: []
+    scan_dirs: {}
   };
   #emuconfpath = null;
   #emuconf = {
@@ -86,7 +86,7 @@ module.exports.Config = class Config {
   };
 
   getScanDirectories = () => {
-    return this.getValue('scan_dirs');
+    return Object.entries(this.getValue('scan_dirs'));
   };
 
   getInitialUser = () => {
