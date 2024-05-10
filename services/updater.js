@@ -62,7 +62,9 @@ const triggerCheck = async () => {
   if (binpath !== null) {
     try {
       currver = fs.readFileSync(verfile);
-    } catch (e) { }
+    } catch (e) {
+      console.error('[UPDATER] Failed to get the installed emulator version');
+    }
   }
 
   try {
@@ -81,7 +83,7 @@ const triggerCheck = async () => {
                 return;
               }
             } else {
-              console.error('No assets in the latest release!');
+              console.error('[UPDATER] No assets in the latest release!');
             }
           }
 
@@ -95,7 +97,9 @@ const triggerCheck = async () => {
         }
       } break;
     }
-  } catch (e) { }
+  } catch (e) {
+    console.error(`[UPDATER] triggerCheck: ${e.toString()}`);
+  }
 
   parentPort.postMessage({ resp: 'error' });
 };

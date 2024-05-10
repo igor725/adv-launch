@@ -1,21 +1,43 @@
 (() => {
-  $('.tb-button.close').on('click', () => {
-    window.electronAPI.sendCommand('quit');
-  });
+  $('#titlebar').on('click', ({ target }) => {
+    const tgc = target.classList;
 
-  $('.tb-button.options').on('click', () => {
-    window.electronAPI.sendCommand('showsettings');
+    if (tgc.contains('close')) {
+      window.electronAPI.sendCommand('quit');
+    } else if (tgc.contains('options')) {
+      window.electronAPI.sendCommand('showsettings');
+    } else if (tgc.contains('minimize')) {
+      window.electronAPI.sendCommand('minimize');
+    }
   });
 
   const bgimage = $('#bgimage');
   const gamelist = $('#gamelist');
   const terminal = $('#terminal');
+  const gsummary = $('#gamesummary');
 
   let loadBGandSound = null;
   let selectedGame = null;
   let playingAmbientFor = null;
 
   const getSelectedGame = () => selectedGame != null ? $(`.gamebadge[data-gid="${selectedGame}"]`) : null;
+
+  const formatTime = (ms) => {
+    const seconds = Math.floor(Math.abs(ms / 1000));
+
+    if (seconds < 1) {
+      return 'Unplayed';
+    } else if (seconds < 60) {
+      return seconds + (seconds > 1 ? ' seconds' : ' second');
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return minutes + (minutes > 1 ? ' minutes' : ' minute');
+    } else {
+      const hours = seconds / 3600;
+      const floored = Math.floor(hours);
+      return ((hours - floored > 0.25) ? hours.toFixed(2) : hours) + (hours > 1 ? ' hours' : ' hour');
+    }
+  }
 
   const fetchGame = (node, force = false) => {
     if (loadBGandSound != null) {
@@ -27,7 +49,7 @@
     if (playingAmbientFor == gid && !force) return;
 
     loadBGandSound = setTimeout(() => {
-      window.electronAPI.sendCommand('getbgaudio', gpath);
+      window.electronAPI.sendCommand('getgamesum', { path: gpath, id: gid });
       playingAmbientFor = gid;
     }, 1200);
   };
@@ -46,10 +68,12 @@
     const sg = getSelectedGame();
     if (sg == null) return alert('You should select the game first!');
 
+    const { gpath, gid } = sg.dataset;
+
     if (target.classList.contains('ofolder')) {
-      window.electronAPI.sendCommand('openfolder', sg.dataset.gpath);
+      window.electronAPI.sendCommand('openfolder', gpath);
     } else if (target.classList.contains('rgame')) {
-      window.electronAPI.sendCommand('rungame', sg.dataset.gpath);
+      window.electronAPI.sendCommand('rungame', { path: gpath, gid: gid });
     }
   }, true);
 
@@ -75,6 +99,8 @@
     if (selectedGame != null) {
       fetchGame(getSelectedGame());
     } else {
+      playingAmbientFor = null;
+      gsummary.style.opacity = 0;
       bgimage.style.backgroundImage = '';
       preventFetching();
     }
@@ -185,5 +211,22 @@
     }
   });
 
+  window.electronAPI.addEventListener('gamesum', (data) => {
+    const lrun = gsummary.$('.lrun p:nth-child(2)');
+    const lplay = gsummary.$('.lplay p:nth-child(2)');
+    lrun.innerText = data.lastrun === -1 ? 'Never' : (new Date(data.lastrun)).toLocaleDateString();
+    lplay.innerText = formatTime(data.playtime);
+    gsummary.style.opacity = 1;
+
+    const trop = gsummary.$('.ltrops');
+    if (data.trophies_max < 1) {
+      trop.style.opacity = 0;
+    } else {
+      trop.style.opacity = 1;
+      trop.children[1].innerText = `${data.trhophies} / ${data.trophies_max}`;
+    }
+  });
+
   window.electronAPI.sendCommand('getgames');
+  gsummary.style.opacity = 0;
 })();

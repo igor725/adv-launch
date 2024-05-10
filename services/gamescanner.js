@@ -2,6 +2,11 @@ const fs = require('fs/promises');
 const path = require('node:path');
 const { parentPort } = require('node:worker_threads');
 
+const applist = {
+  gd: true,
+  gp: true
+};
+
 const readSFO = (buffer) => {
   if (1104986460160n != buffer.readBigUInt64LE(0)) {
     console.error('Invalid magic!');
@@ -66,36 +71,36 @@ const walker = (wpath, ents, depth = 0, maxdepth = 3) => {
       });
     } else if (stat.isFile()) {
       if (name == 'eboot.bin') {
-        const syspath = path.join(wpath, 'sce_sys');
-        const paramsfopath = path.join(syspath, 'param.sfo');
+        const syspath = path.join(wpath, '/sce_sys');
+        const paramsfopath = path.join(syspath, '/param.sfo');
         let paramsfostat = null;
 
         try {
           paramsfostat = await fs.lstat(paramsfopath);
-        } catch (e) { }
+        } catch (e) {
+          console.error(`Failed to stat param.sfo: ${e.toString()}`);
+          return;
+        }
 
-        if (paramsfostat != null && paramsfostat.isFile()) {
+        if (paramsfostat.isFile()) {
           fs.readFile(paramsfopath).then(async (buff) => {
             const sfo_data = readSFO(buff);
             let icon = null;
-            let ispatch = false;
 
             try {
-              ispatch = (await fs.lstat(path.join(syspath, 'changeinfo'))).isDirectory();
+              icon = await fs.readFile(path.join(syspath, '/icon0.png'), { encoding: 'base64' });
             } catch (e) { }
 
-            try {
-              icon = await fs.readFile(path.join(syspath, 'icon0.png'), { encoding: 'base64' });
-            } catch (e) { }
-
-            parentPort.postMessage({
-              id: sfo_data.TITLE_ID,
-              title: sfo_data.TITLE,
-              version: sfo_data.VERSION,
-              ispatch: ispatch,
-              path: wpath,
-              icon: icon
-            });
+            if (applist[sfo_data.CATEGORY]) {
+              parentPort.postMessage({
+                id: sfo_data.TITLE_ID,
+                title: sfo_data.TITLE,
+                version: sfo_data.VERSION,
+                ispatch: sfo_data.CATEGORY === 'gp',
+                path: wpath,
+                icon: icon
+              });
+            }
           });
         }
       }
