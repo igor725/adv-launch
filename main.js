@@ -8,8 +8,15 @@ const { Config } = require('./settings.js');
 
 const emupath = path.join(__dirname, '/bin/emulator');
 const gipath = path.join(__dirname, '/gameinfo');
-fs.mkdirSync(emupath, { recursive: true });
-fs.mkdirSync(gipath, { recursive: true });
+
+try {
+  fs.mkdirSync(emupath, { recursive: true });
+  fs.mkdirSync(gipath, { recursive: true });
+  exec('del temp*.zip', { cwd: emupath });
+} catch (e) {
+  console.error(e.toString());
+  process.exit(1);
+}
 
 let win = null;
 let player = null;
@@ -39,7 +46,7 @@ const scanGameDir = (scanpath, depth) => {
 };
 
 const _runDownloadingProcess = () => {
-  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading emulator binaries, hang tight...', buttons: ['Cancel'] });
+  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading the emulator binaries, hang tight...', buttons: ['Cancel'] });
   updateWorker.postMessage({ act: 'download' });
 }
 
@@ -91,8 +98,8 @@ const updateGameSummary = (gid, lastrun) => {
 
 const updateBinaryPath = (path) => {
   binname = path ?? binname;
-  exec(`"${binname}" -h`).on('close', (code) => {
-    if (code === 1) config.reloadEmulatorSettings();
+  exec(`"${binname}" -h`, { cwd: emupath }).on('close', (code) => {
+    if (code === 1 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });
 };
@@ -254,7 +261,7 @@ const commandHandler = (channel, cmd, info) => {
       exec(`start https://github.com/settings/personal-access-tokens/new`);
       break;
     case 'sett-update':
-      // todo: actually save the config
+      config.updateMultipleKeys(info);
       settwin.close();
       break;
 
@@ -318,9 +325,31 @@ app.whenReady().then(() => {
     });
 
     let token;
-    if (token = config.getGitHubToken()) updateWorker.postMessage({ act: 'set-token', token: token });
-    updateWorker.postMessage({ act: 'set-branch', branch: config.getBranch(), path: emupath });
+    if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+    updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
+    updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
     updateWorker.postMessage({ act: 'run-check' });
+  });
+
+  let updaterchanged = false;
+
+  config.addCallback('launcher', (key, value) => {
+    switch (key) {
+      case 'github_token':
+        updateWorker.postMessage({ act: 'set-token', token: value });
+        break;
+      case 'update_channel':
+        updateWorker.postMessage({ act: 'set-branch', branch: value, path: emupath });
+        break;
+      default:
+        return;
+    }
+    updaterchanged = true;
+  });
+
+  config.addCallback('flush', () => {
+    if (updaterchanged) updateWorker.postMessage({ act: 'run-check' });
+    config.save();
   });
 
   win.loadFile('webroot/index.html');

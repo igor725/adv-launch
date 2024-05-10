@@ -8,6 +8,7 @@ let update_channel = null;
 let atoken = null;
 let emupath = null;
 let verfile = null;
+let freq = null;
 
 const newverinfo = {
   url: '',
@@ -36,7 +37,7 @@ const addDefaultHeaders = (headers) => {
   return Object.assign(defheaders, headers);
 };
 
-const sendExecutable = (binpath) => {
+const sendExecutable = (binpath, currver) => {
   if (binpath === null) {
     parentPort.postMessage({ resp: 'nobinary', latest: newverinfo.tag });
     return;
@@ -79,7 +80,35 @@ const triggerCheck = async () => {
 
   if (binpath !== null) {
     try {
-      currver = fs.readFileSync(verfile, { encoding: 'utf-8' });
+      const vinfo = JSON.parse(fs.readFileSync(verfile));
+
+      if (freq !== null) {
+        const now = Date.now();
+        let next = 0;
+
+        switch (freq) {
+          case 'daily':
+            next = 86400000;
+            break;
+          case 'weekly':
+            next = 604800000;
+            break;
+          case 'monthly':
+            next = 2592000000;
+            break;
+        }
+
+        if (now < (vinfo.lastcheck + next)) {
+          console.error('[UPDATER] Skipping update check, this is not the time for updates');
+          sendExecutable(binpath, currver);
+          return;
+        }
+
+        vinfo.lastcheck = now;
+        fs.writeFileSync(verfile, JSON.stringify(vinfo));
+      }
+
+      currver = vinfo.version;
     } catch (e) {
       console.error('[UPDATER] Failed to get the installed emulator version');
     }
@@ -125,11 +154,11 @@ const triggerCheck = async () => {
       } break;
     }
   } catch (err) {
-    sendExecutable(binpath);
+    sendExecutable(binpath, currver);
     throw err;
   }
 
-  sendExecutable(binpath);
+  sendExecutable(binpath, currver);
 };
 
 const download = async (url, version, headers = undefined) => {
@@ -151,9 +180,26 @@ const download = async (url, version, headers = undefined) => {
   const tempfile = fs.createWriteStream(fpath);
 
   tempfile.on('close', () => {
+    try {
+      fs.unlinkSync(path.join(emupath, '/psoff.exe'));
+    } catch (e) { }
+    try {
+      fs.unlinkSync(path.join(emupath, '/emulator.exe'));
+    } catch (e) { }
     execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
     fs.unlinkSync(fpath);
-    fs.writeFileSync(verfile, version);
+    let data = { version: '', lastcheck: Date.now() };
+
+    try {
+      Object.assign(data, JSON.parse(fs.readFileSync(verfile)));
+    } catch (e) { }
+
+    try {
+      data.version = version;
+      fs.writeFileSync(verfile, JSON.stringify(data));
+    } catch (e) {
+      console.error('[UPDATER] Failed to save current version info: ', e.toString());
+    }
     parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
   });
 
@@ -188,6 +234,10 @@ parentPort.on('message', async (msg) => {
       case 'set-token':
         if (msg.token.startsWith('github_pat_'))
           atoken = msg.token;
+        break;
+
+      case 'set-freq':
+        freq = msg.freq;
         break;
 
       case 'run-check':

@@ -219,10 +219,10 @@
           window.close();
         break;
       case 'save':
-        if (haveUnsaved())
-          window.electronAPI.sendCommand('sett-update');
-        else
+        if (haveUnsaved()) {
+          window.electronAPI.sendCommand('sett-update', modified_cfg);
           wrapper.dataset.ready = 0;
+        }
         break;
     }
   });

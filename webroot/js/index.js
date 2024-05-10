@@ -114,8 +114,13 @@
     bgimage.style.backgroundImage = `url(data:image/png;base64,${image})`;
   });
 
+  const paths = {};
+
   window.electronAPI.addEventListener('add-game', (msg) => {
-    if (msg.ispatch) return;
+    if (msg.ispatch) return; // todo: Handle patches
+
+    if (paths[msg.path]) return;
+    paths[msg.path] = true;
 
     const rootel = document.createElement('div');
     rootel.classList = 'gamebadge';
