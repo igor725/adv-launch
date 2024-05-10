@@ -5,6 +5,7 @@ module.exports.Config = class Config {
   #cfgfile = path.join(__dirname, '/config.json');
   #default = {
     update_channel: 'release',
+    github_token: '',
     bg_volume: 30,
     scan_dirs: []
   };
@@ -25,9 +26,13 @@ module.exports.Config = class Config {
   constructor(cp) {
     try {
       this.#data = JSON.parse(fs.readFileSync(this.#cfgfile, { encoding: 'utf-8' }));
+
+      for (const [key, dvalue] of Object.entries(this.#default)) {
+        this.#data[key] = this.#data[key] ?? dvalue;
+      }
     } catch (e) {
       console.error('Failed to load the default config: ', e.toString());
-      const jdata = JSON.stringify(config.default);
+      const jdata = JSON.stringify(this.#default);
       this.#data = JSON.parse(jdata);
       fs.writeFileSync(cfgfile, jdata);
     }
@@ -39,7 +44,7 @@ module.exports.Config = class Config {
   };
 
   getValue = (name) => {
-    if (!this.#default[name]) {
+    if (this.#default[name] == undefined) {
       console.error('Attempt to get invalid config entry: ', name);
       return null;
     }
@@ -50,13 +55,18 @@ module.exports.Config = class Config {
   setValue = (name, value) => {
     if (!this.#default[name]) {
       console.error('Attempt to set invalid config entry: ', name);
-      return null;
+      return false;
     }
+
+    this.#unsaved = true;
 
     if (value === null) {
       this.#data[name] = this.#default[name];
-      this.#unsaved = true;
+      return true;
     }
+
+    this.#data[name] = value;
+    return true;
   };
 
   getVolume = () => {
@@ -65,6 +75,18 @@ module.exports.Config = class Config {
 
   getBranch = () => {
     return this.getValue('update_channel');
+  };
+
+  getGitHubToken = () => {
+    return this.getValue('github_token');
+  };
+
+  setGitHubToken = (token) => {
+    return this.setValue('github_token', token);
+  };
+
+  getScanDirectories = () => {
+    return this.getValue('scan_dirs');
   };
 
   getInitialUser = () => {
@@ -95,5 +117,9 @@ module.exports.Config = class Config {
     try {
       this.#emuconf.graphics = JSON.parse(fs.readFileSync(path.join(this.#emuconfpath, '/graphics.json')));
     } catch (e) { }
+  };
+
+  getFullConfig = () => {
+    return [this.#emuconf, this.#data];
   };
 };

@@ -28,13 +28,14 @@ const terminalListener = (msg) => {
   win.send('term-data', converter.toHtml(msg.toString()));
 };
 
-const scanGameDir = (scanpath) => {
+const scanGameDir = (scanpath, depth) => {
   const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
   dirworker.on('message', (msg) => {
     if (win.isDestroyed()) return;
     win.send('add-game', msg);
   });
-  dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: 3 });
+  dirworker.on('exit', () => dirworker.unref());
+  dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: depth });
 };
 
 const _runDownloadingProcess = () => {
@@ -96,6 +97,12 @@ const updateBinaryPath = (path) => {
   });
 };
 
+const genericWarnMsg = (text = 'Empty text?', noclose = false) => {
+  const buttons = ['Ok'];
+  if (noclose === false) buttons.push('Close the launcher');
+  win.send('warnmsg', { hidden: false, type: 'text', id: 'gen-warn', text: text, buttons });
+};
+
 const commandHandler = (channel, cmd, info) => {
   switch (cmd) {
     case 'quit':
@@ -105,7 +112,9 @@ const commandHandler = (channel, cmd, info) => {
       win.minimize();
       break;
     case 'getgames':
-      scanGameDir('D:\\ps4\\games\\');
+      for (const dir of config.getScanDirectories()) {
+        scanGameDir(dir.path, dir.depth);
+      }
       break;
     case 'getgamesum':
       win.send('gamesum', getGameSummary(info));
@@ -152,7 +161,10 @@ const commandHandler = (channel, cmd, info) => {
         frame: false,
         resizable: false,
         width: 380,
-        height: 380
+        height: 380,
+        webPreferences: {
+          preload: path.join(__dirname, 'preload.js')
+        }
       });
       settwin.on('closed', () => {
         win.send('input', true);
@@ -165,7 +177,7 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'rungame':
       if (gameproc != null) {
-        win.send('alert', 'You should close your previous game first!');
+        genericWarnMsg('You should close your previous game first!', true);
         return;
       }
       win.send('ingame', true);
@@ -176,7 +188,7 @@ const commandHandler = (channel, cmd, info) => {
       gameproc._startTime = Date.now();
 
       gameproc.on('error', (err) => {
-        win.send('alert', err.toString());
+        genericWarnMsg(`psOff process returned the error: ${err.toString()}`);
         win.send('ingame', false);
         gameproc = null;
       });
@@ -215,7 +227,34 @@ const commandHandler = (channel, cmd, info) => {
           }
           break;
 
+        case 'upd-notoken':
+          win.send('warnmsg', { hidden: true, id: 'upd-notoken' });
+          if (info.resp === 1) {
+            // todo: Switch to releases branch
+          }
+          break;
+
+        case 'gen-warnmsg':
+          if (info.resp === 0) {
+            win.send('warnmsg', { hidden: true, id: 'gen-warnmsg' });
+          } else if (info.resp === 1) {
+            app.quit();
+          }
+          break;
+
+        default:
+          console.error('Unhandled warnmsg action: ', info.id);
+          break;
       }
+      break;
+    case 'sett-request':
+      settwin.send('sett-values', config.getFullConfig());
+      break;
+    case 'sett-opengh':
+      exec(`start https://github.com/settings/personal-access-tokens/new`);
+      break;
+    case 'sett-update':
+      settwin.close();
       break;
 
     default:
@@ -266,12 +305,19 @@ app.whenReady().then(() => {
           win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: `New version of psOff emulator is available! Do you want to download it? (Installed: ${msg.currver}, New: ${msg.newver})`, buttons: ['Yes', 'No'] });
           break;
 
+        case 'notoken':
+          updateBinaryPath(msg.executable);
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-notoken', text: 'You have no GitHub token installed, nightly update check is impossible!', buttons: ['Ok', 'Switch to releases'] });
+          break;
+
         case 'error':
-          win.send('alert', 'Failed to check for updates!');
+          genericWarnMsg(`Failed to check updates for your psOff installation: ${msg.text}`);
           break;
       }
     });
 
+    let token;
+    if (token = config.getGitHubToken()) updateWorker.postMessage({ act: 'set-token', token: token });
     updateWorker.postMessage({ act: 'set-branch', branch: config.getBranch(), path: emupath });
     updateWorker.postMessage({ act: 'run-check' });
   });

@@ -23,25 +23,29 @@
 </head>
 
 <body>
-  <div id="wrapper">
+  <div id="wrapper" data-ready="0">
     <div id="data">
       <div class="separator">Launcher settings</div>
       <div class="row">
         <label for="bgvolume">Bacground music volume: </label>
-        <input id="bgvolume" type="range" min="0" max="100" />
+        <input id="bgvolume" data-cfgfacility="launcher" data-cfgkey="bg_volume" type="range" min="0" max="100" />
+      </div>
+      <div class="row">
+        <label for="ghtok">GitHub token:</label>
+        <input id="ghtok" data-cfgfacility="launcher" data-cfgkey="github_token" type="password" />
       </div>
       <div class="row">
         <label for="updch">Update channel: </label>
-        <select id="updch">
-          <option>Release</option>
-          <option>Nightly</option>
-          <option>Disabled</option>
+        <select id="updch" data-cfgfacility="launcher" data-cfgtype="string" data-cfgchecker="github_token"
+          data-cfgkey="update_channel">
+          <option data-cfgvalue="release">Release</option>
+          <option data-cfgvalue="nightly">Nightly</option>
+          <option data-cfgvalue="disabled">Disabled</option>
         </select>
       </div>
       <label for="gsd">Game scan directories: </label>
       <div class="row">
-        <select id="gsd" size="4">
-          <option data-uid="1">D:\ps4\games | depth: 3</option>
+        <select id="gsd" data-cfgfacility="launcher" data-cfgnoselect="1" data-cfgkey="scan_dirs" size="4">
         </select>
       </div>
       <div class="row">
@@ -61,62 +65,67 @@
       <div class="separator">Emulator settings</div>
       <div class="row">
         <label for="currusr">Current user: </label>
-        <select id="currusr">
-          <option data-uid="1">Anon #1</option>
-          <option data-uid="2">Anon #2</option>
-          <option data-uid="3">Anon #3</option>
-          <option data-uid="4">Anon #4</option>
+        <select id="currusr" data-cfgfacility="emu_general" data-cfgtype="int" data-cfgkey="userIndex" disabled>
+          <option data-cfgvalue="1">Anon</option>
         </select>
       </div>
       <div class="row">
         <label for="mavolume">Master volume: </label>
-        <input id="mavolume" type="range" min="0" max="100" />
+        <input id="mavolume" type="range" data-cfgfacility="emu_audio" data-cfgkey="volume" data-cfgscale="0.01" min="0"
+          max="100" />
       </div>
       <div class="row">
-        <label for="syslang">System language: </label>
-        <select id="syslang">
-          <option data-lid="0">Japanese</option>
-          <option data-lid="1">EnglishUS</option>
-          <option data-lid="2">French</option>
-          <option data-lid="3">Spanish</option>
-          <option data-lid="4">German</option>
-          <option data-lid="5">Italian</option>
-          <option data-lid="6">Dutch</option>
-          <option data-lid="7">PortuguesePT</option>
-          <option data-lid="8">Russian</option>
-          <option data-lid="9">Korean</option>
-          <option data-lid="10">ChineseTraditional</option>
-          <option data-lid="11">ChineseSimplified</option>
-          <option data-lid="12">Finnish</option>
-          <option data-lid="13">Swedish</option>
-          <option data-lid="14">Danish</option>
-          <option data-lid="15">Norwegian</option>
-          <option data-lid="16">Polish</option>
-          <option data-lid="17">PortugueseBR</option>
-          <option data-lid="18">EnglishUK</option>
-          <option data-lid="19">Turkish</option>
-          <option data-lid="20">SpanishLA</option>
-          <option data-lid="21">Arabic</option>
-          <option data-lid="22">FrenchCA</option>
-          <option data-lid="23">Czech</option>
-          <option data-lid="24">Hungarian</option>
-          <option data-lid="25">Greek</option>
-          <option data-lid="26">Romanian</option>
-          <option data-lid="27">Thai</option>
-          <option data-lid="28">Vietnamese</option>
-          <option data-lid="29">Indonesian</option>
+        <label for="syslang">System language:</label>
+        <select data-cfgfacility="emu_general" data-cfgkey="systemlang" data-cfgtype="int" id="syslang">
+          <option data-cfgvalue="0">Japanese</option>
+          <option data-cfgvalue="1">EnglishUS</option>
+          <option data-cfgvalue="2">French</option>
+          <option data-cfgvalue="3">Spanish</option>
+          <option data-cfgvalue="4">German</option>
+          <option data-cfgvalue="5">Italian</option>
+          <option data-cfgvalue="6">Dutch</option>
+          <option data-cfgvalue="7">PortuguesePT</option>
+          <option data-cfgvalue="8">Russian</option>
+          <option data-cfgvalue="9">Korean</option>
+          <option data-cfgvalue="10">ChineseTraditional</option>
+          <option data-cfgvalue="11">ChineseSimplified</option>
+          <option data-cfgvalue="12">Finnish</option>
+          <option data-cfgvalue="13">Swedish</option>
+          <option data-cfgvalue="14">Danish</option>
+          <option data-cfgvalue="15">Norwegian</option>
+          <option data-cfgvalue="16">Polish</option>
+          <option data-cfgvalue="17">PortugueseBR</option>
+          <option data-cfgvalue="18">EnglishUK</option>
+          <option data-cfgvalue="19">Turkish</option>
+          <option data-cfgvalue="20">SpanishLA</option>
+          <option data-cfgvalue="21">Arabic</option>
+          <option data-cfgvalue="22">FrenchCA</option>
+          <option data-cfgvalue="23">Czech</option>
+          <option data-cfgvalue="24">Hungarian</option>
+          <option data-cfgvalue="25">Greek</option>
+          <option data-cfgvalue="26">Romanian</option>
+          <option data-cfgvalue="27">Thai</option>
+          <option data-cfgvalue="28">Vietnamese</option>
+          <option data-cfgvalue="29">Indonesian</option>
         </select>
       </div>
       <div class="row">
         <label for="fullscreen">Enable fullscreen: </label>
-        <input id="fullscreen" type="checkbox" />
+        <input id="fullscreen" data-cfgfacility="emu_graphics" data-cfgkey="fullscreen" type="checkbox" disabled />
       </div>
     </div>
     <div id="buttons">
-      <input type="button" value="Save and apply" />
-      <input type="button" value="Close" onclick="window.close();" />
+      <input type="button" data-action="save" value="Save and apply" disabled />
+      <input type="button" data-action="close" value="Close" />
     </div>
   </div>
+  <div id="wait-spinner">
+    <svg class="spinner" viewBox="0 0 50 50">
+      <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+    </svg>
+  </div>
+
+  <script src="./js/settings.js"></script>
 </body>
 
 </html>

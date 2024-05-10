@@ -155,10 +155,6 @@
     }
   });
 
-  window.electronAPI.addEventListener('alert', (msg) => {
-    alert(msg);
-  });
-
   window.electronAPI.addEventListener('term-data', (code) => {
     terminal.innerHTML += code;
     terminal.scrollTop = terminal.scrollHeight;

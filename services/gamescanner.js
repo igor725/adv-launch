@@ -1,4 +1,4 @@
-const fs = require('fs/promises');
+const fs = require('fs');
 const path = require('node:path');
 const { parentPort } = require('node:worker_threads');
 
@@ -59,16 +59,14 @@ const readSFO = (buffer) => {
   return paramsList;
 };
 
-const walker = (wpath, ents, depth = 0, maxdepth = 3) => {
+const walker = (wpath, ents, depth, maxdepth) => {
   if (depth > maxdepth) return;
 
-  ents.forEach(async (name) => {
+  ents.forEach((name) => {
     const fullpath = path.join(wpath, name);
-    const stat = await fs.lstat(fullpath);
+    const stat = fs.lstatSync(fullpath);
     if (stat.isDirectory()) {
-      fs.readdir(fullpath).then((ents) => {
-        walker(fullpath, ents, depth + 1, maxdepth);
-      });
+      walker(fullpath, fs.readdirSync(fullpath), depth + 1, maxdepth)
     } else if (stat.isFile()) {
       if (name == 'eboot.bin') {
         const syspath = path.join(wpath, '/sce_sys');
@@ -76,32 +74,30 @@ const walker = (wpath, ents, depth = 0, maxdepth = 3) => {
         let paramsfostat = null;
 
         try {
-          paramsfostat = await fs.lstat(paramsfopath);
+          paramsfostat = fs.lstatSync(paramsfopath);
         } catch (e) {
           console.error(`Failed to stat param.sfo: ${e.toString()}`);
           return;
         }
 
         if (paramsfostat.isFile()) {
-          fs.readFile(paramsfopath).then(async (buff) => {
-            const sfo_data = readSFO(buff);
-            let icon = null;
+          const sfo_data = readSFO(fs.readFileSync(paramsfopath));
+          let icon = null;
 
-            try {
-              icon = await fs.readFile(path.join(syspath, '/icon0.png'), { encoding: 'base64' });
-            } catch (e) { }
+          try {
+            icon = fs.readFileSync(path.join(syspath, '/icon0.png'), { encoding: 'base64' });
+          } catch (e) { }
 
-            if (applist[sfo_data.CATEGORY]) {
-              parentPort.postMessage({
-                id: sfo_data.TITLE_ID,
-                title: sfo_data.TITLE,
-                version: sfo_data.VERSION,
-                ispatch: sfo_data.CATEGORY === 'gp',
-                path: wpath,
-                icon: icon
-              });
-            }
-          });
+          if (applist[sfo_data.CATEGORY]) {
+            parentPort.postMessage({
+              id: sfo_data.TITLE_ID,
+              title: sfo_data.TITLE,
+              version: sfo_data.VERSION,
+              ispatch: sfo_data.CATEGORY === 'gp',
+              path: wpath,
+              icon: icon
+            });
+          }
         }
       }
     }
@@ -111,9 +107,8 @@ const walker = (wpath, ents, depth = 0, maxdepth = 3) => {
 parentPort.on('message', (msg) => {
   switch (msg.act) {
     case 'scangdir':
-      fs.readdir(msg.path).then((ents) => {
-        walker(msg.path, ents, 0, msg.depth);
-      });
+      walker(msg.path, fs.readdirSync(msg.path), 0, msg.depth);
+      process.exit(0);
       break;
   }
 });
