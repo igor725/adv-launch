@@ -15,6 +15,14 @@ const newverinfo = {
   tag: ''
 };
 
+const updateVersionFile = (version) => {
+  try {
+    fs.writeFileSync(verfile, JSON.stringify({ version: version, lastcheck: Date.now() }));
+  } catch (e) {
+    console.error('[UPDATER] Failed to save current version info: ', e.toString());
+  }
+};
+
 const searchBinary = () => {
   let binpath = null;
 
@@ -72,7 +80,7 @@ const loadJSON = (url, headers = undefined) =>
     });
   });
 
-const triggerCheck = async () => {
+const triggerCheck = async (force) => {
   const binpath = searchBinary();
 
   let currver = 'v.0.0';
@@ -82,8 +90,7 @@ const triggerCheck = async () => {
     try {
       const vinfo = JSON.parse(fs.readFileSync(verfile));
 
-      if (freq !== null) {
-        const now = Date.now();
+      if (force == false && freq !== null) {
         let next = 0;
 
         switch (freq) {
@@ -98,14 +105,11 @@ const triggerCheck = async () => {
             break;
         }
 
-        if (now < (vinfo.lastcheck + next)) {
+        if (Date.now() < (vinfo.lastcheck + next)) {
           console.error('[UPDATER] Skipping update check, this is not the time for updates');
           sendExecutable(binpath, currver);
           return;
         }
-
-        vinfo.lastcheck = now;
-        fs.writeFileSync(verfile, JSON.stringify(vinfo));
       }
 
       currver = vinfo.version;
@@ -158,6 +162,7 @@ const triggerCheck = async () => {
     throw err;
   }
 
+  updateVersionFile(currver);
   sendExecutable(binpath, currver);
 };
 
@@ -188,18 +193,7 @@ const download = async (url, version, headers = undefined) => {
     } catch (e) { }
     execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
     fs.unlinkSync(fpath);
-    let data = { version: '', lastcheck: Date.now() };
-
-    try {
-      Object.assign(data, JSON.parse(fs.readFileSync(verfile)));
-    } catch (e) { }
-
-    try {
-      data.version = version;
-      fs.writeFileSync(verfile, JSON.stringify(data));
-    } catch (e) {
-      console.error('[UPDATER] Failed to save current version info: ', e.toString());
-    }
+    updateVersionFile(version);
     parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
   });
 
@@ -241,7 +235,7 @@ parentPort.on('message', async (msg) => {
         break;
 
       case 'run-check':
-        await triggerCheck();
+        await triggerCheck(msg.force);
         break;
 
       case 'download':

@@ -99,7 +99,7 @@ const updateGameSummary = (gid, lastrun) => {
 const updateBinaryPath = (path) => {
   binname = path ?? binname;
   exec(`"${binname}" -h`, { cwd: emupath }).on('close', (code) => {
-    if (code === 1 || code === 4294967295) config.reloadEmulatorSettings();
+    if (code === 0 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });
 };
@@ -237,7 +237,7 @@ const commandHandler = (channel, cmd, info) => {
         case 'upd-notoken':
           win.send('warnmsg', { hidden: true, id: 'upd-notoken' });
           if (info.resp === 1) {
-            // todo: Switch to releases branch
+            config.updateMultipleKeys([{}, { update_channel: 'release' }]);
           }
           break;
 
@@ -328,7 +328,7 @@ app.whenReady().then(() => {
     if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
-    updateWorker.postMessage({ act: 'run-check' });
+    updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
   let updaterchanged = false;
@@ -337,10 +337,12 @@ app.whenReady().then(() => {
     switch (key) {
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
-        break;
+        return;
       case 'update_channel':
         updateWorker.postMessage({ act: 'set-branch', branch: value, path: emupath });
         break;
+      case 'update_freq':
+        updateWorker.postMessage({ act: 'set-freq', freq: value });
       default:
         return;
     }
@@ -348,7 +350,7 @@ app.whenReady().then(() => {
   });
 
   config.addCallback('flush', () => {
-    if (updaterchanged) updateWorker.postMessage({ act: 'run-check' });
+    if (updaterchanged) updateWorker.postMessage({ act: 'run-check', force: true });
     config.save();
   });
 
