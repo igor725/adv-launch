@@ -103,6 +103,10 @@
     }
   }, true);
 
+  terminal.on('dblclick', (ev) => {
+    navigator.clipboard.writeText(terminal.innerText);
+  });
+
   gamelist.on('click', ({ target: gbadge }) => {
     if (!isGameBadge(gbadge)) return;
     if (selectedGame != null) {
