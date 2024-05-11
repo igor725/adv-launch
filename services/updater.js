@@ -181,33 +181,35 @@ const download = async (url, version, headers = undefined) => {
     throw new Error(`REST /artifacts failed: ${resp.message}`);
   }
 
+  execSync('del temp*.zip', { cwd: emupath });
+
   const fpath = path.join(emupath, `/temp${Date.now()}.zip`);
   const tempfile = fs.createWriteStream(fpath);
 
-  tempfile.on('close', () => {
-    execSync('del *.dll *.exe', { cwd: emupath });
-    execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
-    fs.unlinkSync(fpath);
-    updateVersionFile(version);
-    parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-  });
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: addDefaultHeaders(headers) }, (resp) => {
+      const need = resp.headers['content-length'] ?? -1;
+      let down = 0;
 
-  https.get(url, { headers: addDefaultHeaders(headers) }, (resp) => {
-    const need = resp.headers['content-length'] ?? -1;
-    let down = 0;
+      resp.on('data', (chunk) => {
+        tempfile.write(chunk);
+        down += chunk.length;
+        parentPort.postMessage({ resp: 'progress', value: (down / need) * 100 });
+      });
 
-    resp.on('data', (chunk) => {
-      tempfile.write(chunk);
-      down += chunk.length;
-      parentPort.postMessage({ resp: 'progress', value: (down / need) * 100 });
-    });
-
-    resp.on('end', () => {
+      resp.on('end', () => {
+        tempfile.end();
+        // Let the OS cook a bit
+        setTimeout(() => resolve(fpath, version), 500);
+      });
+    }).on('error', (err) => {
       tempfile.end();
+      // Let the OS cook a bit
+      setTimeout(() => {
+        fs.unlinkSync(fpath);
+        reject(err);
+      }, 500);
     });
-  }).on('error', (err) => {
-    fs.unlinkSync(fpath);
-    throw err;
   });
 };
 
@@ -216,7 +218,7 @@ const validateEmulatorPath = () => {
   if (!fs.lstatSync(emupath).isDirectory()) throw new Error('Emulator path is not a directory!');
 };
 
-parentPort.on('message', async (msg) => {
+const commandHandler = async (msg) => {
   try {
     switch (msg.act) {
       case 'set-branch':
@@ -242,10 +244,30 @@ parentPort.on('message', async (msg) => {
 
       case 'download':
         validateEmulatorPath();
-        download(newverinfo.url, newverinfo.tag);
+        await download(newverinfo.url, newverinfo.tag).then((fpath, newver) => {
+          execSync('del *.dll *.exe', { cwd: emupath });
+          execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
+          parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
+          updateVersionFile(newver);
+          fs.unlinkSync(fpath);
+        });
+        break;
+
+      case 'retry':
+        if (!newverinfo.tag || !newverinfo.url) {
+          await commandHandler({ act: 'run-check' });
+        } else {
+          await commandHandler({ act: 'download' });
+        }
+        break;
+
+      default:
+        console.error('[UPDATER] Unhandled command ', msg.act);
         break;
     }
   } catch (err) {
     parentPort.postMessage({ resp: 'error', text: err.toString() });
   }
-});
+};
+
+parentPort.on('message', commandHandler);
