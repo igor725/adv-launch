@@ -228,7 +228,7 @@
   });
 
   $('#gsd-dialog').on('click', () => {
-    window.electronAPI.sendCommand('sett-requestdialog');
+    window.electronAPI.selectFolder().then((path) => $('#gsd-path').value = path);
   });
 
   $('#gsd-add').on('click', () => {

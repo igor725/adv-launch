@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('child_process');
@@ -167,8 +167,8 @@ const commandHandler = (channel, cmd, info) => {
         parent: win,
         frame: false,
         resizable: false,
-        width: 380,
-        height: 380,
+        width: 400,
+        height: 400,
         webPreferences: {
           preload: path.join(__dirname, 'preload.js')
         }
@@ -273,6 +273,11 @@ const commandHandler = (channel, cmd, info) => {
 
 app.whenReady().then(() => {
   ipcMain.on('command', commandHandler);
+  ipcMain.handle('opendir', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
+    if (canceled) return null;
+    return filePaths[0];
+  });
 
   win = new BrowserWindow({
     width: 1014,

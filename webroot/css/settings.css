@@ -47,10 +47,6 @@
   width: 100%;
 }
 
-#gsd-path {
-  width: 179px;
-}
-
 #wait-spinner {
   display: flex;
   align-items: center;
