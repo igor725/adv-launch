@@ -185,12 +185,7 @@ const download = async (url, version, headers = undefined) => {
   const tempfile = fs.createWriteStream(fpath);
 
   tempfile.on('close', () => {
-    try {
-      fs.unlinkSync(path.join(emupath, '/psoff.exe'));
-    } catch (e) { }
-    try {
-      fs.unlinkSync(path.join(emupath, '/emulator.exe'));
-    } catch (e) { }
+    execSync('del *.dll *.exe', { cwd: emupath });
     execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
     fs.unlinkSync(fpath);
     updateVersionFile(version);
