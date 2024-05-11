@@ -355,7 +355,10 @@ app.whenReady().then(() => {
   });
 
   config.addCallback('flush', () => {
-    if (updaterchanged) updateWorker.postMessage({ act: 'run-check', force: true });
+    if (updaterchanged) {
+      updateWorker.postMessage({ act: 'run-check', force: true });
+      updaterchanged = false;
+    }
     config.save();
   });
 
