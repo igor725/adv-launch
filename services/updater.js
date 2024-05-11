@@ -1,5 +1,5 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 const https = require('follow-redirects').https;
 const path = require('node:path');
 const { parentPort } = require('node:worker_threads');
@@ -198,17 +198,15 @@ const download = async (url, version, headers = undefined) => {
       });
 
       resp.on('end', () => {
-        tempfile.end();
-        // Let the OS cook a bit
-        setTimeout(() => resolve(fpath, version), 500);
+        tempfile.end(() => {
+          resolve(fpath, version);
+        });
       });
     }).on('error', (err) => {
-      tempfile.end();
-      // Let the OS cook a bit
-      setTimeout(() => {
+      tempfile.end(() => {
         fs.unlinkSync(fpath);
         reject(err);
-      }, 500);
+      });
     });
   });
 };
