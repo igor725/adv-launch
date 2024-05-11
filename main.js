@@ -45,9 +45,9 @@ const scanGameDir = (scanpath, depth) => {
   dirworker.postMessage({ act: 'scangdir', path: scanpath, depth: depth });
 };
 
-const _runDownloadingProcess = () => {
+const _runDownloadingProcess = (retry = false) => {
   win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading the emulator binaries, hang tight...', buttons: ['Cancel'] });
-  updateWorker.postMessage({ act: 'download' });
+  updateWorker.postMessage({ act: retry ? 'retry' : 'download' });
 }
 
 const getGameSummary = (info) => {
@@ -253,9 +253,19 @@ const commandHandler = (channel, cmd, info) => {
           }
           break;
 
-        case 'gen-warnmsg':
+        case 'upd-fail':
           if (info.resp === 0) {
-            win.send('warnmsg', { hidden: true, id: 'gen-warnmsg' });
+            _runDownloadingProcess(true);
+          } else if (info.resp === 1) {
+            win.send('warnmsg', { hidden: true, id: 'upd-fail' });
+          } else if (info.resp === 2) {
+            app.quit();
+          }
+          break;
+
+        case 'gen-warn':
+          if (info.resp === 0) {
+            win.send('warnmsg', { hidden: true, id: 'gen-warn' });
           } else if (info.resp === 1) {
             app.quit();
           }
@@ -390,7 +400,7 @@ app.whenReady().then(() => {
           break;
 
         case 'error':
-          genericWarnMsg(`Failed to check updates for your psOff installation: ${msg.text}`);
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-fail', text: `Failed to check updates for your psOff installation: ${msg.text}`, buttons: ['Retry', 'Ignore', 'Close the launcher'] });
           break;
       }
     });
