@@ -49,7 +49,7 @@
     if (playingAmbientFor == gid && !force) return;
 
     loadBGandSound = setTimeout(() => {
-      window.electronAPI.sendCommand('getgamesum', { path: gpath, id: gid });
+      window.electronAPI.sendCommand('getgamesum', { gpath: gpath, gid: gid });
       playingAmbientFor = gid;
     }, 1200);
   };
@@ -61,6 +61,32 @@
       clearTimeout(loadBGandSound);
       loadBGandSound = null;
     }
+  };
+
+  const isGameBadge = (target) => target.classList.contains('gamebadge');
+  // const getGameTitleFromBadge = (target) => target.$('.gbi-name').innerText;
+  const getGameTitleIdFromBadge = (target) => target.dataset.gid;
+  const getGamePathFromBadge = (target) => target.dataset.gpath;
+  const getGameVersionFromBadge = (target) => target.dataset.gver;
+
+  const createContextFor = (gbadge, x, y) => {
+    const data = {
+      x: x, y: y,
+      gid: getGameTitleIdFromBadge(gbadge),
+      gpath: getGamePathFromBadge(gbadge),
+      gver: getGameVersionFromBadge(gbadge),
+      patches: []
+    };
+
+    const patches = gbadge._patches;
+    for (let i = 0; i < patches.length; ++i) {
+      data.patches.push({
+        path: patches[i].path,
+        version: patches[i].version
+      });
+    }
+
+    window.electronAPI.buildGameContextMenu(data);
   };
 
   $('#gamebuttons').on('click', ({ target }) => {
@@ -77,9 +103,8 @@
     }
   }, true);
 
-  gamelist.on('click', ({ target }) => {
-    if (!target.classList.contains('gb-info')) return;
-    const gbadge = target.parentNode;
+  gamelist.on('click', ({ target: gbadge }) => {
+    if (!isGameBadge(gbadge)) return;
     if (selectedGame != null) {
       getSelectedGame().classList.remove('selected');
     }
@@ -87,15 +112,13 @@
     selectedGame = gbadge.dataset.gid;
   }, true);
 
-  gamelist.on('mouseover', ({ target }) => {
-    if (!target.classList.contains('gb-info')) return;
-    fetchGame(target.parentNode);
+  gamelist.on('mouseover', ({ target: gbadge }) => {
+    if (!isGameBadge(gbadge)) return;
+    fetchGame(gbadge);
   }, true);
 
-  gamelist.on('mouseout', ({ target }) => {
-    if (!target.classList.contains('gb-info')) return;
-    const gbadge = target.parentNode;
-
+  gamelist.on('mouseout', ({ target: gbadge }) => {
+    if (!isGameBadge(gbadge)) return;
     if (selectedGame != null) {
       fetchGame(getSelectedGame());
     } else {
@@ -117,7 +140,21 @@
   const paths = {};
 
   window.electronAPI.addEventListener('add-game', (msg) => {
-    if (msg.ispatch) return; // todo: Handle patches
+    if (msg.ispatch) {
+      const gamebadge = $(`#gamelist .gamebadge[data-gid="${msg.id}"]`);
+      if (gamebadge === null) {
+        console.warn(`Patch v${msg.version} for ${msg.id} was ignored, since there is no applicable game!`);
+        return;
+      }
+
+      gamebadge._patches.push({
+        version: msg.version,
+        path: msg.path,
+        icon: msg.icon
+      });
+
+      return;
+    }
 
     if (paths[msg.path]) return;
     paths[msg.path] = true;
@@ -127,6 +164,7 @@
     rootel.dataset.gid = msg.id;
     rootel.dataset.gver = msg.version;
     rootel.dataset.gpath = msg.path;
+    rootel._patches = [];
 
     if (msg.icon)
       rootel.style.backgroundImage = `url(data:image/png;base64,${msg.icon})`;
@@ -170,6 +208,12 @@
   warn.on('click', ({ target }) => {
     if (!target.classList.contains('warnbutton')) return;
     window.electronAPI.sendCommand('warnresp', { id: target.parentNode.parentNode.dataset.wid, resp: parseInt(target.dataset.bid) });
+  }, true);
+
+  gamelist.on('contextmenu', (ev) => {
+    if (!isGameBadge(ev.target)) return;
+    ev.preventDefault();
+    createContextFor(ev.target, ev.clientX, ev.clientY);
   }, true);
 
   window.electronAPI.addEventListener('warnmsg', (data) => {

@@ -85,14 +85,11 @@
   width: 100%;
   height: 100%;
   transition: opacity 0.15s;
-}
-
-.gamebadge .gb-info:hover {
-  opacity: 1;
-}
-
-.gamebadge .gb-info * {
   pointer-events: none;
+}
+
+.gamebadge:hover .gb-info {
+  opacity: 1;
 }
 
 .gamebadge .gb-info .gbi-name {

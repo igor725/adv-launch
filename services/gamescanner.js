@@ -92,7 +92,7 @@ const walker = (wpath, ents, depth, maxdepth) => {
             parentPort.postMessage({
               id: sfo_data.TITLE_ID,
               title: sfo_data.TITLE,
-              version: sfo_data.VERSION,
+              version: sfo_data.APP_VER,
               ispatch: sfo_data.CATEGORY === 'gp',
               path: wpath,
               icon: icon

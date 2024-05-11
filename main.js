@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('child_process');
@@ -51,26 +51,26 @@ const _runDownloadingProcess = () => {
 }
 
 const getGameSummary = (info) => {
-  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0 };
+  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
 
   try {
-    const data = fs.readFileSync(`${gipath}/${info.id}.json`);
+    const data = fs.readFileSync(`${gipath}/${info.gid}.json`);
     Object.assign(dsum, JSON.parse(data));
   } catch (e) {
-    console.error(`Failed to load game info for ${info.id}: ${e.toString()}`);
+    console.error(`Failed to load game info for ${info.gid}: ${e.toString()}`);
   }
 
   try {
-    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${info.id}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
+    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${info.gid}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
   } catch (e) {
-    console.error(`Failed to load trophies info for ${info.id}: ${e.toString()}`);
+    console.error(`Failed to load trophies info for ${info.gid}: ${e.toString()}`);
   }
 
   return dsum;
 };
 
-const updateGameSummary = (gid, lastrun) => {
-  const dsum = { lastrun: 0, playtime: 0, trophies_max: 0, trophies: 0 };
+const updateGameSummary = (gid, update) => {
+  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
 
   try {
     const data = fs.readFileSync(`${gipath}/${gid}.json`);
@@ -80,8 +80,9 @@ const updateGameSummary = (gid, lastrun) => {
   }
 
   try {
-    dsum.lastrun = lastrun;
-    dsum.playtime += (Date.now() - lastrun);
+    if (update.lastrun !== undefined)
+      dsum.playtime += (Date.now() - update.lastrun);
+    Object.assign(dsum, update);
     fs.writeFileSync(`${gipath}/${gid}.json`, JSON.stringify(dsum));
   } catch (e) {
     console.error(`Failed to save game info for ${gid}: ${e.toString()}`);
@@ -132,7 +133,7 @@ const commandHandler = (channel, cmd, info) => {
       }
 
       try {
-        win.send('set-bg-image', fs.readFileSync(path.join(info.path, '/sce_sys/pic0.png'), { encoding: 'base64' }));
+        win.send('set-bg-image', fs.readFileSync(path.join(info.gpath, '/sce_sys/pic0.png'), { encoding: 'base64' }));
       } catch (e) {
         win.send('set-bg-image', null);
       }
@@ -142,7 +143,7 @@ const commandHandler = (channel, cmd, info) => {
       if (gameproc != null || volume == 0) return;
 
       try {
-        const apath = path.join(info.path, '/sce_sys/snd0.at9');
+        const apath = path.join(info.gpath, '/sce_sys/snd0.at9');
         if (fs.lstatSync(apath).isFile()) {
           player = spawn(path.join(__dirname, '/bin/ffplay.exe'), [
             '-nodisp', '-volume', volume,
@@ -182,13 +183,20 @@ const commandHandler = (channel, cmd, info) => {
     case 'openfolder':
       exec(`explorer "${info}"`);
       break;
+    case 'applypatch':
+      updateGameSummary(info.gid, { patch: info.patch });
+      break;
     case 'rungame':
       if (gameproc != null) {
         genericWarnMsg('You should close your previous game first!', true);
         return;
       }
       win.send('ingame', true);
-      gameproc = spawn(path.join(emupath, binname), [`--file=${info.path}\\eboot.bin`], { cwd: emupath });
+      const emuargs = [`--file=${info.path}\\eboot.bin`];
+      const patch = getGameSummary(info).patch;
+      if (patch) emuargs.push(`--update=${patch}`);
+
+      gameproc = spawn(path.join(emupath, binname), emuargs, { cwd: emupath });
       gameproc.stdout.on('data', terminalListener);
       gameproc.stderr.on('data', terminalListener);
       gameproc._gameID = info.gid;
@@ -202,7 +210,7 @@ const commandHandler = (channel, cmd, info) => {
 
       gameproc.on('close', (code) => {
         config.reloadEmulatorSettings();
-        win.send('gamesum', updateGameSummary(gameproc._gameID, gameproc._startTime));
+        win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }));
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
         gameproc = null;
@@ -278,6 +286,51 @@ app.whenReady().then(() => {
     if (canceled) return null;
     return filePaths[0];
   });
+  ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {
+    const gameinfo = getGameSummary(data);
+
+    const popupdata = [
+      {
+        click: () => commandHandler('command', 'openfolder', data.path),
+        type: 'normal',
+        label: 'Open game folder'
+      },
+      {
+        type: 'submenu',
+        label: 'Apply patch...',
+        submenu: [
+          {
+            click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: '' }),
+            type: 'radio',
+            label: `Original (${data.gver})`,
+            checked: false
+          }
+        ]
+      }
+    ];
+
+    for (const patch of data.patches) {
+      popupdata[1].submenu.push({
+        click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: patch.path }),
+        type: 'radio',
+        label: patch.version,
+        checked: gameinfo.patch === patch.path
+      })
+    }
+
+    try {
+      const menu = Menu.buildFromTemplate(popupdata);
+
+      menu.popup({
+        callback: resolve,
+        window: win,
+        x: data.x,
+        y: data.y
+      });
+    } catch (e) {
+      reject(e);
+    }
+  }));
 
   win = new BrowserWindow({
     width: 1014,
