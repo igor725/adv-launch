@@ -38,7 +38,7 @@
 
 #maindata {
   display: grid;
-  grid-template-columns: 286px 1fr;
+  grid-template-columns: 300px 1fr;
   position: fixed;
   top: 25px;
   width: 100%;
@@ -47,7 +47,7 @@
 
 #gamelist {
   display: grid;
-  grid-template-columns: repeat(2, 138px);
+  grid-template-columns: 1fr 1fr;
   background-color: rgba(0, 0, 0, 0.3);
   overflow-y: scroll;
   overflow-x: hidden;
