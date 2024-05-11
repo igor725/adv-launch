@@ -38,7 +38,7 @@
 
 #maindata {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 287px 1fr;
   position: fixed;
   top: 25px;
   width: 100%;
@@ -46,14 +46,19 @@
 }
 
 #gamelist {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-bottom: 35px;
   background-color: rgba(0, 0, 0, 0.3);
   overflow-y: scroll;
   overflow-x: hidden;
   opacity: 0.05;
   transition: opacity 0.15s;
-  min-height: 100%;
+  height: 100%;
 }
 
 #gamelist:hover {
@@ -65,7 +70,7 @@
   height: 128px;
   border-radius: 6px;
   background-color: rgba(70, 69, 69, 0.3);
-  margin: 10px;
+  margin: 0;
   background-repeat: no-repeat;
   background-size: contain;
 }
