@@ -1,9 +1,9 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
-const { spawn, exec } = require('child_process');
+const { spawn, exec } = require('node:child_process');
 const path = require('node:path');
-const fs = require('fs');
+const fs = require('node:fs');
 const { Config } = require('./settings.js');
 
 const emupath = path.join(__dirname, '/bin/emulator');
