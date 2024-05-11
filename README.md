@@ -2,6 +2,15 @@
 
 This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay/psOff_public/) written in JS using Electron framework.
 
+<details>
+  <summary>Screenshots</summary>
+
+  ![screen1](/misc/screen1.png)
+  ![screen1](/misc/screen2.png)
+  ![screen1](/misc/screen3.png)
+
+</details>
+
 ## Features
 + Multiple game directories support with deep scaning
 + Automatic updates for emulator releases and nightly builds
