@@ -38,7 +38,7 @@
 
 #maindata {
   display: grid;
-  grid-template-columns: 287px 1fr;
+  grid-template-columns: 28.31vw 1fr;
   position: fixed;
   top: 25px;
   width: 100%;
