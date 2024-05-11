@@ -52,6 +52,10 @@
 #gamefilter {
   grid-area: filter;
   transition: opacity 0.15s;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding-left: 10px;
+  border: none;
+  color: white;
   opacity: 0.05;
 }
 
