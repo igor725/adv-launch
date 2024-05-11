@@ -64,7 +64,7 @@
   };
 
   const isGameBadge = (target) => target.classList.contains('gamebadge');
-  // const getGameTitleFromBadge = (target) => target.$('.gbi-name').innerText;
+  const getGameTitleFromBadge = (target) => target.$('.gbi-name').innerText;
   const getGameTitleIdFromBadge = (target) => target.dataset.gid;
   const getGamePathFromBadge = (target) => target.dataset.gpath;
   const getGameVersionFromBadge = (target) => target.dataset.gver;
@@ -128,6 +128,14 @@
       preventFetching();
     }
   }, true);
+
+  $('#gamefilter').on('input', ({ target }) => {
+    const filter = target.value.toLowerCase();
+    for (let elem = gamelist.firstChild; elem !== null; elem = elem.nextSibling) {
+      if (!isGameBadge(elem)) return;
+      elem.style.display = filter === '' ? null : (getGameTitleIdFromBadge(elem).toLowerCase().indexOf(filter) === -1 && getGameTitleFromBadge(elem).toLowerCase().indexOf(filter) === -1) ? 'none' : null;
+    }
+  });
 
   window.electronAPI.addEventListener('set-bg-image', (image) => {
     if (image == null) {

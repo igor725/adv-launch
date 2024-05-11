@@ -211,6 +211,11 @@ const download = async (url, version, headers = undefined) => {
   });
 };
 
+const validateEmulatorPath = () => {
+  if (!emupath) throw new Error('No emulator path installed!');
+  if (!fs.lstatSync(emupath).isDirectory()) throw new Error('Emulator path is not a directory!');
+};
+
 parentPort.on('message', async (msg) => {
   try {
     switch (msg.act) {
@@ -218,6 +223,7 @@ parentPort.on('message', async (msg) => {
         verfile = path.join(msg.path, '/version.adv');
         update_channel = msg.branch;
         emupath = msg.path;
+        validateEmulatorPath();
         break;
 
       case 'set-token':
@@ -230,10 +236,12 @@ parentPort.on('message', async (msg) => {
         break;
 
       case 'run-check':
+        validateEmulatorPath();
         await triggerCheck(msg.force);
         break;
 
       case 'download':
+        validateEmulatorPath();
         download(newverinfo.url, newverinfo.tag);
         break;
     }
