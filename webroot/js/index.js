@@ -37,7 +37,7 @@
       const floored = Math.floor(hours);
       return ((hours - floored > 0.25) ? hours.toFixed(2) : hours) + (hours > 1 ? ' hours' : ' hour');
     }
-  }
+  };
 
   const fetchGame = (node, force = false) => {
     if (loadBGandSound != null) {

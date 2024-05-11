@@ -6,6 +6,7 @@ module.exports.Config = class Config {
   #default = {
     update_channel: 'release',
     update_freq: 'weekly',
+    first_launch: true,
     github_token: '',
     bg_volume: 30,
     scan_dirs: {}
@@ -40,7 +41,7 @@ module.exports.Config = class Config {
       console.error('[SETTINGS] Failed to load the default config: ', e.toString());
       const jdata = JSON.stringify(this.#default);
       this.#data = JSON.parse(jdata);
-      fs.writeFileSync(cfgfile, jdata);
+      fs.writeFileSync(this.#cfgfile, jdata);
     }
 
     if (cp !== null) {
@@ -79,6 +80,16 @@ module.exports.Config = class Config {
   getSysLang = () => {
     if (this.#emuconf.general === null) return 1;
     return this.#emuconf.general.systemlang ?? 1;
+  };
+
+  markLaunch = () => {
+    this.#data.first_launch = false;
+    this.#unsaved.launcher = true;
+    this.save();
+  };
+
+  isFirstLaunch = () => {
+    return this.getValue('first_launch');
   };
 
   reloadEmulatorSettings = () => {

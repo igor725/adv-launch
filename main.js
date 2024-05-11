@@ -97,12 +97,16 @@ const updateGameSummary = (gid, update) => {
   return dsum;
 };
 
-const updateBinaryPath = (path) => {
+const updateBinaryPath = (path, checkfirst = false) => {
   binname = path ?? binname;
   exec(`"${binname}" -h`, { cwd: emupath }).on('close', (code) => {
     if (code === 0 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });
+
+  if (checkfirst && config.isFirstLaunch()) {
+    win.send('warnmsg', { hidden: false, type: 'text', id: 'first-launch', text: 'Welcome to psOff advanced launcher! Do you want to open the launcher settings?', buttons: ['No, just let me be', 'Yes, please'] });
+  }
 };
 
 const genericWarnMsg = (text = 'Empty text?', noclose = false) => {
@@ -257,6 +261,15 @@ const commandHandler = (channel, cmd, info) => {
           }
           break;
 
+        case 'first-launch':
+          config.markLaunch();
+          win.send('warnmsg', { hidden: true, id: 'first-launch' });
+
+          if (info.resp === 1) {
+            commandHandler('command', 'showsettings');
+          }
+          break;
+
         default:
           console.error('Unhandled warnmsg action: ', info.id);
           break;
@@ -362,8 +375,8 @@ app.whenReady().then(() => {
           break;
 
         case 'done':
-          updateBinaryPath(msg.executable);
           win.send('warnmsg', { id: 'upd-progr', hidden: true });
+          updateBinaryPath(msg.executable, true);
           break;
 
         case 'available':
@@ -393,6 +406,9 @@ app.whenReady().then(() => {
 
   config.addCallback('launcher', (key, value) => {
     switch (key) {
+      case 'scan_dirs':
+        commandHandler('command', 'getgames');
+        return;
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
         return;
@@ -401,6 +417,17 @@ app.whenReady().then(() => {
         break;
       case 'update_freq':
         updateWorker.postMessage({ act: 'set-freq', freq: value });
+        break;
+      case 'bg_volume':
+        /**
+         * Awful hack ahead!
+         * Force frontend to resend the game info so the backend will
+         * restart the background music with the new volume setting.
+        */
+        win.send('ingame', true);
+        win.send('ingame', false);
+        break;
+
       default:
         return;
     }

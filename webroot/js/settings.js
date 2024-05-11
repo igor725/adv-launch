@@ -131,7 +131,10 @@
     for (const elem of htels) {
       const fac = getFacility(elem);
       const key = getKey(elem);
-      if (fac[key] === undefined) continue;
+      if (fac[key] === undefined) {
+        elem.title = 'This feature is not available in your current emulator version!';
+        continue;
+      }
       elem.disabled = '';
 
       switch (elem.tagName) {
