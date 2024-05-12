@@ -13,10 +13,10 @@ module.exports.Config = class Config {
   };
   #emuconfpath = null;
   #emuconf = {
-    controls: null,
-    graphics: null,
-    general: null,
-    audio: null
+    controls: {},
+    graphics: {},
+    general: {},
+    audio: {}
   };
   #unsaved = {
     launcher: false,
@@ -103,29 +103,25 @@ module.exports.Config = class Config {
     try {
       this.#emuconf.controls = JSON.parse(fs.readFileSync(this.#emuconfpath.controls));
     } catch (e) {
-      console.error('Failed to open emulator controls config, emptying it: ', e.toString());
-      this.#emuconf.controls = {};
+      console.error('Failed to parse emulator controls config: ', e.toString());
     }
 
     try {
       this.#emuconf.general = JSON.parse(fs.readFileSync(this.#emuconfpath.general));
     } catch (e) {
-      console.error('Failed to open emulator general config, emptying it: ', e.toString());
-      this.#emuconf.general = {};
+      console.error('Failed to parse emulator general config: ', e.toString());
     }
 
     try {
       this.#emuconf.audio = JSON.parse(fs.readFileSync(this.#emuconfpath.audio));
     } catch (e) {
-      console.error('Failed to open emulator audio config, emptying it: ', e.toString());
-      this.#emuconf.audio = {};
+      console.error('Failed to parse emulator audio config: ', e.toString());
     }
 
     try {
       this.#emuconf.graphics = JSON.parse(fs.readFileSync(this.#emuconfpath.graphics));
     } catch (e) {
-      console.error('Failed to open emulator graphics config, emptying it: ', e.toString());
-      this.#emuconf.graphics = {};
+      console.error('Failed to parse emulator graphics config: ', e.toString());
     }
   };
 
