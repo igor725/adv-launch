@@ -3,11 +3,11 @@
   const bgimage = $('#bgimage');
   const gsummary = $('#gamesummary');
 
+  const getGameBadgeById = (id) => $(`.gamebadge[data-gid="${id}"]`);
   const isGameBadge = (target) => target.classList.contains('gamebadge');
   const getGameTitleFromBadge = (target) => target.$('.gbi-name').innerText;
   const getGameTitleIdFromBadge = (target) => target.dataset.gid;
   const getGamePathFromBadge = (target) => target.dataset.gpath;
-  const getTrophiesPathFromBadge = (target) => target.dataset.gtroph;
   const getGameVersionFromBadge = (target) => target.dataset.gver;
 
   const formatTime = (ms) => {
@@ -32,7 +32,7 @@
   let playingAmbientFor = null;
 
   window.gamelistAPI = {
-    getSelectedGame: () => selectedGame != null ? $(`.gamebadge[data-gid="${selectedGame}"]`) : null,
+    getSelectedGame: () => selectedGame != null ? getGameBadgeById(selectedGame) : null,
     preventFetching: () => {
       window.electronAPI.sendCommand('stopaudio');
 
@@ -48,14 +48,16 @@
         loadBGandSound = null;
       }
 
-      const { gpath, gid, gtroph } = node.dataset;
+      const { gpath, gid, gtroph, gipatch } = node.dataset;
       if (playingAmbientFor == gid && !force) return;
 
       loadBGandSound = setTimeout(() => {
-        window.electronAPI.sendCommand('getgamesum', { gpath: gpath, gid: gid });
+        const possible_paths = [];
+        if (gipatch) possible_paths.push(gipatch);
+        possible_paths.push(gpath);
+        window.electronAPI.sendCommand('getgamesum', { gpath: possible_paths, gid: gid });
         if (gtroph) {
-          window.electronAPI.readTrophies(gtroph).then((data) => {
-            if (getTrophiesPathFromBadge(node) != gtroph) return;
+          window.electronAPI.readTrophies(possible_paths).then((data) => {
             window.trophyAPI.updateTrophies(data);
           }).catch((err) => {
             window.trophyAPI.setError(err.toString());
@@ -191,6 +193,7 @@
     const lrun = gsummary.$('.lrun p:nth-child(2)');
     const lplay = gsummary.$('.lplay p:nth-child(2)');
     window.trophyAPI.updateAchieved(data.trophies);
+    if (data.patch) getGameBadgeById(data.gid).dataset.gipatch = data.patch;
     lrun.innerText = data.lastrun === -1 ? 'Never' : (new Date(data.lastrun)).toLocaleDateString();
     lplay.innerText = formatTime(data.playtime);
     gsummary.style.opacity = 1;

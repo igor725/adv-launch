@@ -102,19 +102,31 @@ module.exports.Config = class Config {
 
     try {
       this.#emuconf.controls = JSON.parse(fs.readFileSync(this.#emuconfpath.controls));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to open emulator controls config, emptying it: ', e.toString());
+      this.#emuconf.controls = {};
+    }
 
     try {
       this.#emuconf.general = JSON.parse(fs.readFileSync(this.#emuconfpath.general));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to open emulator general config, emptying it: ', e.toString());
+      this.#emuconf.general = {};
+    }
 
     try {
       this.#emuconf.audio = JSON.parse(fs.readFileSync(this.#emuconfpath.audio));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to open emulator audio config, emptying it: ', e.toString());
+      this.#emuconf.audio = {};
+    }
 
     try {
       this.#emuconf.graphics = JSON.parse(fs.readFileSync(this.#emuconfpath.graphics));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to open emulator graphics config, emptying it: ', e.toString());
+      this.#emuconf.graphics = {};
+    }
   };
 
   getFullConfig = () => {

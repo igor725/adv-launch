@@ -10,6 +10,10 @@ const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/troph
 const emupath = path.join(__dirname, '/bin/emulator');
 const gipath = path.join(__dirname, '/gameinfo');
 
+const SCE_PIC_PATH = '/sce_sys/pic0.png';
+const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
+const SCE_BGA_PATH = '/sce_sys/snd0.at9';
+
 try {
   fs.mkdirSync(emupath, { recursive: true });
   fs.mkdirSync(gipath, { recursive: true });
@@ -80,6 +84,7 @@ const getGameSummary = (info, loadtrophies = true) => {
   }
 
   if (loadtrophies) dsum.trophies = loadTrophiesData(info.gid);
+  dsum.gid = info.gid;
 
   return dsum;
 };
@@ -104,6 +109,7 @@ const updateGameSummary = (gid, update, loadtrophies = false) => {
   }
 
   if (loadtrophies) dsum.trophies = loadTrophiesData(gid);
+  dsum.gid = gid;
 
   return dsum;
 };
@@ -147,27 +153,54 @@ const commandHandler = (channel, cmd, info) => {
         player = null;
       }
 
+      let bgimage = null;
       try {
-        win.send('set-bg-image', fs.readFileSync(path.join(info.gpath, '/sce_sys/pic0.png'), { encoding: 'base64' }));
+        bgimage = fs.readFileSync(path.join(info.gpath[0], SCE_PIC_PATH), { encoding: 'base64' });
       } catch (e) {
-        win.send('set-bg-image', null);
+        if (info.gpath[1]) {
+          try {
+            bgimage = fs.readFileSync(path.join(info.gpath[1], SCE_PIC_PATH), { encoding: 'base64' });
+          } catch (e2) {
+            console.error(e2.toString());
+            bgimage = null;
+          }
+        } else {
+          console.error(e.toString());
+          bgimage = null;
+        }
       }
+      win.send('set-bg-image', bgimage);
 
       const volume = config.getVolume();
 
       if (gameproc != null || volume == 0) return;
 
-      try {
-        const apath = path.join(info.gpath, '/sce_sys/snd0.at9');
-        if (fs.lstatSync(apath).isFile()) {
+      const runPlayer = (apath) => {
+        try {
           player = spawn(path.join(__dirname, '/bin/ffplay.exe'), [
             '-nodisp', '-volume', volume,
             '-vn', '-loglevel', 'quiet',
             '-loop', '0', '-i', apath
           ]);
+        } catch (e) {
+          console.error(`Failed to run background audio play: ${e.toString()}`);
         }
+      };
+
+      try {
+        const apath = path.join(info.gpath[0], SCE_BGA_PATH);
+        if (fs.lstatSync(apath).isFile()) runPlayer(apath);
       } catch (e) {
-        console.error(`Failed to run background audio play: ${e.toString()}`);
+        if (info.gpath[1]) {
+          try {
+            const apath = path.join(info.gpath[1], SCE_BGA_PATH);
+            if (fs.lstatSync(apath).isFile()) runPlayer(apath);
+          } catch (e2) {
+            console.error(e2.toString());
+          }
+        } else {
+          console.error(e.toString());
+        }
       }
       break;
     case 'stopaudio':
@@ -320,8 +353,15 @@ app.whenReady().then(() => {
     if (canceled) return null;
     return filePaths[0];
   });
-  ipcMain.handle('opentrp', async (event, path) => {
-    const tropxml = new Trophies(path, -1);
+
+  ipcMain.handle('opentrp', async (event, paths) => {
+    let tropxml = null;
+    try {
+      tropxml = new Trophies(path.join(paths[0], SCE_TROPHY_PATH), -1);
+    } catch (err) {
+      if (paths[1]) tropxml = new Trophies(path.join(paths[1], SCE_TROPHY_PATH), -1);
+      else throw err;
+    }
     let tfile = tropxml.findFile(`trop_${String(config.getSysLang()).padStart(2, '0')}.esfm`);
     if (tfile === null && (tfile = tropxml.findFile('trop.esfm')) == null) return null;
     const data = new TrophyDataReader(tfile);

@@ -83,17 +83,16 @@ const walker = (wpath, ents, depth, maxdepth) => {
         if (paramsfostat.isFile()) {
           const sfo_data = readSFO(fs.readFileSync(paramsfopath));
           let icon = null;
-          let troph = null;
+          let troph = false;
 
           try {
             icon = fs.readFileSync(path.join(syspath, '/icon0.png'), { encoding: 'base64' });
           } catch (e) { }
 
           try {
-            troph = path.join(syspath, '/trophy/trophy00.trp');
-            if (!fs.lstatSync(troph).isFile()) troph = null;
+            troph = fs.lstatSync(path.join(syspath, '/trophy/trophy00.trp')).isFile();
           } catch (e) {
-            troph = null;
+            troph = false;
           }
 
           if (applist[sfo_data.CATEGORY]) {

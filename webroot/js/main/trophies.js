@@ -52,8 +52,10 @@
       trlist.dataset.hidden = hidden ? '0' : '1';
 
       setTimeout(() => {
-        if (trlist.dataset.hidden === '1')
+        if (trlist.dataset.hidden === '1') {
+          trlist.scrollTo(0, 0); // Should be called before setting the style, won't work otherwise
           trlist.style.display = 'none';
+        }
       }, 300);
     }, 0);
   };

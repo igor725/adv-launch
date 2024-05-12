@@ -16,12 +16,12 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 + Automatic updates for emulator releases and nightly builds
 + List filtering by title name/id
 + Game's background music
++ Trophies system
 
 ## Planned features
 + Controllers/Keybind cofiguration
 + Gamepad control support
 + Audio device selection
-+ Trophies system
 + Custom themes
 
 ## How can I download it?
