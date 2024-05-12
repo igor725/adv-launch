@@ -449,6 +449,13 @@ app.whenReady().then(() => {
       case 'trophyKey':
         try {
           TrophySharedConfig.setERK(value);
+          /**
+           * Awful hack ahead!
+           * Force frontend to resend the game info so the backend will
+           * resend trophies data with the new key installed.
+          */
+          win.send('ingame', true);
+          win.send('ingame', false);
         } catch (err) {
           console.error('Failed to update trophy key: ', err.toString());
         }

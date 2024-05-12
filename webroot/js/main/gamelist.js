@@ -58,7 +58,7 @@
             if (getTrophiesPathFromBadge(node) != gtroph) return;
             window.trophyAPI.updateTrophies(data);
           }).catch((err) => {
-            console.error(err.toString());
+            window.trophyAPI.setError(err.toString());
           });
         }
 

@@ -14,6 +14,9 @@
       trlist.innerHTML = elems.join('');
       ltrops.children[3].innerText = data.length;
     },
+    setError: (err) => {
+      trlist.innerHTML = `<p style="width: 100%; height: 100%; display: flex; align-items: center; text-align:center;">${err}</p>`;
+    },
     updateAchieved: (data) => {
       if (unlockstyle === null) {
         unlockstyle = document.createElement('style');
