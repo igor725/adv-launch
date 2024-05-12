@@ -199,7 +199,7 @@ const download = async (url, version, headers = undefined) => {
 
       resp.on('end', () => {
         tempfile.end(() => {
-          resolve(fpath, version);
+          resolve({ fpath, version });
         });
       });
     }).on('error', (err) => {
@@ -241,11 +241,11 @@ const commandHandler = async (msg) => {
 
       case 'download':
         validateEmulatorPath();
-        await download(newverinfo.url, newverinfo.tag).then((fpath, newver) => {
+        await download(newverinfo.url, newverinfo.tag).then(({ fpath, version }) => {
           execSync('del *.dll *.exe', { cwd: emupath });
           execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
           parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-          updateVersionFile(newver);
+          updateVersionFile(version);
           fs.unlinkSync(fpath);
         });
         break;

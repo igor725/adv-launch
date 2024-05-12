@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 module.exports.Config = class Config {
-  #cfgfile = path.join(__dirname, '/config.json');
+  #cfgfile = path.join(__dirname, '../config.json');
   #default = {
     update_channel: 'release',
     update_freq: 'weekly',
@@ -82,6 +82,11 @@ module.exports.Config = class Config {
     return this.#emuconf.general.systemlang ?? 1;
   };
 
+  getTrophyKey = () => {
+    if (this.#emuconf.general === null) return '';
+    return this.#emuconf.general.trophyKey ?? '';
+  };
+
   markLaunch = () => {
     this.#data.first_launch = false;
     this.#unsaved.launcher = true;
@@ -141,7 +146,7 @@ module.exports.Config = class Config {
       const fac = this.#emuconf[facility];
       Object.assign(fac, values);
       this.#unsaved.emulator[facility] = true;
-      for (const [key, value] in Object.entries(values)) {
+      for (const [key, value] of Object.entries(values)) {
         this.runCallback(`emu.${facility}`, key, value);
       }
     }

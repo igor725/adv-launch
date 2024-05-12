@@ -3,7 +3,7 @@
   color: white;
   outline: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgb(15, 15, 15) #00000000;
+  scrollbar-color: #0f0f0f #00000000;
 }
 
 select,
@@ -18,9 +18,10 @@ body {
   height: 100%;
   margin: 0;
   position: relative;
+  overflow: hidden;
 }
 
 body {
-  background-color: rgb(37, 37, 37);
+  background-color: #252525;
   user-select: none;
 }

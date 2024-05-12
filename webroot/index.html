@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="css/fa.min.css" />
   <link rel="stylesheet" href="css/fa-solid.min.css" />
   <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/titlebar.css" />
+  <link rel="stylesheet" href="css/warnmsg.css" />
+  <link rel="stylesheet" href="css/gamelist.css" />
+  <link rel="stylesheet" href="css/gameinfo.css" />
+  <link rel="stylesheet" href="css/terminal.css" />
   <link rel="stylesheet" href="css/main.css" />
   <script src="js/vars.js"></script>
 </head>
@@ -30,18 +35,20 @@
           <div id="terminal" title="Double click here to copy the terminal output"></div>
         </div>
         <div id="gameinfo">
-          <div id="gamesummary">
+          <div id="gamesummary" style="opacity: 0;">
             <div class="info lrun">
-              <p>Last run:</p>
+              <p class="title">Last run:</p>
               <p>5/9/2024</p>
             </div>
             <div class="info lplay">
-              <p>Playtime:</p>
+              <p class="title">Playtime:</p>
               <p>0min</p>
             </div>
-            <div class="info ltrops">
-              <p>Trophies:</p>
-              <p>0 / 0</p>
+            <div class="info ltrops" data-hidden="1">
+              <p class="title">Trophies: </p>
+              <p>0</p>
+              <p>/</p>
+              <p>0</p>
             </div>
           </div>
           <div id="gamebuttons">
@@ -52,8 +59,13 @@
       </div>
     </div>
   </div>
+  <div id="trophieslist" data-hidden="1" style="display: none;"></div>
   <div id="warnmsg" data-active="0"></div>
 
+  <script src="./js/main/warnmsg.js"></script>
+  <script src="./js/main/trophies.js"></script>
+  <script src="./js/main/terminal.js"></script>
+  <script src="./js/main/gamelist.js"></script>
   <script src="./js/index.js"></script>
 </body>
 

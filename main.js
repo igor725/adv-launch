@@ -4,7 +4,8 @@ const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
-const { Config } = require('./settings.js');
+const { Config } = require('./libs/settings.js');
+const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
 
 const emupath = path.join(__dirname, '/bin/emulator');
 const gipath = path.join(__dirname, '/gameinfo');
@@ -50,8 +51,26 @@ const _runDownloadingProcess = (retry = false) => {
   updateWorker.postMessage({ act: retry ? 'retry' : 'download' });
 }
 
-const getGameSummary = (info) => {
-  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
+const loadTrophiesData = (gid) => {
+  try {
+    const tfile = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`);
+    const trophies = [];
+    const count = tfile.readUint32LE(0);
+    for (let i = 0; i < count; ++i) {
+      const offset = 4 + (i * 12);
+      trophies.push([tfile.readUint32LE(offset), tfile.readBigUint64LE(offset + 4)]);
+    }
+
+    return trophies;
+  } catch (e) {
+    console.error(`Failed to load trophies info for ${gid}: ${e.toString()}`);
+  }
+
+  return [];
+};
+
+const getGameSummary = (info, loadtrophies = true) => {
+  const dsum = { lastrun: -1, playtime: 0, patch: '' };
 
   try {
     const data = fs.readFileSync(`${gipath}/${info.gid}.json`);
@@ -60,17 +79,13 @@ const getGameSummary = (info) => {
     console.error(`Failed to load game info for ${info.gid}: ${e.toString()}`);
   }
 
-  try {
-    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${info.gid}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
-  } catch (e) {
-    console.error(`Failed to load trophies info for ${info.gid}: ${e.toString()}`);
-  }
+  if (loadtrophies) dsum.trophies = loadTrophiesData(info.gid);
 
   return dsum;
 };
 
-const updateGameSummary = (gid, update) => {
-  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
+const updateGameSummary = (gid, update, loadtrophies = false) => {
+  const dsum = { lastrun: -1, playtime: 0, patch: '' };
 
   try {
     const data = fs.readFileSync(`${gipath}/${gid}.json`);
@@ -88,11 +103,7 @@ const updateGameSummary = (gid, update) => {
     console.error(`Failed to save game info for ${gid}: ${e.toString()}`);
   }
 
-  try {
-    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
-  } catch (e) {
-    console.error(`Failed to load trophies info for ${gid}: ${e.toString()}`);
-  }
+  if (loadtrophies) dsum.trophies = loadTrophiesData(gid);
 
   return dsum;
 };
@@ -197,7 +208,7 @@ const commandHandler = (channel, cmd, info) => {
       }
       win.send('ingame', true);
       const emuargs = [`--file=${info.path}\\eboot.bin`];
-      const patch = getGameSummary(info).patch;
+      const patch = getGameSummary(info, false).patch;
       if (patch) emuargs.push(`--update=${patch}`);
 
       gameproc = spawn(path.join(emupath, binname), emuargs, { cwd: emupath });
@@ -214,7 +225,7 @@ const commandHandler = (channel, cmd, info) => {
 
       gameproc.on('close', (code) => {
         config.reloadEmulatorSettings();
-        win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }));
+        win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }, true));
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
         gameproc = null;
@@ -309,8 +320,16 @@ app.whenReady().then(() => {
     if (canceled) return null;
     return filePaths[0];
   });
+  ipcMain.handle('opentrp', async (event, path) => {
+    const tropxml = new Trophies(path, -1);
+    let tfile = tropxml.findFile(`trop_${String(config.getSysLang()).padStart(2, '0')}.esfm`);
+    if (tfile === null && (tfile = tropxml.findFile('trop.esfm')) == null) return null;
+    const data = new TrophyDataReader(tfile);
+    data.addImages(tropxml);
+    return data.array;
+  });
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {
-    const gameinfo = getGameSummary(data);
+    const currpatch = getGameSummary(data, false).patch;
 
     const popupdata = [
       {
@@ -337,7 +356,7 @@ app.whenReady().then(() => {
         click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: patch.path }),
         type: 'radio',
         label: patch.version,
-        checked: gameinfo.patch === patch.path
+        checked: currpatch === patch.path
       })
     }
 
@@ -406,14 +425,36 @@ app.whenReady().then(() => {
       }
     });
 
-    let token;
-    if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+    {
+      let token;
+      if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+    }
+
+    try {
+      let erk;
+      if (erk = config.getTrophyKey()) TrophySharedConfig.setERK(erk);
+    } catch (err) {
+      console.error('Failed to set trophy key: ', err.toString());
+    }
+
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
   let updaterchanged = false;
+
+  config.addCallback('emu.general', (key, value) => {
+    switch (key) {
+      case 'trophyKey':
+        try {
+          TrophySharedConfig.setERK(value);
+        } catch (err) {
+          console.error('Failed to update trophy key: ', err.toString());
+        }
+        return;
+    }
+  });
 
   config.addCallback('launcher', (key, value) => {
     switch (key) {

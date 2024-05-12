@@ -1,0 +1,122 @@
+#gameinfo {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  background-color: #0000004c;
+}
+
+#gamesummary {
+  display: flex;
+  flex-direction: row;
+  padding-left: 10px;
+  gap: 20px;
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  vertical-align: middle;
+}
+
+#gamesummary p {
+  height: 100%;
+  margin-top: 0;
+}
+
+#gamesummary p.title {
+  margin-right: 5px;
+}
+
+#gamesummary .info {
+  display: flex;
+}
+
+#gamesummary .ltrops[data-hidden="1"] {
+  display: none;
+}
+
+#gamesummary .ltrops:hover {
+  background-color: #9a9a9a7c;
+  cursor: pointer;
+}
+
+#trophieslist {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background-color: #0000007e;
+  bottom: -320px;
+  transition: bottom 250ms;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 400px;
+  height: 320px;
+}
+
+#trophieslist[data-hidden="0"] {
+  bottom: 45px;
+}
+
+#trophieslist div.row {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-grow: 1;
+  width: 100%;
+  min-height: 90px;
+  border-bottom: 1px solid white;
+  padding-left: 5px;
+}
+
+#trophieslist div.row img {
+  -webkit-user-drag: none;
+  width: 64px;
+  height: 64px;
+}
+
+#trophieslist div.row div.info {
+  padding-left: 10px;
+  width: 100%;
+}
+
+#trophieslist div.row p.name {
+  font-weight: bold;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+#trophieslist div.row p.name .fa-trophy {
+  margin-left: 10px;
+}
+
+#trophieslist div.row p.name .grade-P {
+  color: rgb(191, 191, 191);
+}
+
+#trophieslist div.row p.name .grade-G {
+  color: rgb(228, 194, 78);
+}
+
+#trophieslist div.row p.name .grade-S {
+  color: rgb(150, 164, 182);
+}
+
+#trophieslist div.row p.name .grade-B {
+  color: rgb(199, 124, 48);
+}
+
+#trophieslist div.row p.detail {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#gamebuttons {
+  display: flex;
+  flex-direction: row;
+  bottom: 25px;
+  width: 300px;
+  height: 40px;
+}
+
+.gbutton {
+  width: 150px;
+  line-height: 40px;
+}

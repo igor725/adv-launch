@@ -26,7 +26,7 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 
 ## How can I download it?
 
-Glad you asked! Just hit the [Actions](<https://github.com/igor725/adv-launch/actions>) button and download the latest available build.
+Glad you asked! Just hit the [Actions](<https://github.com/igor725/adv-launch/actions?query=branch%3Amain>) button and download the latest available build.
 
 ## Contributing
 
