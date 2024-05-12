@@ -227,8 +227,7 @@ const commandHandler = async (msg) => {
         break;
 
       case 'set-token':
-        if (msg.token.startsWith('github_pat_'))
-          atoken = msg.token;
+        atoken = msg.token;
         break;
 
       case 'set-freq':
