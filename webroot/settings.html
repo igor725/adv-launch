@@ -9,17 +9,13 @@
 </style>
 
 <head>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self';">
+  <link rel="stylesheet" href="css/fa.min.css" />
+  <link rel="stylesheet" href="css/fa-solid.min.css" />
   <link rel="stylesheet" href="css/shared.css" />
   <link rel="stylesheet" href="css/settings.css" />
-  <script>
-    // Why not?
-    window.on = window.addEventListener;
-    window.$ = qs => document.querySelector(qs);
-    window.$$ = qs => document.querySelectorAll(qs);
-    Element.prototype.on = Element.prototype.addEventListener;
-    Element.prototype.$ = Element.prototype.querySelector;
-    Element.prototype.$$ = Element.prototype.querySelectorAll;
-  </script>
+  <script src="js/vars.js"></script>
 </head>
 
 <body>
@@ -131,9 +127,7 @@
     </div>
   </div>
   <div id="wait-spinner">
-    <svg class="spinner" viewBox="0 0 50 50">
-      <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
+    <i class="fa-solid fa-pulse fa-spinner fa-4x" style="color: #6a8dc5;"></i>
   </div>
 
   <script src="./js/settings.js"></script>

@@ -200,7 +200,7 @@
     }
   }, true);
 
-  wrapper.on('blur', ({ target }) => {
+  wrapper.on('input', ({ target }) => {
     switch (target.tagName) {
       case 'INPUT':
         switch (target.getAttribute('type')) {

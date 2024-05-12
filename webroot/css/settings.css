@@ -12,7 +12,13 @@
 }
 
 .row {
+  display: flex;
   width: 100%;
+}
+
+input:not([type="checkbox"]),
+select {
+  flex: 1;
 }
 
 #data {
@@ -24,7 +30,7 @@
 
 #buttons {
   display: flex;
-  min-height: 40px;
+  min-height: 25px;
 }
 
 #buttons * {

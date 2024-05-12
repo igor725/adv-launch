@@ -362,6 +362,7 @@ app.whenReady().then(() => {
     minHeight: 570,
     frame: false,
     webPreferences: {
+      allowRunningInsecureContent: false,
       nodeIntegrationInWorker: true,
       preload: path.join(__dirname, 'preload.js')
     }
