@@ -421,7 +421,7 @@ app.whenReady().then(() => {
         return;
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
-        return;
+        break;
       case 'update_channel':
         updateWorker.postMessage({ act: 'set-branch', branch: value, path: emupath });
         break;
