@@ -1,9 +1,15 @@
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url('../fonts/UbuntuMono-Regular.ttf');
+}
+
 * {
   box-sizing: border-box;
   color: white;
   outline: 0;
   scrollbar-width: thin;
   scrollbar-color: #0f0f0f #00000000;
+  font-family: 'Ubuntu Mono';
 }
 
 select,
