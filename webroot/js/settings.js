@@ -1,4 +1,4 @@
-(() => {
+window._onLangReady = (() => {
   const wrapper = $('#wrapper');
   let saved_cfg = null;
   let modified_cfg = [{
@@ -74,7 +74,7 @@
       case 'github_token':
         if (newvalue === 'nightly') {
           if (!modified_cfg[1].github_token && !saved_cfg[1].github_token) {
-            if (confirm('Nightly build requires GitHub authentication! Do you want to proceed?\nThe application will open web page for token generation, you should create a fine-grained token there with whatever name and expiration date. Leave all the settings the same and just hit "Generate token" button, then copy the result token to the corresponding settings field.')) {
+            if (confirm(window.trAPI.get('settings.alerts.ghtoken'))) {
               window.electronAPI.sendCommand('sett-opengh');
             }
 
@@ -132,7 +132,7 @@
       const fac = getFacility(elem);
       const key = getKey(elem);
       if (fac[key] === undefined) {
-        elem.title = 'This feature is not available in your current emulator version!';
+        elem.title = window.trAPI.get('settings.alerts.unavail');
         continue;
       }
       elem.disabled = '';
@@ -195,12 +195,13 @@
             const fac = getFacility(target, modified_cfg);
             if (fac === null) return;
             fac[getKey(target)] = target.value * getRangeScale(target);
+            $('#rangevalue').style.display = null;
             break;
         }
     }
   }, true);
 
-  wrapper.on('blur', ({ target }) => {
+  wrapper.on('input', ({ target }) => {
     switch (target.tagName) {
       case 'INPUT':
         switch (target.getAttribute('type')) {
@@ -210,15 +211,26 @@
             if (fac === null) return;
             fac[getKey(target)] = target.value;
             break;
+
+          case 'range': {
+            const rv = $('#rangevalue');
+            const tb = target.getBoundingClientRect();
+            rv.style.display = 'block';
+            rv.style.top = `${tb.top - 15}px`;
+            rv.style.left = `${tb.left + (target.value / target.max) * tb.width - 25}px`;
+            rv.innerText = target.value;
+          } break;
         }
         break;
+
+
     }
   }, true);
 
   $('#buttons').on('click', ({ target }) => {
     switch (target.dataset.action) {
       case 'close':
-        if (!haveUnsaved() || confirm('You have unsaved settings! Are you sure you want to exit?'))
+        if (!haveUnsaved() || confirm(window.trAPI.get('settings.alerts.unsaved')))
           window.close();
         break;
       case 'save':
@@ -263,11 +275,11 @@
   });
 
   {
-    const svbtn = $('#buttons input[data-action="save"]');
+    const svbtn = $('#buttons button[data-action="save"]');
     setInterval(() => {
       svbtn.disabled = haveUnsaved() ? '' : 'disabled';
     }, 600);
   }
 
   window.electronAPI.sendCommand('sett-request');
-})();
+});

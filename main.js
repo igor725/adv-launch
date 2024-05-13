@@ -4,10 +4,15 @@ const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
-const { Config } = require('./settings.js');
+const { Config } = require('./libs/settings.js');
+const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
 
 const emupath = path.join(__dirname, '/bin/emulator');
 const gipath = path.join(__dirname, '/gameinfo');
+
+const SCE_PIC_PATH = '/sce_sys/pic0.png';
+const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
+const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 
 try {
   fs.mkdirSync(emupath, { recursive: true });
@@ -46,12 +51,30 @@ const scanGameDir = (scanpath, depth) => {
 };
 
 const _runDownloadingProcess = (retry = false) => {
-  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading the emulator binaries, hang tight...', buttons: ['Cancel'] });
+  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: '{$tr:updater.warns.downproc}', buttons: ['{$tr:buttons.ca}'] });
   updateWorker.postMessage({ act: retry ? 'retry' : 'download' });
 }
 
-const getGameSummary = (info) => {
-  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
+const loadTrophiesData = (gid) => {
+  try {
+    const tfile = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`);
+    const trophies = [];
+    const count = tfile.readUint32LE(0);
+    for (let i = 0; i < count; ++i) {
+      const offset = 4 + (i * 12);
+      trophies.push([tfile.readUint32LE(offset), tfile.readBigUint64LE(offset + 4)]);
+    }
+
+    return trophies;
+  } catch (e) {
+    console.error(`Failed to load trophies info for ${gid}: ${e.toString()}`);
+  }
+
+  return [];
+};
+
+const getGameSummary = (info, loadtrophies = true) => {
+  const dsum = { lastrun: -1, playtime: 0, patch: '' };
 
   try {
     const data = fs.readFileSync(`${gipath}/${info.gid}.json`);
@@ -60,17 +83,14 @@ const getGameSummary = (info) => {
     console.error(`Failed to load game info for ${info.gid}: ${e.toString()}`);
   }
 
-  try {
-    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${info.gid}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
-  } catch (e) {
-    console.error(`Failed to load trophies info for ${info.gid}: ${e.toString()}`);
-  }
+  if (loadtrophies) dsum.trophies = loadTrophiesData(info.gid);
+  dsum.gid = info.gid;
 
   return dsum;
 };
 
-const updateGameSummary = (gid, update) => {
-  const dsum = { lastrun: -1, playtime: 0, trophies_max: 0, trophies: 0, patch: '' };
+const updateGameSummary = (gid, update, loadtrophies = false) => {
+  const dsum = { lastrun: -1, playtime: 0, patch: '' };
 
   try {
     const data = fs.readFileSync(`${gipath}/${gid}.json`);
@@ -88,11 +108,8 @@ const updateGameSummary = (gid, update) => {
     console.error(`Failed to save game info for ${gid}: ${e.toString()}`);
   }
 
-  try {
-    dsum.trophies = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`).readUint32LE(0);
-  } catch (e) {
-    console.error(`Failed to load trophies info for ${gid}: ${e.toString()}`);
-  }
+  if (loadtrophies) dsum.trophies = loadTrophiesData(gid);
+  dsum.gid = gid;
 
   return dsum;
 };
@@ -105,14 +122,14 @@ const updateBinaryPath = (path, checkfirst = false) => {
   });
 
   if (checkfirst && config.isFirstLaunch()) {
-    win.send('warnmsg', { hidden: false, type: 'text', id: 'first-launch', text: 'Welcome to psOff advanced launcher! Do you want to open the launcher settings?', buttons: ['No, just let me be', 'Yes, please'] });
+    win.send('warnmsg', { hidden: false, type: 'text', id: 'first-launch', text: '{$tr:main.firstrun.text}', buttons: ['{$tr:main.firstrun.nobtn}', '{$tr:main.firstrun.yesbtn}'] });
   }
 };
 
-const genericWarnMsg = (text = 'Empty text?', noclose = false) => {
-  const buttons = ['Ok'];
-  if (noclose === false) buttons.push('Close the launcher');
-  win.send('warnmsg', { hidden: false, type: 'text', id: 'gen-warn', text: text, buttons });
+const genericWarnMsg = (text = 'Empty text?', noclose = false, trparams) => {
+  const buttons = ['{$tr:buttons.ok}'];
+  if (noclose === false) buttons.push('{$tr:buttons.cl}');
+  win.send('warnmsg', { hidden: false, type: 'text', id: 'gen-warn', text: text, trparams: trparams, buttons });
 };
 
 const commandHandler = (channel, cmd, info) => {
@@ -136,27 +153,54 @@ const commandHandler = (channel, cmd, info) => {
         player = null;
       }
 
+      let bgimage = null;
       try {
-        win.send('set-bg-image', fs.readFileSync(path.join(info.gpath, '/sce_sys/pic0.png'), { encoding: 'base64' }));
+        bgimage = fs.readFileSync(path.join(info.gpath[0], SCE_PIC_PATH), { encoding: 'base64' });
       } catch (e) {
-        win.send('set-bg-image', null);
+        if (info.gpath[1]) {
+          try {
+            bgimage = fs.readFileSync(path.join(info.gpath[1], SCE_PIC_PATH), { encoding: 'base64' });
+          } catch (e2) {
+            console.error(e2.toString());
+            bgimage = null;
+          }
+        } else {
+          console.error(e.toString());
+          bgimage = null;
+        }
       }
+      win.send('set-bg-image', bgimage);
 
       const volume = config.getVolume();
 
       if (gameproc != null || volume == 0) return;
 
-      try {
-        const apath = path.join(info.gpath, '/sce_sys/snd0.at9');
-        if (fs.lstatSync(apath).isFile()) {
+      const runPlayer = (apath) => {
+        try {
           player = spawn(path.join(__dirname, '/bin/ffplay.exe'), [
             '-nodisp', '-volume', volume,
             '-vn', '-loglevel', 'quiet',
             '-loop', '0', '-i', apath
           ]);
+        } catch (e) {
+          console.error(`Failed to run background audio play: ${e.toString()}`);
         }
+      };
+
+      try {
+        const apath = path.join(info.gpath[0], SCE_BGA_PATH);
+        if (fs.lstatSync(apath).isFile()) runPlayer(apath);
       } catch (e) {
-        console.error(`Failed to run background audio play: ${e.toString()}`);
+        if (info.gpath[1]) {
+          try {
+            const apath = path.join(info.gpath[1], SCE_BGA_PATH);
+            if (fs.lstatSync(apath).isFile()) runPlayer(apath);
+          } catch (e2) {
+            console.error(e2.toString());
+          }
+        } else {
+          console.error(e.toString());
+        }
       }
       break;
     case 'stopaudio':
@@ -183,6 +227,7 @@ const commandHandler = (channel, cmd, info) => {
         settwin = null;
       });
       settwin.loadFile('webroot/settings.html');
+      settwin.webContents.once('did-finish-load', () => settwin.send('set-lang', config.getSysLang()));
       break;
     case 'openfolder':
       exec(`explorer "${info}"`);
@@ -192,12 +237,12 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'rungame':
       if (gameproc != null) {
-        genericWarnMsg('You should close your previous game first!', true);
+        genericWarnMsg('{$tr:main.actions.alrun}', true);
         return;
       }
       win.send('ingame', true);
       const emuargs = [`--file=${info.path}\\eboot.bin`];
-      const patch = getGameSummary(info).patch;
+      const patch = getGameSummary(info, false).patch;
       if (patch) emuargs.push(`--update=${patch}`);
 
       gameproc = spawn(path.join(emupath, binname), emuargs, { cwd: emupath });
@@ -207,14 +252,14 @@ const commandHandler = (channel, cmd, info) => {
       gameproc._startTime = Date.now();
 
       gameproc.on('error', (err) => {
-        genericWarnMsg(`psOff process returned the error: ${err.toString()}`);
+        genericWarnMsg('{$tr:main.actions.gerror}', true, { error: err.toString() });
         win.send('ingame', false);
         gameproc = null;
       });
 
       gameproc.on('close', (code) => {
         config.reloadEmulatorSettings();
-        win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }));
+        win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }, true));
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
         gameproc = null;
@@ -309,8 +354,23 @@ app.whenReady().then(() => {
     if (canceled) return null;
     return filePaths[0];
   });
+
+  ipcMain.handle('opentrp', async (event, paths) => {
+    let tropxml = null;
+    try {
+      tropxml = new Trophies(path.join(paths[0], SCE_TROPHY_PATH), -1);
+    } catch (err) {
+      if (paths[1]) tropxml = new Trophies(path.join(paths[1], SCE_TROPHY_PATH), -1);
+      else throw err;
+    }
+    let tfile = tropxml.findFile(`trop_${String(config.getSysLang()).padStart(2, '0')}.esfm`);
+    if (tfile === null && (tfile = tropxml.findFile('trop.esfm')) == null) return null;
+    const data = new TrophyDataReader(tfile);
+    data.addImages(tropxml);
+    return data.array;
+  });
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {
-    const gameinfo = getGameSummary(data);
+    const currpatch = getGameSummary(data, false).patch;
 
     const popupdata = [
       {
@@ -337,7 +397,7 @@ app.whenReady().then(() => {
         click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: patch.path }),
         type: 'radio',
         label: patch.version,
-        checked: gameinfo.patch === patch.path
+        checked: currpatch === patch.path
       })
     }
 
@@ -362,6 +422,7 @@ app.whenReady().then(() => {
     minHeight: 570,
     frame: false,
     webPreferences: {
+      allowRunningInsecureContent: false,
       nodeIntegrationInWorker: true,
       preload: path.join(__dirname, 'preload.js')
     }
@@ -377,7 +438,7 @@ app.whenReady().then(() => {
 
       switch (msg.resp) {
         case 'nobinary':
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: `Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release (${msg.latest})?`, buttons: ['Yes', 'Ignore', 'Close the launcher'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: '{$tr:updater.warns.noemu}', trparams: msg, buttons: ['{$tr:buttons.ye}', '{$tr:buttons.ig}', '{$tr:buttons.cl}'] });
           break;
 
         case 'progress':
@@ -391,28 +452,56 @@ app.whenReady().then(() => {
 
         case 'available':
           updateBinaryPath(msg.executable);
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: `New version of psOff emulator is available! Do you want to download it? (Installed: ${msg.currver}, New: ${msg.newver})`, buttons: ['Yes', 'No'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: '{$tr:updater.warns.newver}', trparams: msg, buttons: ['{$tr:buttons.ye}', '{$tr:buttons.no}'] });
           break;
 
         case 'notoken':
           updateBinaryPath(msg.executable);
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-notoken', text: 'You have no GitHub token installed, nightly update check is impossible!', buttons: ['Ok', 'Switch to releases'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-notoken', text: '{$tr:updater.errors.nonightly}', buttons: ['{$tr:buttons.ok}', '${$tr:buttons.sr}'] });
           break;
 
         case 'error':
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-fail', text: `Failed to check updates for your psOff installation: ${msg.text}`, buttons: ['Retry', 'Ignore', 'Close the launcher'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-fail', text: '{$tr:updater.errors.checkfail}', trparams: { error: msg.text }, buttons: ['{$tr:buttons.re}', '{$tr:buttons.ig}', '{$tr:buttons.cl}'] });
           break;
       }
     });
 
-    let token;
-    if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+    {
+      let token;
+      if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+    }
+
+    try {
+      let erk;
+      if (erk = config.getTrophyKey()) TrophySharedConfig.setERK(erk);
+    } catch (err) {
+      console.error('Failed to set trophy key: ', err.toString());
+    }
+
+    win.send('set-lang', config.getSysLang());
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
-  let updaterchanged = false;
+  let updaterchanged = false, shouldreload = false;
+
+  config.addCallback('emu.general', (key, value) => {
+    switch (key) {
+      case 'systemlang':
+        win.send('set-lang', value);
+        shouldreload = true;
+        break;
+      case 'trophyKey':
+        try {
+          TrophySharedConfig.setERK(value);
+          shouldreload = true;
+        } catch (err) {
+          console.error('Failed to update trophy key: ', err.toString());
+          return;
+        }
+    }
+  });
 
   config.addCallback('launcher', (key, value) => {
     switch (key) {
@@ -429,13 +518,7 @@ app.whenReady().then(() => {
         updateWorker.postMessage({ act: 'set-freq', freq: value });
         break;
       case 'bg_volume':
-        /**
-         * Awful hack ahead!
-         * Force frontend to resend the game info so the backend will
-         * restart the background music with the new volume setting.
-        */
-        win.send('ingame', true);
-        win.send('ingame', false);
+        shouldreload = true;
         break;
 
       default:
@@ -448,6 +531,18 @@ app.whenReady().then(() => {
     if (updaterchanged) {
       updateWorker.postMessage({ act: 'run-check', force: true });
       updaterchanged = false;
+    }
+
+    if (shouldreload) {
+      /**
+       * Awful hack ahead!
+       * Force frontend to resend the game info so the backend will
+       * resend trophies data with the new key installed, restart
+       * the music player and some other things.
+      */
+      win.send('ingame', true);
+      win.send('ingame', false);
+      shouldreload = false;
     }
     config.save();
   });

@@ -83,10 +83,17 @@ const walker = (wpath, ents, depth, maxdepth) => {
         if (paramsfostat.isFile()) {
           const sfo_data = readSFO(fs.readFileSync(paramsfopath));
           let icon = null;
+          let troph = false;
 
           try {
             icon = fs.readFileSync(path.join(syspath, '/icon0.png'), { encoding: 'base64' });
           } catch (e) { }
+
+          try {
+            troph = fs.lstatSync(path.join(syspath, '/trophy/trophy00.trp')).isFile();
+          } catch (e) {
+            troph = false;
+          }
 
           if (applist[sfo_data.CATEGORY]) {
             parentPort.postMessage({
@@ -94,6 +101,7 @@ const walker = (wpath, ents, depth, maxdepth) => {
               title: sfo_data.TITLE,
               version: sfo_data.APP_VER,
               ispatch: sfo_data.CATEGORY === 'gp',
+              trophies: troph,
               path: wpath,
               icon: icon
             });
@@ -109,6 +117,5 @@ parentPort.on('message', (msg) => {
     case 'scangdir':
       walker(msg.path, fs.readdirSync(msg.path), 0, msg.depth);
       process.exit(0);
-      break;
   }
 });

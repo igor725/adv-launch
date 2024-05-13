@@ -3,12 +3,13 @@
   color: white;
   outline: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgb(15, 15, 15) #00000000;
+  scrollbar-color: #0f0f0f #00000000;
 }
 
 select,
 option,
-input {
+input,
+button {
   color: black;
 }
 
@@ -18,44 +19,10 @@ body {
   height: 100%;
   margin: 0;
   position: relative;
+  overflow: hidden;
 }
 
 body {
-  background-color: rgb(37, 37, 37);
+  background-color: #252525;
   user-select: none;
-}
-
-.spinner {
-  animation: rotate 2s linear infinite;
-  width: 50px;
-  height: 50px;
-}
-
-.spinner .path {
-  stroke: hsl(210, 73%, 75%);
-  stroke-linecap: round;
-  animation: dash 1.5s ease-in-out infinite;
-}
-
-@keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes dash {
-  0% {
-    stroke-dasharray: 1, 150;
-    stroke-dashoffset: 0;
-  }
-
-  50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -35;
-  }
-
-  100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -124;
-  }
 }

@@ -2,17 +2,19 @@
 <html>
 
 <head>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';">
+  <link rel="stylesheet" href="css/fa.min.css" />
+  <link rel="stylesheet" href="css/fa-solid.min.css" />
   <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/titlebar.css" />
+  <link rel="stylesheet" href="css/warnmsg.css" />
+  <link rel="stylesheet" href="css/gamelist.css" />
+  <link rel="stylesheet" href="css/gameinfo.css" />
+  <link rel="stylesheet" href="css/terminal.css" />
   <link rel="stylesheet" href="css/main.css" />
-  <script>
-    // Why not?
-    window.on = window.addEventListener;
-    window.$ = qs => document.querySelector(qs);
-    window.$$ = qs => document.querySelectorAll(qs);
-    Element.prototype.on = Element.prototype.addEventListener;
-    Element.prototype.$ = Element.prototype.querySelector;
-    Element.prototype.$$ = Element.prototype.querySelectorAll;
-  </script>
+  <script src="js/translator.min.js"></script>
+  <script src="js/vars.js"></script>
 </head>
 
 <body>
@@ -20,9 +22,9 @@
     <div id="titlebar">
       <div class="title">psOff advanced launcher</div>
       <div class="draggable"></div>
-      <div class="button tb-button options">O</div>
-      <div class="button tb-button minimize">_</div>
-      <div class="button tb-button close">X</div>
+      <div class="button tb-button options fa-solid fa-gear"></div>
+      <div class="button tb-button minimize fa-solid fa-window-minimize"></div>
+      <div class="button tb-button close fa-solid fa-xmark"></div>
     </div>
 
     <div id="bgimage"></div>
@@ -34,30 +36,38 @@
           <div id="terminal" title="Double click here to copy the terminal output"></div>
         </div>
         <div id="gameinfo">
-          <div id="gamesummary">
+          <div id="gamesummary" style="opacity: 0;">
             <div class="info lrun">
-              <p>Last run:</p>
+              <p class="title" eo-translator="main.gamesummary.lastrun"></p>
               <p>5/9/2024</p>
             </div>
             <div class="info lplay">
-              <p>Playtime:</p>
+              <p class="title" eo-translator="main.gamesummary.playtime.label"></p>
               <p>0min</p>
             </div>
-            <div class="info ltrops">
-              <p>Trophies:</p>
-              <p>0 / 0</p>
+            <div class="info ltrops" data-hidden="1">
+              <p class="title" eo-translator="main.gamesummary.trophies"></p>
+              <p>0</p>
+              <p>/</p>
+              <p>0</p>
             </div>
           </div>
           <div id="gamebuttons">
-            <div class="gbutton button ofolder">Open game folder</div>
-            <div class="gbutton button rgame">Run game</div>
+            <div class="gbutton button ofolder" eo-translator="main.gamebuttons.open"></div>
+            <div class="gbutton button rgame" eo-translator="main.gamebuttons.run"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div id="trophieslist" data-hidden="1" style="display: none;"></div>
   <div id="warnmsg" data-active="0"></div>
 
+  <script src="./js/lang.js"></script>
+  <script src="./js/main/warnmsg.js"></script>
+  <script src="./js/main/trophies.js"></script>
+  <script src="./js/main/terminal.js"></script>
+  <script src="./js/main/gamelist.js"></script>
   <script src="./js/index.js"></script>
 </body>
 

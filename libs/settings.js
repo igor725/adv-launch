@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 module.exports.Config = class Config {
-  #cfgfile = path.join(__dirname, '/config.json');
+  #cfgfile = path.join(__dirname, '../config.json');
   #default = {
     update_channel: 'release',
     update_freq: 'weekly',
@@ -13,10 +13,10 @@ module.exports.Config = class Config {
   };
   #emuconfpath = null;
   #emuconf = {
-    controls: null,
-    graphics: null,
-    general: null,
-    audio: null
+    controls: {},
+    graphics: {},
+    general: {},
+    audio: {}
   };
   #unsaved = {
     launcher: false,
@@ -82,6 +82,11 @@ module.exports.Config = class Config {
     return this.#emuconf.general.systemlang ?? 1;
   };
 
+  getTrophyKey = () => {
+    if (this.#emuconf.general === null) return '';
+    return this.#emuconf.general.trophyKey ?? '';
+  };
+
   markLaunch = () => {
     this.#data.first_launch = false;
     this.#unsaved.launcher = true;
@@ -97,19 +102,27 @@ module.exports.Config = class Config {
 
     try {
       this.#emuconf.controls = JSON.parse(fs.readFileSync(this.#emuconfpath.controls));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to parse emulator controls config: ', e.toString());
+    }
 
     try {
       this.#emuconf.general = JSON.parse(fs.readFileSync(this.#emuconfpath.general));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to parse emulator general config: ', e.toString());
+    }
 
     try {
       this.#emuconf.audio = JSON.parse(fs.readFileSync(this.#emuconfpath.audio));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to parse emulator audio config: ', e.toString());
+    }
 
     try {
       this.#emuconf.graphics = JSON.parse(fs.readFileSync(this.#emuconfpath.graphics));
-    } catch (e) { }
+    } catch (e) {
+      console.error('Failed to parse emulator graphics config: ', e.toString());
+    }
   };
 
   getFullConfig = () => {
@@ -141,7 +154,7 @@ module.exports.Config = class Config {
       const fac = this.#emuconf[facility];
       Object.assign(fac, values);
       this.#unsaved.emulator[facility] = true;
-      for (const [key, value] in Object.entries(values)) {
+      for (const [key, value] of Object.entries(values)) {
         this.runCallback(`emu.${facility}`, key, value);
       }
     }

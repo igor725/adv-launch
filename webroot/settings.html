@@ -9,25 +9,22 @@
 </style>
 
 <head>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';">
+  <link rel="stylesheet" href="css/fa.min.css" />
+  <link rel="stylesheet" href="css/fa-solid.min.css" />
   <link rel="stylesheet" href="css/shared.css" />
   <link rel="stylesheet" href="css/settings.css" />
-  <script>
-    // Why not?
-    window.on = window.addEventListener;
-    window.$ = qs => document.querySelector(qs);
-    window.$$ = qs => document.querySelectorAll(qs);
-    Element.prototype.on = Element.prototype.addEventListener;
-    Element.prototype.$ = Element.prototype.querySelector;
-    Element.prototype.$$ = Element.prototype.querySelectorAll;
-  </script>
+  <script src="js/translator.min.js"></script>
+  <script src="js/vars.js"></script>
 </head>
 
 <body>
   <div id="wrapper" data-ready="0">
     <div id="data">
-      <div class="separator">Launcher settings</div>
+      <div class="separator" eo-translator="settings.launcher.header"></div>
       <div class="row">
-        <label for="bgvolume">Bacground music volume: </label>
+        <label for="bgvolume" eo-translator="settings.launcher.bgmvol"></label>
         <input id="bgvolume" data-cfgfacility="launcher" data-cfgkey="bg_volume" type="range" min="0" max="100" />
       </div>
       <div class="row">
@@ -35,7 +32,7 @@
         <input id="ghtok" data-cfgfacility="launcher" data-cfgkey="github_token" type="password" />
       </div>
       <div class="row">
-        <label for="updch">Update channel: </label>
+        <label for="updch" eo-translator="settings.launcher.updch"></label>
         <select id="updch" data-cfgfacility="launcher" data-cfgtype="string" data-cfgchecker="github_token"
           data-cfgkey="update_channel">
           <option data-cfgvalue="release">Release</option>
@@ -44,14 +41,14 @@
         </select>
       </div>
       <div class="row">
-        <label for="updfr">Update frequency: </label>
+        <label for="updfr" eo-translator="settings.launcher.updfr.label"></label>
         <select id="updfr" data-cfgfacility="launcher" data-cfgtype="string" data-cfgkey="update_freq">
-          <option data-cfgvalue="daily">Daily</option>
-          <option data-cfgvalue="weekly">Weekly</option>
-          <option data-cfgvalue="monthly">Monthly</option>
+          <option data-cfgvalue="daily" eo-translator="settings.launcher.updfr.opt.daily"></option>
+          <option data-cfgvalue="weekly" eo-translator="settings.launcher.updfr.opt.weekly"></option>
+          <option data-cfgvalue="monthly" eo-translator="settings.launcher.updfr.opt.monthly"></option>
         </select>
       </div>
-      <label for="gsd">Game scan directories: </label>
+      <label for="gsd" eo-translator="settings.launcher.gsd.label"></label>
       <div class="row">
         <select id="gsd" size="4"></select>
       </div>
@@ -66,27 +63,27 @@
           <option>5</option>
           <option>6</option>
         </select>
-        <input id="gsd-add" type="button" value="Add" />
-        <input id="gsd-remove" type="button" value="Remove" />
+        <button id="gsd-add" eo-translator="settings.launcher.gsd.buttons.add"></button>
+        <button id="gsd-remove" eo-translator="settings.launcher.gsd.buttons.remove"></button>
       </div>
-      <div class="separator">Emulator settings</div>
+      <div class="separator" eo-translator="settings.emulator.header"></div>
       <div class="row">
-        <label for="currusr">Current user: </label>
+        <label for="currusr" eo-translator="settings.emulator.currusr.label"></label>
         <select id="currusr" data-cfgfacility="emu_general" data-cfgtype="int" data-cfgkey="userIndex" disabled>
-          <option data-cfgvalue="1">Anon</option>
+          <option data-cfgvalue="1" eo-translator="settings.emulator.currusr.opt.default"></option>
         </select>
       </div>
       <div class="row">
-        <label for="trophykey">Trophy ERK: </label>
+        <label for="trophykey" eo-translator="settings.emulator.troperk"></label>
         <input id="trophykey" type="password" data-cfgfacility="emu_general" data-cfgkey="trophyKey" disabled />
       </div>
       <div class="row">
-        <label for="mavolume">Master volume: </label>
+        <label for="mavolume" eo-translator="settings.emulator.mastervol"></label>
         <input id="mavolume" type="range" data-cfgfacility="emu_audio" data-cfgkey="volume" data-cfgscale="0.01" min="0"
           max="100" />
       </div>
       <div class="row">
-        <label for="syslang">System language:</label>
+        <label for="syslang" eo-translator="settings.emulator.lang"></label>
         <select data-cfgfacility="emu_general" data-cfgkey="systemlang" data-cfgtype="int" id="syslang">
           <option data-cfgvalue="0">Japanese</option>
           <option data-cfgvalue="1">EnglishUS</option>
@@ -121,21 +118,21 @@
         </select>
       </div>
       <div class="row">
-        <label for="fullscreen">Enable fullscreen: </label>
+        <label for="fullscreen" eo-translator="settings.emulator.fullscreen"></label>
         <input id="fullscreen" data-cfgfacility="emu_graphics" data-cfgkey="fullscreen" type="checkbox" disabled />
       </div>
     </div>
     <div id="buttons">
-      <input type="button" data-action="save" value="Save and apply" disabled />
-      <input type="button" data-action="close" value="Close" />
+      <button data-action="save" eo-translator="settings.save" disabled></button>
+      <button data-action="close" eo-translator="settings.close"></button>
     </div>
   </div>
   <div id="wait-spinner">
-    <svg class="spinner" viewBox="0 0 50 50">
-      <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
+    <i class="fa-solid fa-pulse fa-spinner fa-4x" style="color: #6a8dc5;"></i>
   </div>
+  <div id="rangevalue"></div>
 
+  <script src="./js/lang.js"></script>
   <script src="./js/settings.js"></script>
 </body>
 
