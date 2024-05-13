@@ -21,7 +21,12 @@
     warn.dataset.wid = data.id;
     warn.dataset.wtype = data.type;
     warn.dataset.active = 1;
-    let code = `<p>${data.text}</p>`;
+
+    let text = data.text;
+    const match = text.match(/^\{\$tr\:(.+)\}$/);
+    if (match) text = window.trAPI.get(match[1], { params: data.trparams });
+
+    let code = `<p>${text}</p>`;
 
     if (data.type === 'progress') {
       code += `<progress class="prdata" min="${data.prmin}" max="${data.prmax}" value="${data.prinit}"></progress>`;
@@ -29,7 +34,10 @@
 
     code += '<div>';
     for (let i = 0; i < data.buttons.length; ++i) {
-      code += `<input class="warnbutton" type="button" data-bid="${i}" value="${data.buttons[i]}" />`;
+      let btlab = data.buttons[i];
+      const match = btlab.match(/^\{\$tr\:(.+)\}$/);
+      if (match) btlab = window.trAPI.get(match[1]);
+      code += `<input class="warnbutton" type="button" data-bid="${i}" value="${btlab}" />`;
     }
 
     warn.innerHTML = code + '</div>';

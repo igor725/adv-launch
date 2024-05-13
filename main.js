@@ -51,7 +51,7 @@ const scanGameDir = (scanpath, depth) => {
 };
 
 const _runDownloadingProcess = (retry = false) => {
-  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: 'Downloading the emulator binaries, hang tight...', buttons: ['Cancel'] });
+  win.send('warnmsg', { hidden: false, type: 'progress', prmin: 0, prmax: 100, id: 'upd-progr', text: '{$tr:updater.warns.downproc}', buttons: ['{$tr:buttons.ca}'] });
   updateWorker.postMessage({ act: retry ? 'retry' : 'download' });
 }
 
@@ -122,14 +122,14 @@ const updateBinaryPath = (path, checkfirst = false) => {
   });
 
   if (checkfirst && config.isFirstLaunch()) {
-    win.send('warnmsg', { hidden: false, type: 'text', id: 'first-launch', text: 'Welcome to psOff advanced launcher! Do you want to open the launcher settings?', buttons: ['No, just let me be', 'Yes, please'] });
+    win.send('warnmsg', { hidden: false, type: 'text', id: 'first-launch', text: '{$tr:main.firstrun.text}', buttons: ['{$tr:main.firstrun.nobtn}', '{$tr:main.firstrun.yesbtn}'] });
   }
 };
 
-const genericWarnMsg = (text = 'Empty text?', noclose = false) => {
-  const buttons = ['Ok'];
-  if (noclose === false) buttons.push('Close the launcher');
-  win.send('warnmsg', { hidden: false, type: 'text', id: 'gen-warn', text: text, buttons });
+const genericWarnMsg = (text = 'Empty text?', noclose = false, trparams) => {
+  const buttons = ['{$tr:buttons.ok}'];
+  if (noclose === false) buttons.push('{$tr:buttons.cl}');
+  win.send('warnmsg', { hidden: false, type: 'text', id: 'gen-warn', text: text, trparams: trparams, buttons });
 };
 
 const commandHandler = (channel, cmd, info) => {
@@ -227,6 +227,7 @@ const commandHandler = (channel, cmd, info) => {
         settwin = null;
       });
       settwin.loadFile('webroot/settings.html');
+      settwin.webContents.once('did-finish-load', () => settwin.send('set-lang', config.getSysLang()));
       break;
     case 'openfolder':
       exec(`explorer "${info}"`);
@@ -236,7 +237,7 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'rungame':
       if (gameproc != null) {
-        genericWarnMsg('You should close your previous game first!', true);
+        genericWarnMsg('{$tr:main.actions.alrun}', true);
         return;
       }
       win.send('ingame', true);
@@ -251,7 +252,7 @@ const commandHandler = (channel, cmd, info) => {
       gameproc._startTime = Date.now();
 
       gameproc.on('error', (err) => {
-        genericWarnMsg(`psOff process returned the error: ${err.toString()}`);
+        genericWarnMsg('{$tr:main.actions.gerror}', true, { error: err.toString() });
         win.send('ingame', false);
         gameproc = null;
       });
@@ -437,7 +438,7 @@ app.whenReady().then(() => {
 
       switch (msg.resp) {
         case 'nobinary':
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: `Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release (${msg.latest})?`, buttons: ['Yes', 'Ignore', 'Close the launcher'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: '{$tr:updater.warns.noemu}', trparams: msg, buttons: ['{$tr:buttons.ye}', '{$tr:buttons.ig}', '{$tr:buttons.cl}'] });
           break;
 
         case 'progress':
@@ -451,16 +452,16 @@ app.whenReady().then(() => {
 
         case 'available':
           updateBinaryPath(msg.executable);
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: `New version of psOff emulator is available! Do you want to download it? (Installed: ${msg.currver}, New: ${msg.newver})`, buttons: ['Yes', 'No'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-newver', text: '{$tr:updater.warns.newver}', trparams: msg, buttons: ['{$tr:buttons.ye}', '{$tr:buttons.no}'] });
           break;
 
         case 'notoken':
           updateBinaryPath(msg.executable);
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-notoken', text: 'You have no GitHub token installed, nightly update check is impossible!', buttons: ['Ok', 'Switch to releases'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-notoken', text: '{$tr:updater.errors.nonightly}', buttons: ['{$tr:buttons.ok}', '${$tr:buttons.sr}'] });
           break;
 
         case 'error':
-          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-fail', text: `Failed to check updates for your psOff installation: ${msg.text}`, buttons: ['Retry', 'Ignore', 'Close the launcher'] });
+          win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-fail', text: '{$tr:updater.errors.checkfail}', trparams: { error: msg.text }, buttons: ['{$tr:buttons.re}', '{$tr:buttons.ig}', '{$tr:buttons.cl}'] });
           break;
       }
     });
@@ -477,6 +478,7 @@ app.whenReady().then(() => {
       console.error('Failed to set trophy key: ', err.toString());
     }
 
+    win.send('set-lang', config.getSysLang());
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
     updateWorker.postMessage({ act: 'run-check', force: false });
@@ -486,6 +488,9 @@ app.whenReady().then(() => {
 
   config.addCallback('emu.general', (key, value) => {
     switch (key) {
+      case 'systemlang':
+        win.send('set-lang', value);
+        break;
       case 'trophyKey':
         try {
           TrophySharedConfig.setERK(value);

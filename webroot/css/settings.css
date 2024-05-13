@@ -71,3 +71,13 @@ select {
 #wrapper[data-ready="1"]+#wait-spinner {
   display: none;
 }
+
+#rangevalue {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+  background-color: #000000fc;
+  text-align: center;
+  width: 25px;
+  height: 15px;
+}

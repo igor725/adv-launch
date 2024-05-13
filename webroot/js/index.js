@@ -14,7 +14,7 @@
   $('#gamebuttons').on('click', ({ target }) => {
     if (!target.classList.contains('gbutton')) return;
     const sg = window.gamelistAPI.getSelectedGame();
-    if (sg == null) return alert('You should select the game first!');
+    if (sg == null) return alert(window.trAPI.get('main.actions.nogame'));
 
     const { gpath, gid } = sg.dataset;
 

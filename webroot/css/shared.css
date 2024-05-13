@@ -8,7 +8,8 @@
 
 select,
 option,
-input {
+input,
+button {
   color: black;
 }
 

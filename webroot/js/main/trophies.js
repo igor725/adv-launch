@@ -9,7 +9,7 @@
       const elems = [];
       for (let i = 0; i < data.length; ++i) {
         const ctrop = data[i];
-        elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? '[HIDDEN]' : ctrop.detail}</p></div></div>`);
+        elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
       }
       trlist.innerHTML = elems.join('');
       ltrops.children[3].innerText = data.length;

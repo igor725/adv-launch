@@ -1,0 +1,89 @@
+{
+  "buttons": {
+    "ok": "OK",
+    "ca": "Cancel",
+    "cl": "Close the launcher",
+    "sr": "Switch to releases",
+    "re": "Retry",
+    "ig": "Ignore",
+    "ye": "Yes",
+    "no": "No"
+  },
+  "settings": {
+    "launcher": {
+      "header": "Launcher settings",
+      "bgmvol": "Background music volume:",
+      "updch": "Update channel:",
+      "updfr": {
+        "label": "Update frequency:",
+        "opt": {
+          "daily": "Daily",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      },
+      "gsd": {
+        "label": "Game scan directories:",
+        "buttons": {
+          "add": "Add",
+          "remove": "Remove"
+        }
+      }
+    },
+    "emulator": {
+      "header": "Emulator settings",
+      "currusr": {
+        "label": "Current user:",
+        "opt": {
+          "default": "Anon"
+        }
+      },
+      "troperk": "Trophy ERK:",
+      "mastervol": "Master volume:",
+      "lang": "System language:",
+      "fullscreen": "Enable fullscreen:"
+    },
+    "alerts": {
+      "ghtoken": "Nightly build requires GitHub authentication! Do you want to proceed?\nThe application will open web page for token generation, you should create a fine-grained token there with whatever name and expiration date. Leave all the settings the same and just hit \"Generate token\" button, then copy the result token to the corresponding settings field.",
+      "unavail": "This feature is not available in your current emulator version!",
+      "unsaved": "You have unsaved settings! Are you sure you want to exit?"
+    },
+    "save": "Save and close",
+    "close": "Exit without saving"
+  },
+  "main": {
+    "actions": {
+      "alrun": "You should close your previous game first!",
+      "nogame": "You should select the game first!",
+      "gerror": "psOff process returned the error: {error}"
+    },
+    "gamesummary": {
+      "lastrun": "Last run:",
+      "playtime": "Playtime:",
+      "trophies": "Trophies:"
+    },
+    "gamebuttons": {
+      "open": "Open game folder",
+      "run": "Run game"
+    },
+    "firstrun": {
+      "text": "Welcome to psOff advanced launcher! Do you want to open the launcher settings?",
+      "nobtn": "No, just let me be",
+      "yesbtn": "Yes, please"
+    }
+  },
+  "updater": {
+    "warns": {
+      "newver": "New version of psOff emulator is available! Do you want to download it? (Installed: {currver}, New: {newver})",
+      "noemu": "Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release ({latest})?",
+      "downproc": "Downloading the emulator binaries, hang tight..."
+    },
+    "errors": {
+      "checkfail": "Failed to check updates for your psOff installation: {error}",
+      "nonightly": "You have no GitHub token installed, nightly update check is impossible!"
+    }
+  },
+  "trophies": {
+    "hidden": "[HIDDEN]"
+  }
+}

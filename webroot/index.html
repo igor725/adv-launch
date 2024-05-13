@@ -3,7 +3,7 @@
 
 <head>
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self';">
+    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';">
   <link rel="stylesheet" href="css/fa.min.css" />
   <link rel="stylesheet" href="css/fa-solid.min.css" />
   <link rel="stylesheet" href="css/shared.css" />
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/gameinfo.css" />
   <link rel="stylesheet" href="css/terminal.css" />
   <link rel="stylesheet" href="css/main.css" />
+  <script src="js/translator.min.js"></script>
   <script src="js/vars.js"></script>
 </head>
 
@@ -37,23 +38,23 @@
         <div id="gameinfo">
           <div id="gamesummary" style="opacity: 0;">
             <div class="info lrun">
-              <p class="title">Last run:</p>
+              <p class="title" eo-translator="main.gamesummary.lastrun"></p>
               <p>5/9/2024</p>
             </div>
             <div class="info lplay">
-              <p class="title">Playtime:</p>
+              <p class="title" eo-translator="main.gamesummary.playtime"></p>
               <p>0min</p>
             </div>
             <div class="info ltrops" data-hidden="1">
-              <p class="title">Trophies: </p>
+              <p class="title" eo-translator="main.gamesummary.trophies"></p>
               <p>0</p>
               <p>/</p>
               <p>0</p>
             </div>
           </div>
           <div id="gamebuttons">
-            <div class="gbutton button ofolder">Open game folder</div>
-            <div class="gbutton button rgame">Run game</div>
+            <div class="gbutton button ofolder" eo-translator="main.gamebuttons.open"></div>
+            <div class="gbutton button rgame" eo-translator="main.gamebuttons.run"></div>
           </div>
         </div>
       </div>
@@ -62,6 +63,7 @@
   <div id="trophieslist" data-hidden="1" style="display: none;"></div>
   <div id="warnmsg" data-active="0"></div>
 
+  <script src="./js/lang.js"></script>
   <script src="./js/main/warnmsg.js"></script>
   <script src="./js/main/trophies.js"></script>
   <script src="./js/main/terminal.js"></script>
