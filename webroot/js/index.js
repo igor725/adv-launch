@@ -1,4 +1,4 @@
-(() => {
+window._onLangReady = (() => {
   $('#titlebar').on('click', ({ target }) => {
     const tgc = target.classList;
 
@@ -40,4 +40,4 @@
   });
 
   window.electronAPI.sendCommand('getgames');
-})();
+});

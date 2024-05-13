@@ -1,4 +1,4 @@
-(() => {
+window._onLangReady = (() => {
   const wrapper = $('#wrapper');
   let saved_cfg = null;
   let modified_cfg = [{
@@ -282,4 +282,4 @@
   }
 
   window.electronAPI.sendCommand('sett-request');
-})();
+});

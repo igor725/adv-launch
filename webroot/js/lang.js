@@ -4,6 +4,8 @@
   const dict = {};
 
   let translator = null;
+  let langready = false;
+  let dlang = -1;
 
   const proms = [];
   for (let i = 0; i < avail_langs.length; ++i) {
@@ -27,11 +29,12 @@
   }
 
   const checkTranslator = () => {
-    if (translator === null) throw new Error('Translator is not ready yet!');
+    if (!langready) throw new Error('Translator is not ready yet!');
   }
 
   window.trAPI = {
     retranslate: (lang = 1) => {
+      dlang = lang;
       checkTranslator();
       translator.language = avail_langs[lang] ?? 'en';
       translator.translateDOM();
@@ -42,12 +45,21 @@
     }
   };
 
+  window.electronAPI.addEventListener('set-lang', (lang) => {
+    dlang = lang;
+    if (langready) window.trAPI.retranslate(dlang);
+  });
+
   Promise.all(proms).then(() => {
     translator = new EOTranslator(dict);
-    // window.trAPI.retranslate(8);
+    let int;
 
-    window.electronAPI.addEventListener('set-lang', (lang) => {
-      window.trAPI.retranslate(lang);
-    });
+    int = setInterval(() => {
+      if (!window._onLangReady || dlang === -1) return;
+      langready = true;
+      clearInterval(int);
+      window._onLangReady();
+      window.trAPI.retranslate(dlang);
+    }, 50);
   });
 })();

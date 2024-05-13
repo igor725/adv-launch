@@ -484,27 +484,22 @@ app.whenReady().then(() => {
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
-  let updaterchanged = false;
+  let updaterchanged = false, shouldreload = false;
 
   config.addCallback('emu.general', (key, value) => {
     switch (key) {
       case 'systemlang':
         win.send('set-lang', value);
+        shouldreload = true;
         break;
       case 'trophyKey':
         try {
           TrophySharedConfig.setERK(value);
-          /**
-           * Awful hack ahead!
-           * Force frontend to resend the game info so the backend will
-           * resend trophies data with the new key installed.
-          */
-          win.send('ingame', true);
-          win.send('ingame', false);
+          shouldreload = true;
         } catch (err) {
           console.error('Failed to update trophy key: ', err.toString());
+          return;
         }
-        return;
     }
   });
 
@@ -523,13 +518,7 @@ app.whenReady().then(() => {
         updateWorker.postMessage({ act: 'set-freq', freq: value });
         break;
       case 'bg_volume':
-        /**
-         * Awful hack ahead!
-         * Force frontend to resend the game info so the backend will
-         * restart the background music with the new volume setting.
-        */
-        win.send('ingame', true);
-        win.send('ingame', false);
+        shouldreload = true;
         break;
 
       default:
@@ -542,6 +531,18 @@ app.whenReady().then(() => {
     if (updaterchanged) {
       updateWorker.postMessage({ act: 'run-check', force: true });
       updaterchanged = false;
+    }
+
+    if (shouldreload) {
+      /**
+       * Awful hack ahead!
+       * Force frontend to resend the game info so the backend will
+       * resend trophies data with the new key installed, restart
+       * the music player and some other things.
+      */
+      win.send('ingame', true);
+      win.send('ingame', false);
+      shouldreload = false;
     }
     config.save();
   });
