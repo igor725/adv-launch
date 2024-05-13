@@ -419,10 +419,10 @@ app.whenReady().then(() => {
   }));
 
   win = new BrowserWindow({
-    width: 1014,
-    height: 570,
-    minWidth: 1014,
-    minHeight: 570,
+    width: 1030,
+    height: 580,
+    minWidth: 1030,
+    minHeight: 580,
     frame: false,
     webPreferences: {
       allowRunningInsecureContent: false,
