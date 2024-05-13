@@ -6,8 +6,9 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
   <summary>Screenshots</summary>
 
   ![screen1](/misc/screen1.png)
-  ![screen1](/misc/screen2.png)
-  ![screen1](/misc/screen3.png)
+  ![screen2](/misc/screen2.png)
+  ![screen3](/misc/screen3.png)
+  ![screen4](/misc/screen4.png)
 
 </details>
 
