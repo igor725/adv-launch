@@ -59,7 +59,15 @@
     },
     "gamesummary": {
       "lastrun": "Last run:",
-      "playtime": "Playtime:",
+      "playtime": {
+        "label": "Playtime:",
+        "duration": {
+          "null": "Unplayed",
+          "seconds": "{value} sec.",
+          "minutes": "{value} min.",
+          "hours": "{value} hr."
+        }
+      },
       "trophies": "Trophies:"
     },
     "gamebuttons": {

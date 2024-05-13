@@ -59,7 +59,15 @@
     },
     "gamesummary": {
       "lastrun": "Запуск:",
-      "playtime": "Наиграно:",
+      "playtime": {
+        "label": "Наиграно:",
+        "duration": {
+          "null": "Unplayed",
+          "seconds": "{value} сек.",
+          "minutes": "{value} мин.",
+          "hours": "{value} ч."
+        }
+      },
       "trophies": "Трофеи:"
     },
     "gamebuttons": {

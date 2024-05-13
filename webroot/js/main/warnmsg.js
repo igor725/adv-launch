@@ -24,7 +24,7 @@
 
     let text = data.text;
     const match = text.match(/^\{\$tr\:(.+)\}$/);
-    if (match) text = window.trAPI.get(match[1], { params: data.trparams });
+    if (match) text = window.trAPI.get(match[1], data.trparams);
 
     let code = `<p>${text}</p>`;
 

@@ -14,16 +14,18 @@
     const seconds = Math.floor(Math.abs(ms / 1000));
 
     if (seconds < 1) {
-      return 'Unplayed';
+      return window.trAPI.get('main.gamesummary.playtime.duration.null');
     } else if (seconds < 60) {
-      return seconds + (seconds > 1 ? ' seconds' : ' second');
+      return window.trAPI.get('main.gamesummary.playtime.duration.seconds', { value: seconds });
     } else if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
-      return minutes + (minutes > 1 ? ' minutes' : ' minute');
+      return window.trAPI.get('main.gamesummary.playtime.duration.minutes', { value: minutes });
     } else {
       const hours = seconds / 3600;
       const floored = Math.floor(hours);
-      return ((hours - floored > 0.25) ? hours.toFixed(2) : hours) + (hours > 1 ? ' hours' : ' hour');
+      return window.trAPI.get('main.gamesummary.playtime.duration.hours', {
+        value: ((hours - floored > 0.25) ? hours.toFixed(2) : hours)
+      });
     }
   };
 

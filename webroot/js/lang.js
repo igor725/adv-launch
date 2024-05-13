@@ -1,5 +1,36 @@
 (() => {
-  const avail_langs = [null, 'en', null, null, null, null, null, null, 'ru'];
+  const avail_langs = [
+    null, // Japanese
+    'en', // EnglishUS
+    null, // French
+    null, // Spanish
+    null, // German
+    null, // Italian
+    null, // Dutch
+    null, // PortuguesePT
+    'ru', // Russian
+    null, // Korean
+    null, // ChineseTraditional
+    null, // ChineseSimplified
+    null, // Finnish
+    null, // Swedish
+    null, // Danish
+    null, // Norwegian
+    null, // Polish
+    null, // PortugueseBR
+    null, // EnglishUK
+    null, // Turkish
+    null, // SpanishLA
+    null, // Arabic
+    null, // FrenchCA
+    null, // Czech
+    null, // Hungarian
+    null, // Greek
+    null, // Romanian
+    null, // Thai
+    null, // Vietnamese
+    null, // Indonesian
+  ];
 
   const dict = {};
 
@@ -41,7 +72,7 @@
     },
     get: (id, params) => {
       checkTranslator();
-      return translator.translate(id, params);
+      return translator.translate(id, { params });
     }
   };
 
@@ -50,8 +81,9 @@
     if (langready) window.trAPI.retranslate(dlang);
   });
 
-  Promise.all(proms).then(() => {
+  Promise.allSettled(proms).finally(() => {
     translator = new EOTranslator(dict);
+    translator.fallbacklang = 'en';
     let int;
 
     int = setInterval(() => {
