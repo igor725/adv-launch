@@ -109,7 +109,7 @@ window._onLangReady = (() => {
     $('#gsd').innerHTML = opts.join('');
   };
 
-  window.electronAPI.addEventListener('sett-values', (msg) => {
+  window.electronAPI.requestConfig().then((msg) => {
     saved_cfg = msg;
     refillScanDirs(saved_cfg);
 
@@ -286,6 +286,4 @@ window._onLangReady = (() => {
       svbtn.disabled = haveUnsaved() ? '' : 'disabled';
     }, 600);
   }
-
-  window.electronAPI.sendCommand('sett-request');
 });

@@ -333,9 +333,6 @@ const commandHandler = (channel, cmd, info) => {
           break;
       }
       break;
-    case 'sett-request':
-      settwin.send('sett-values', config.getFullConfig());
-      break;
     case 'sett-opengh':
       exec(`start https://github.com/settings/personal-access-tokens/new`);
       break;
@@ -352,6 +349,9 @@ const commandHandler = (channel, cmd, info) => {
 
 app.whenReady().then(() => {
   ipcMain.on('command', commandHandler);
+
+  ipcMain.handle('reqcfg', () => config.getFullConfig());
+
   ipcMain.handle('opendir', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
     if (canceled) return null;
@@ -372,6 +372,7 @@ app.whenReady().then(() => {
     data.addImages(tropxml);
     return data.array;
   });
+
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {
     const currpatch = getGameSummary(data, false).patch;
 
