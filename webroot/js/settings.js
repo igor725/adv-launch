@@ -242,9 +242,15 @@ window._onLangReady = (() => {
     }
   });
 
-  $('#gsd-dialog').on('click', () => {
-    window.electronAPI.selectFolder().then((path) => $('#gsd-path').value = path);
-  });
+  wrapper.on('click', ({ target }) => {
+    const elemid = target.dataset.setpathto;
+    if (!elemid) return;
+    window.electronAPI.selectFolder().then((path) => {
+      const elem = document.getElementById(elemid);
+      elem.value = path;
+      elem.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }, true);
 
   $('#gsd-add').on('click', () => {
     const path = $('#gsd-path').value;

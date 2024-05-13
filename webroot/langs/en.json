@@ -55,7 +55,8 @@
     "actions": {
       "alrun": "You should close your previous game first!",
       "nogame": "You should select the game first!",
-      "gerror": "psOff process returned the error: {error}"
+      "gerror": "psOff process returned the error: {error}",
+      "reqrst": "One or more changed settings requires restart!"
     },
     "gamesummary": {
       "lastrun": "Last run:",

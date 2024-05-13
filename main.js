@@ -1,27 +1,15 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
-const { spawn, exec } = require('node:child_process');
+const { spawn, exec, execSync } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
 const { Config } = require('./libs/settings.js');
 const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
 
-const emupath = path.join(__dirname, '/bin/emulator');
-const gipath = path.join(__dirname, '/gameinfo');
-
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
 const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
-
-try {
-  fs.mkdirSync(emupath, { recursive: true });
-  fs.mkdirSync(gipath, { recursive: true });
-  exec('del temp*.zip', { cwd: emupath });
-} catch (e) {
-  console.error(e.toString());
-  process.exit(1);
-}
 
 let win = null;
 let player = null;
@@ -30,7 +18,22 @@ let gameproc = null;
 let updateWorker = null;
 let binname = 'psoff.exe';
 
-const config = new Config(path.join(emupath, '/config'));
+const config = new Config();
+
+const emupath = config.getValue('emu_path');
+const gipath = path.join(__dirname, '/gameinfo');
+
+fs.mkdirSync(gipath, { recursive: true });
+
+try {
+  const testfile = path.join(emupath, '/test');
+  fs.mkdirSync(emupath, { recursive: true });
+  fs.writeFileSync(testfile, 'test');
+  fs.unlinkSync(testfile);
+} catch (e) {
+  console.error('Emulator directory is not writeable anymore, resetting to default one: ', e.toString());
+  config.resetValue('emu_path');
+}
 
 const converter = new Convert({
   newline: true
@@ -479,12 +482,13 @@ app.whenReady().then(() => {
     }
 
     win.send('set-lang', config.getSysLang());
-    updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel'), path: emupath });
+    updateWorker.postMessage({ act: 'set-path', path: emupath });
+    updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel') });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
-  let updaterchanged = false, shouldreload = false;
+  let updaterchanged = false, shouldreload = false, reqrestart = false;
 
   config.addCallback('emu.general', (key, value) => {
     switch (key) {
@@ -511,15 +515,28 @@ app.whenReady().then(() => {
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
         break;
+      case 'emu_path':
+        try {
+          const testfile = path.join(value, '/test');
+          fs.mkdirSync(value, { recursive: true });
+          fs.writeFileSync(testfile, 'test');
+          fs.unlinkSync(testfile);
+          reqrestart = true;
+        } catch (e) {
+          genericWarnMsg('Failed to change the emulator path: ' + e.toString());
+          return false;
+        }
+
+        return true;
       case 'update_channel':
-        updateWorker.postMessage({ act: 'set-branch', branch: value, path: emupath });
+        updateWorker.postMessage({ act: 'set-branch', branch: value });
         break;
       case 'update_freq':
         updateWorker.postMessage({ act: 'set-freq', freq: value });
         break;
       case 'bg_volume':
         shouldreload = true;
-        break;
+        return;
 
       default:
         return;
@@ -544,6 +561,11 @@ app.whenReady().then(() => {
       win.send('ingame', false);
       shouldreload = false;
     }
+
+    if (reqrestart) {
+      genericWarnMsg('{$tr:main.actions.reqrst}');
+    }
+
     config.save();
   });
 
