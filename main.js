@@ -347,6 +347,25 @@ const commandHandler = (channel, cmd, info) => {
   }
 };
 
+const messageBox = (id, data) => {
+  const prid = `_promise-${id}-${Date.now()}`;
+  return new Promise((resolve, reject) => {
+    const resid = `${prid}-resolve`;
+    const rejid = `${prid}-reject`;
+
+    const final = (rejected, res) => {
+      ipcMain.removeAllListeners(resid);
+      ipcMain.removeAllListeners(rejid);
+      if (rejected) return reject(res);
+      return resolve(res);
+    };
+
+    ipcMain.once(resid, (_, res) => final(false, res));
+    ipcMain.once(rejid, (_, err) => final(true, err));
+    win.send('warnmsg-p', [prid, data]);
+  });
+};
+
 app.whenReady().then(() => {
   ipcMain.on('command', commandHandler);
 
@@ -435,6 +454,7 @@ app.whenReady().then(() => {
   win.setAspectRatio(16 / 9);
 
   win.webContents.once('did-finish-load', () => {
+    messageBox('test', { text: 'test', buttons: ['Ok'] }).then((resp) => console.log(resp));
     updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
 
     updateWorker.on('message', (msg) => {
