@@ -41,12 +41,15 @@
       "troperk": "Trophy ERK:",
       "mastervol": "Master volume:",
       "lang": "System language:",
-      "fullscreen": "Enable fullscreen:"
+      "fullscreen": "Enable fullscreen:",
+      "keybinds": "Open keyboard bind settings",
+      "inbackends": "Gamepad backend configuration"
     },
     "alerts": {
       "ghtoken": "Nightly build requires GitHub authentication! Do you want to proceed?\nThe application will open web page for token generation, you should create a fine-grained token there with whatever name and expiration date. Leave all the settings the same and just hit \"Generate token\" button, then copy the result token to the corresponding settings field.",
       "unavail": "This feature is not available in your current emulator version!",
-      "unsaved": "You have unsaved settings! Are you sure you want to exit?"
+      "unsaved": "You have unsaved settings! Are you sure you want to exit?",
+      "multiplekb": "You have multiple gamepad backends set to \"keyboard\" it is not recommended since keyboard backend does not allow you to assing different buttons for each gamepad so pressed keybind will be reported to each emulated gamepad! Do you want to continue?"
     },
     "save": "Save and close",
     "close": "Exit without saving"

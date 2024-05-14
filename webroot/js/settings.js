@@ -5,7 +5,9 @@ window._onLangReady = (() => {
     general: {},
     graphics: {},
     audio: {},
-    controls: {}
+    controls: {
+      pads: [{}, {}, {}, {}]
+    }
   }, {}];
 
   const _isSimilar = (v1, v2) => {
@@ -58,6 +60,10 @@ window._onLangReady = (() => {
 
   const getKey = (elem) => elem.dataset.cfgkey;
 
+  const getArrayIndex = (elem) => parseInt(elem.dataset.cfgarridx);
+
+  const getInnerObjKey = (elem) => elem.dataset.cfginkey;
+
   const getRangeScale = (elem) => elem.dataset.cfgscale ? parseFloat(elem.dataset.cfgscale) : 1.0;
 
   const getOptionValue = (type, elem) => {
@@ -109,18 +115,57 @@ window._onLangReady = (() => {
     $('#gsd').innerHTML = opts.join('');
   };
 
+  const aliases = {
+    kb: {
+      keyboard: true,
+      kbd: true,
+      kb: true
+    },
+    de: {
+      sdl: true,
+      gamepad: true
+    },
+    xi: {
+      xinput: true,
+      xbox: true
+    }
+  };
+
   window.electronAPI.requestConfig().then((msg) => {
     saved_cfg = msg;
     refillScanDirs(saved_cfg);
 
     {
       const uselect = $('select[data-cfgkey="userIndex"]');
+      const inusers = $('#inusers');
+
       const profiles = msg[0].general.profiles;
+      const pads = msg[0].controls.pads;
+
       if (profiles) {
-        const opts = [];
+        const opts = [], inbacks = [];
         for (let i = 0; i < 4; ++i) {
           opts.push(`<option data-cfgvalue="${i + 1}">${profiles[i].name}</option>`);
+          inbacks.push(`
+          <div>
+            <label>${profiles[i].name}</label>
+            <select
+              data-cfgfacility="emu_controls"
+              data-cfgnoselect="1"
+              data-cfgkey="pads"
+              data-cfghint="arrobj"
+              data-cfgarridx="${i}"
+              data-cfginkey="type"
+              data-cfgtype="string"
+              style="flex: 1"
+            >
+              <option data-cfgvalue="sdl" ${aliases.de[pads[i].type] ? 'selected' : ''}>SDL2</option>
+              <option data-cfgvalue="xinput" ${aliases.xi[pads[i].type] ? 'selected' : ''}>XInput</option>
+              <option data-cfgvalue="keyboard" ${aliases.kb[pads[i].type] ? 'selected' : ''}>Keyboard</option>
+            </select>
+          </div>`);
         }
+        inusers.innerHTML = inbacks.join('');
         uselect.innerHTML = opts.join('');
         uselect.disabled = '';
       }
@@ -177,23 +222,37 @@ window._onLangReady = (() => {
             break;
         }
         break;
+      case 'BUTTON':
+        if (target.getAttribute('id') === 'ctlsett') {
+          window.open('./controller.html', '_blank', 'frame=false,width=900,height=625');
+        }
+        break;
     }
   }, true);
 
   wrapper.on('change', ({ target }) => {
+    const fac = getFacility(target, modified_cfg);
+    if (fac === null) return;
+
     switch (target.tagName) {
       case 'SELECT':
-        const fac = getFacility(target, modified_cfg);
-        if (fac === null) return;
-        const newvalue = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
-        if (!runSelectChecker(target, newvalue)) return;
-        fac[getKey(target)] = newvalue;
+        const key = getKey(target);
+        switch (target.dataset.cfghint) {
+          case 'arrobj': {
+            const idx = getArrayIndex(target);
+            const innkey = getInnerObjKey(target);
+            fac[key][idx][innkey] = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
+          } break;
+          default: {
+            const newvalue = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
+            if (!runSelectChecker(target, newvalue)) return;
+            fac[key] = newvalue;
+          } break;
+        }
         break;
       case 'INPUT':
         switch (target.getAttribute('type')) {
           case 'range':
-            const fac = getFacility(target, modified_cfg);
-            if (fac === null) return;
             fac[getKey(target)] = target.value * getRangeScale(target);
             $('#rangevalue').style.display = null;
             break;
@@ -235,6 +294,16 @@ window._onLangReady = (() => {
         break;
       case 'save':
         if (haveUnsaved()) {
+          let haskb = false;
+          for (let i = 0; i < 4; ++i) {
+            if (aliases.kb[modified_cfg[0].controls.pads[i].type]) {
+              if (haskb) {
+                if (!confirm(window.trAPI.get('settings.alerts.multiplekb'))) return;
+                break;
+              }
+              haskb = true;
+            }
+          }
           window.electronAPI.sendCommand('sett-update', modified_cfg);
           wrapper.dataset.ready = 0;
         }

@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html>
-<style>
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-  }
-</style>
 
 <head>
   <meta http-equiv="Content-Security-Policy"
@@ -72,6 +65,13 @@
         <button id="gsd-remove" style="flex: 0;" eo-translator="settings.launcher.gsd.buttons.remove"></button>
       </div>
       <div class="separator" eo-translator="settings.emulator.header"></div>
+      <div class="row" style="flex-direction: column;">
+        <label for="inusers" eo-translator="settings.emulator.inbackends"></label>
+        <div id="inusers"></div>
+      </div>
+      <div class="row">
+        <button id="ctlsett" style="flex: 1;" eo-translator="settings.emulator.keybinds"></button>
+      </div>
       <div class="row">
         <label for="currusr" eo-translator="settings.emulator.currusr.label"></label>
         <select id="currusr" data-cfgfacility="emu_general" data-cfgtype="int" data-cfgkey="userIndex" disabled>

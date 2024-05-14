@@ -159,13 +159,35 @@ module.exports.Config = class Config {
       }
     }
 
+    const updateValue = (dst_obj, src_obj, key) => {
+      if (typeof dst_obj[key] === 'object') {
+        const dst = dst_obj[key];
+        const src = src_obj[key];
+
+        if (Array.isArray(src)) {
+          if (!Array.isArray(dst)) throw new Error('Type mismatch!');
+          for (let i = 0; i < src.length; ++i) {
+            updateValue(dst, src, i);
+          }
+        } else {
+          if (Array.isArray(dst)) throw new Error('Type mismatch!');
+          for (const [okey] of Object.entries(src)) {
+            updateValue(dst, src, okey);
+          }
+        }
+        return;
+      }
+
+      dst_obj[key] = src_obj[key];
+    };
+
     for (const [facility, values] of Object.entries(data[0])) {
       const fac = this.#emuconf[facility];
 
       for (const [key, value] of Object.entries(values)) {
         if (this.runCallback(`emu.${facility}`, key, value)) {
           this.#unsaved.emulator[facility] = true;
-          fac[key] = values[key];
+          updateValue(fac, values, key, values);
         }
       }
     }
