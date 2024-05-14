@@ -1,4 +1,5 @@
 (() => {
+  const trAPI = window.opener.trAPI;
   const ctl_modified = {};
   const _keybinds = window._keybinds;
   const _isSimilar = window._isSimilar;
@@ -36,20 +37,62 @@
       overlay.appendChild(htbtn);
     }
 
-    window.warnAPI.callback = (data) => {
-      switch (data.event) {
-        case 'click':
-          if (data.resp === 0) window.warnAPI.send({ hidden: true, id: data.id });
-          break;
-        case 'key':
-          console.log(data);
-          break;
-      }
+    const special_cases = {
+      'controller.ls': ['controller.lx-', 'controller.lx+', 'controller.ly-', 'controller.ly+'],
+      'controller.rs': ['controller.rx-', 'controller.rx+', 'controller.ry-', 'controller.ry+'],
+      'controller.lb': ['controller.l1', 'controller.l2'],
+      'controller.rb': ['controller.r1', 'controller.r2']
     };
 
     overlay.on('click', ({ target }) => {
       if (target.tagName !== 'BUTTON') return;
-      window.warnAPI.send({ id: target.dataset.cfgbtn, text: '{$tr:settings.emulator.wkeybind.bindmessage}', trparams: { action: target.dataset.cfgbtn }, hidden: false, buttons: ['Close'] })
+      const actionid = target.dataset.cfgbtn;
+
+      const createButtonMsg = (actionid) => (new Promise((resolve, reject) => {
+        window.warnAPI.callback = (data) => {
+          window.warnAPI.send({ hidden: true, id: data.id });
+
+          switch (data.event) {
+            case 'click':
+              if (data.resp === 0) reject('cancelled');
+              break;
+            case 'key':
+              resolve({ action: data.id, key: data.key });
+              break;
+          }
+        };
+
+        window.warnAPI.send({
+          id: actionid, text: '{$tr:settings.emulator.wkeybind.bindmessage}',
+          trparams: { action: actionid }, hidden: false, buttons: ['{$tr:buttons.ca}']
+        });
+      }));
+
+      const spechandler = (sc, idx = 0, collected = []) => {
+        if (idx === 0) alert(trAPI.get('settings.emulator.wkeybind.alerts.multikey', { count: sc.length }));
+        if (!sc[idx]) return { multiple: true, keys: collected };
+        return createButtonMsg(sc[idx]).then((data) => {
+          collected.push(data);
+          return spechandler(sc, idx + 1, collected);
+        });
+      };
+
+      (special_cases[actionid] ? spechandler(special_cases[actionid]) : createButtonMsg(actionid)).then((data) => {
+        alert('Binding is not actually implemented yet');
+        if (data.multiple) {
+          const keys = data.keys;
+          for (let i = 0; i < keys.length; ++i) {
+            const key = keys[i];
+            ctl_modified[key.action] = resolveSDLKey(key.code);
+          }
+
+          return;
+        }
+
+        ctl_modified[key.action] = resolveSDLKey(key.code);
+      }).catch((reason) => {
+        if (reason !== 'cancelled') throw reason;
+      });
     }, true);
   };
   doc.data = './img/dualshock4.svg';
@@ -62,5 +105,5 @@
    * elements inside child window. We should explicitly pass each element from child
    * window to the parent to get it translated.
   */
-  document.querySelectorAll('[eo-translator]').forEach((el) => window.opener.trAPI.translateElement(el));
+  document.querySelectorAll('[eo-translator]').forEach((el) => trAPI.translateElement(el));
 })();

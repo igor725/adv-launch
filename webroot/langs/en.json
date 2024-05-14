@@ -46,6 +46,9 @@
       "inbackends": "Gamepad backend configuration",
       "wkeybind": {
         "bindmessage": "Press key for {action}...",
+        "alerts": {
+          "multikey": "Please note that you're about to see {count} button assignment messages, which will follow one after another. If you press the \"Cancel\" button then all prveious binds in line will be cancelled too."
+        },
         "buttons": {
           "save": "Save and close",
           "reset": "Reset changes",

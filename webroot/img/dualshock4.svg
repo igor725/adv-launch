@@ -8,11 +8,11 @@
 <rect width="600" height="400" fill="#1E1E1E"/>
 <g id="dualshock4">
 <g id="bumpers">
-<g data-btn="r1" id="R1">
+<g data-btn="rb" id="R1">
 <path d="M502 37C481.772 26.0119 457.98 23.5859 434 33V48H502V37Z" fill="#424040"/>
 <path d="M502 37C481.772 26.0119 457.98 23.5859 434 33V48H502V37Z" stroke="black" stroke-width="1.2"/>
 </g>
-<g data-btn="l1" id="L1">
+<g data-btn="lb" id="L1">
 <path d="M99 38C119.228 27.0119 143.02 24.5859 167 34V49H99V38Z" fill="#424040"/>
 <path d="M99 38C119.228 27.0119 143.02 24.5859 167 34V49H99V38Z" stroke="black" stroke-width="1.2"/>
 </g>
