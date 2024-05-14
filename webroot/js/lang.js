@@ -65,11 +65,11 @@
 
   window.trAPI = {
     retranslate: (lang = 1) => {
-      dlang = lang;
       checkTranslator();
-      translator.language = avail_langs[lang] ?? 'en';
+      translator.language = avail_langs[dlang = lang] ?? 'en';
       translator.translateDOM();
     },
+    translateElement: (elem) => translator.translateElement(elem),
     get: (id, params) => {
       checkTranslator();
       return translator.translate(id, { params });

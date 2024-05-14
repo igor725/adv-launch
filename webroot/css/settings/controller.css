@@ -15,3 +15,12 @@
 #buttons button {
   flex: 1;
 }
+
+#controller .overlay button {
+  position: absolute;
+  opacity: 0;
+}
+
+#controller .overlay button:hover {
+  opacity: 1;
+}

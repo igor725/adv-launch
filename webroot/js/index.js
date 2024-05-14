@@ -39,5 +39,13 @@ window._onLangReady = (() => {
     }
   });
 
+  window.electronAPI.addEventListener('warnmsg', (data) => window.warnAPI.send(data));
+
+  window.electronAPI.addEventListener('warnmsg-upd', (data) => window.warnAPI.update(data));
+
+  window.warnAPI.callback = (data) => {
+    if (data.event === 'click') window.electronAPI.sendCommand('warnresp', data)
+  };
+
   window.electronAPI.sendCommand('getgames');
 });

@@ -43,7 +43,15 @@
       "lang": "System language:",
       "fullscreen": "Enable fullscreen:",
       "keybinds": "Open keyboard bind settings",
-      "inbackends": "Gamepad backend configuration"
+      "inbackends": "Gamepad backend configuration",
+      "wkeybind": {
+        "bindmessage": "Press key for {action}...",
+        "buttons": {
+          "save": "Save and close",
+          "reset": "Reset changes",
+          "exit": "Exit without saving"
+        }
+      }
     },
     "alerts": {
       "ghtoken": "Nightly build requires GitHub authentication! Do you want to proceed?\nThe application will open web page for token generation, you should create a fine-grained token there with whatever name and expiration date. Leave all the settings the same and just hit \"Generate token\" button, then copy the result token to the corresponding settings field.",

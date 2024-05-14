@@ -6,6 +6,7 @@ window._onLangReady = (() => {
     graphics: {},
     audio: {},
     controls: {
+      keybinds: {},
       pads: [{}, {}, {}, {}]
     }
   }, {}];
@@ -224,7 +225,9 @@ window._onLangReady = (() => {
         break;
       case 'BUTTON':
         if (target.getAttribute('id') === 'ctlsett') {
-          window.open('./controller.html', '_blank', 'frame=false,width=900,height=625');
+          const cwin = window.open('./controller.html', '_blank', 'frame=false,width=900,height=625');
+          cwin._keybinds = [saved_cfg[0].controls.keybinds, modified_cfg[0].controls.keybinds];
+          cwin._isSimilar = _isSimilar;
         }
         break;
     }
