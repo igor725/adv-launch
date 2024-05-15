@@ -227,6 +227,8 @@ window._onLangReady = (() => {
         if (target.getAttribute('id') === 'ctlsett') {
           const cwin = window.open('./controller.html', '_blank', 'frame=false,width=900,height=625');
           cwin._keybinds = [saved_cfg[0].controls.keybinds, modified_cfg[0].controls.keybinds];
+          cwin._updatepadcolor = (color) => modified_cfg[1].inpadcolor = color;
+          cwin._currpadcolor = modified_cfg[1].inpadcolor ?? saved_cfg[1].inpadcolor;
         }
         break;
     }

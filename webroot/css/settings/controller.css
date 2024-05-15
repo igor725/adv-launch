@@ -24,3 +24,10 @@
 #controller .overlay button:hover {
   opacity: 1;
 }
+
+#colorpick {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}

@@ -3,6 +3,11 @@
   const ctl_modified = {};
   const _keybinds = window._keybinds;
   delete window._keybinds;
+  if (!_keybinds) {
+    alert('You should not reload this page under any circumstances!');
+    window.close();
+    return;
+  }
 
   const savebtn = $('#buttons [data-action="save"]');
   const resetbtn = $('#buttons [data-action="reset"]');
@@ -149,8 +154,30 @@
   const doc = document.createElement('object');
   doc.onload = () => {
     const dcd = doc.contentDocument;
+    const shouldfill = Array.from(dcd.querySelectorAll('#dualshock4 path'))
+      .filter((path) => path.getAttribute('fill') === '#3B3E95');
     const buttons = dcd.querySelectorAll('[data-btn]');
     const overlay = $('#controller .overlay');
+    const canvas = $('#colorpick');
+
+    dcd.addEventListener('contextmenu', (ev) => {
+      ev.preventDefault();
+      canvas.style.display = 'block';
+      canvas.style.left = `${ev.clientX - 100}px`;
+      canvas.style.top = `${ev.clientY - 100}px`;
+    });
+
+    canvas.on('mouseout', () => {
+      canvas.style.display = null;
+    });
+
+    canvas.on('click', ({ offsetX, offsetY }) => {
+      const color = `#${window._cpickerGetColor(offsetX, offsetY)}`;
+      shouldfill.forEach((path) => path.setAttribute('fill', color));
+      window._updatepadcolor(color);
+    });
+
+    if (window._currpadcolor) shouldfill.forEach((path) => path.setAttribute('fill', window._currpadcolor));
 
     const special_cases = {
       'controller.ls': ['controller.lx-', 'controller.lx+', 'controller.ly-', 'controller.ly+'],

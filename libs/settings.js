@@ -7,6 +7,7 @@ module.exports.Config = class Config {
     emu_path: path.join(__dirname, '../bin/emulator'),
     update_channel: 'release',
     update_freq: 'weekly',
+    inpadcolor: '#3B3E95',
     first_launch: true,
     github_token: '',
     bg_volume: 30,

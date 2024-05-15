@@ -9,6 +9,7 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
   ![screen2](/misc/screen2.png)
   ![screen3](/misc/screen3.png)
   ![screen4](/misc/screen4.png)
+  ![screen5](/misc/screen5.png)
 
 </details>
 
@@ -18,9 +19,9 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 + List filtering by title name/id
 + Game's background music
 + Trophies system
++ Controllers/Keybind cofiguration
 
 ## Planned features
-+ Controllers/Keybind cofiguration
 + Gamepad control support
 + Audio device selection
 + Custom themes
