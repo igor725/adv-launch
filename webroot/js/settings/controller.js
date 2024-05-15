@@ -4,6 +4,15 @@
   const _keybinds = window._keybinds;
   delete window._keybinds;
 
+  const savebtn = $('#buttons [data-action="save"]');
+
+  if (Object.keys(_keybinds[1]).length > 0) {
+    savebtn.disabled = '';
+    for (const [act, key] of Object.entries(_keybinds[1])) {
+      ctl_modified[act] = key;
+    }
+  }
+
   const keymap = {
     "KeyA": "A",
     "KeyB": "B",
@@ -206,12 +215,11 @@
       }).catch((reason) => {
         if (reason !== 'cancelled') throw reason;
       }).finally(() => {
-        const sbtn = $('#buttons [data-action="save"]');
-        sbtn.disabled = 'disabled';
+        savebtn.disabled = 'disabled';
 
         for (const [action, key] of Object.entries(ctl_modified)) {
           if (_keybinds[0][action].toLowerCase() !== key.toLowerCase()) {
-            sbtn.disabled = '';
+            savebtn.disabled = '';
             break;
           }
         }
