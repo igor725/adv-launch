@@ -5,9 +5,11 @@
   delete window._keybinds;
 
   const savebtn = $('#buttons [data-action="save"]');
+  const resetbtn = $('#buttons [data-action="reset"]');
 
   if (Object.keys(_keybinds[1]).length > 0) {
     savebtn.disabled = '';
+    resetbtn.disabled = '';
     for (const [act, key] of Object.entries(_keybinds[1])) {
       ctl_modified[act] = key;
     }
@@ -133,6 +135,10 @@
         window.close();
         break;
       case 'reset':
+        Object.keys(_keybinds[1]).forEach(key => { delete _keybinds[1][key]; });
+        Object.keys(ctl_modified).forEach(key => { delete ctl_modified[key]; });
+        resetbtn.disabled = 'disabled';
+        savebtn.disabled = 'disabled';
         break;
       case 'exit':
         window.close();
@@ -146,6 +152,15 @@
     const buttons = dcd.querySelectorAll('[data-btn]');
     const overlay = $('#controller .overlay');
 
+    const special_cases = {
+      'controller.ls': ['controller.lx-', 'controller.lx+', 'controller.ly-', 'controller.ly+'],
+      'controller.rs': ['controller.rx-', 'controller.rx+', 'controller.ry-', 'controller.ry+'],
+      'controller.lb': ['controller.l1', 'controller.l2'],
+      'controller.rb': ['controller.r1', 'controller.r2']
+    };
+
+    const getBindedKey = (action) => _keybinds[1][action] ?? _keybinds[0][action];
+
     for (let i = 0; i < buttons.length; ++i) {
       const svgbtn = buttons[i]
       const bbox = svgbtn.getBoundingClientRect();
@@ -154,17 +169,14 @@
       htbtn.style.left = `${bbox.left}px`;
       htbtn.style.width = `${bbox.width}px`;
       htbtn.style.height = `${bbox.height}px`;
-      htbtn.dataset.cfgbtn = `controller.${svgbtn.dataset.btn}`;
+      const action = htbtn.dataset.cfgbtn = `controller.${svgbtn.dataset.btn}`;
       htbtn.innerText = '...';
+      if (special_cases[action])
+        htbtn.title = special_cases[action].map((subact) => `${subact}: ${getBindedKey(subact)}`).join('\n');
+      else
+        htbtn.title = `${action}: ${getBindedKey(action)}`;
       overlay.appendChild(htbtn);
     }
-
-    const special_cases = {
-      'controller.ls': ['controller.lx-', 'controller.lx+', 'controller.ly-', 'controller.ly+'],
-      'controller.rs': ['controller.rx-', 'controller.rx+', 'controller.ry-', 'controller.ry+'],
-      'controller.lb': ['controller.l1', 'controller.l2'],
-      'controller.rb': ['controller.r1', 'controller.r2']
-    };
 
     overlay.on('click', ({ target }) => {
       if (target.tagName !== 'BUTTON') return;
@@ -220,6 +232,7 @@
         for (const [action, key] of Object.entries(ctl_modified)) {
           if (_keybinds[0][action].toLowerCase() !== key.toLowerCase()) {
             savebtn.disabled = '';
+            resetbtn.disabled = '';
             break;
           }
         }
