@@ -68,8 +68,8 @@
     window.warnAPI.callback({ event: 'click', id: warn.dataset.wid, resp: parseInt(target.dataset.bid) });
   }, true);
 
-  window.on('keydown', ({ target, keyCode }) => {
+  window.on('keydown', ({ code }) => {
     if (warn.dataset.active !== '1' || !window.warnAPI.callback) return;
-    window.warnAPI.callback({ event: 'key', id: warn.dataset.wid, key: keyCode });
+    window.warnAPI.callback({ event: 'key', id: warn.dataset.wid, code: code });
   });
 })();

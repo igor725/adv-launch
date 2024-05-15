@@ -2,13 +2,126 @@
   const trAPI = window.opener.trAPI;
   const ctl_modified = {};
   const _keybinds = window._keybinds;
-  const _isSimilar = window._isSimilar;
-  window._keybinds = null;
-  window._isSimilar = null;
+  delete window._keybinds;
+
+  const keymap = {
+    "KeyA": "A",
+    "KeyB": "B",
+    "KeyC": "C",
+    "KeyD": "D",
+    "KeyE": "E",
+    "KeyF": "F",
+    "KeyG": "G",
+    "KeyH": "H",
+    "KeyI": "I",
+    "KeyJ": "J",
+    "KeyK": "K",
+    "KeyL": "L",
+    "KeyM": "M",
+    "KeyN": "N",
+    "KeyO": "O",
+    "KeyP": "P",
+    "KeyQ": "Q",
+    "KeyR": "R",
+    "KeyS": "S",
+    "KeyT": "T",
+    "KeyU": "U",
+    "KeyV": "V",
+    "KeyW": "W",
+    "KeyX": "X",
+    "KeyY": "Y",
+    "KeyZ": "Z",
+    "Digit1": "1",
+    "Digit2": "2",
+    "Digit3": "3",
+    "Digit4": "4",
+    "Digit5": "5",
+    "Digit6": "6",
+    "Digit7": "7",
+    "Digit8": "8",
+    "Digit9": "9",
+    "Digit0": "0",
+    "Enter": "Return",
+    "Escape": "Escape",
+    "Backspace": "Backspace",
+    "Tab": "Tab",
+    "Space": "Space",
+    "Minus": "-",
+    "Equal": "=",
+    "BracketLeft": "[",
+    "BracketRight": "]",
+    "Backslash": "\\",
+    "Semicolon": ";",
+    "Quote": "'",
+    "Backquote": "`",
+    "Comma": ",",
+    "Period": ".",
+    "Slash": "/",
+    "CapsLock": "CapsLock",
+    "F1": "F1",
+    "F2": "F2",
+    "F3": "F3",
+    "F4": "F4",
+    "F5": "F5",
+    "F6": "F6",
+    "F7": "F7",
+    "F8": "F8",
+    "F9": "F9",
+    "F10": "F10",
+    "F11": "F11",
+    "F12": "F12",
+    "ScrollLock": "Pause",
+    "Pause": "Pause",
+    "Insert": "Insert",
+    "Home": "Home",
+    "PageUp": "PageUp",
+    "Delete": "Delete",
+    "End": "End",
+    "PageDown": "PageDown",
+    "ArrowRight": "Right",
+    "ArrowLeft": "Left",
+    "ArrowDown": "Down",
+    "ArrowUp": "Up",
+    "NumLock": "Numlock",
+    "NumpadDivide": "Keypad /",
+    "NumpadMultiply": "Keypad *",
+    "NumpadSubtract": "Keypad -",
+    "NumpadAdd": "Keypad +",
+    "NumpadEnter": "Keypad Enter",
+    "Numpad1": "Keypad 1",
+    "Numpad2": "Keypad 2",
+    "Numpad3": "Keypad 3",
+    "Numpad4": "Keypad 4",
+    "Numpad5": "Keypad 5",
+    "Numpad6": "Keypad 6",
+    "Numpad7": "Keypad 7",
+    "Numpad8": "Keypad 8",
+    "Numpad9": "Keypad 9",
+    "Numpad0": "Keypad 0",
+    "NumpadDecimal": "Keypad .",
+    "VolumeUp": "VolumeUp",
+    "VolumeDown": "VolumeDown",
+    "ControlLeft": "Left Ctrl",
+    "ShiftLeft": "Left Shift",
+    "AltLeft": "Left Alt",
+    "ControlRight": "Right Ctrl",
+    "ShiftRight": "Right Shift",
+    "AltRight": "Right Alt",
+    "MediaTrackNext": "AudioNext",
+    "MediaTrackPrevious": "AudioPrev",
+    "MediaPlayPause": "AudioPlay",
+    "VolumeMute": "AudioMute"
+  };
+
+  const resolveSDLKey = (key) => keymap[key];
 
   $('#buttons').on('click', ({ target }) => {
     switch (target.dataset.action) {
       case 'save':
+        for (const [action, key] of Object.entries(ctl_modified)) {
+          _keybinds[1][action] = key;
+        }
+        window.close();
         break;
       case 'reset':
         break;
@@ -57,7 +170,8 @@
               if (data.resp === 0) reject('cancelled');
               break;
             case 'key':
-              resolve({ action: data.id, key: data.key });
+              const code = resolveSDLKey(data.code);
+              if (code) resolve({ action: data.id, code });
               break;
           }
         };
@@ -78,20 +192,29 @@
       };
 
       (special_cases[actionid] ? spechandler(special_cases[actionid]) : createButtonMsg(actionid)).then((data) => {
-        alert('Binding is not actually implemented yet');
         if (data.multiple) {
           const keys = data.keys;
           for (let i = 0; i < keys.length; ++i) {
             const key = keys[i];
-            ctl_modified[key.action] = resolveSDLKey(key.code);
+            ctl_modified[key.action] = key.code;
           }
 
           return;
         }
 
-        ctl_modified[key.action] = resolveSDLKey(key.code);
+        ctl_modified[data.action] = data.code;
       }).catch((reason) => {
         if (reason !== 'cancelled') throw reason;
+      }).finally(() => {
+        const sbtn = $('#buttons [data-action="save"]');
+        sbtn.disabled = 'disabled';
+
+        for (const [action, key] of Object.entries(ctl_modified)) {
+          if (_keybinds[0][action].toLowerCase() !== key.toLowerCase()) {
+            sbtn.disabled = '';
+            break;
+          }
+        }
       });
     }, true);
   };
@@ -104,6 +227,6 @@
    * this thing returns invaid HTML elements it seems, so translator won't translate
    * elements inside child window. We should explicitly pass each element from child
    * window to the parent to get it translated.
-  */
+   */
   document.querySelectorAll('[eo-translator]').forEach((el) => trAPI.translateElement(el));
 })();
