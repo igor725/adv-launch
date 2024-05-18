@@ -25,7 +25,7 @@
         <input id="ghtok" data-cfgfacility="launcher" data-cfgkey="github_token" type="password" />
       </div>
       <div class="row">
-        <label for="emupath">Emulator path:</label>
+        <label for="emupath" eo-translator="settings.launcher.emupath"></label>
         <input id="emupath" data-cfgfacility="launcher" data-cfgkey="emu_path" type="text" />
         <input data-setpathto="emupath" style="flex: 0;" type="button" value="..." />
       </div>
@@ -81,6 +81,11 @@
       <div class="row">
         <label for="trophykey" eo-translator="settings.emulator.troperk"></label>
         <input id="trophykey" type="password" data-cfgfacility="emu_general" data-cfgkey="trophyKey" disabled />
+      </div>
+      <div class="row">
+        <label for="madevice" eo-translator="settings.emulator.masterdevice"></label>
+        <select data-cfgfacility="emu_audio" data-cfgkey="device" data-cfgtype="string" style="width: 100%;"
+          id="madevice"></select>
       </div>
       <div class="row">
         <label for="mavolume" eo-translator="settings.emulator.mastervol"></label>

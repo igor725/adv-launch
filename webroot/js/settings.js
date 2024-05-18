@@ -132,9 +132,19 @@ window._onLangReady = (() => {
     }
   };
 
-  window.electronAPI.requestConfig().then((msg) => {
+  window.electronAPI.requestConfig().then(async (msg) => {
     saved_cfg = msg;
     refillScanDirs(saved_cfg);
+
+    await window.electronAPI.requestAudioDevices().then((list) => {
+      const htels = [];
+
+      for (let i = 0; i < list.length; ++i) {
+        htels.push(`<option data-cfgvalue="${list[i]}">${list[i]}</option>`);
+      }
+
+      $('#madevice').innerHTML = htels.join();
+    });
 
     {
       const uselect = $('select[data-cfgkey="userIndex"]');

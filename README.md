@@ -20,10 +20,10 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 + Game's background music
 + Trophies system
 + Controllers/Keybind cofiguration
++ Audio device selection
 
 ## Planned features
 + Gamepad control support
-+ Audio device selection
 + Custom themes
 
 ## How can I download it?

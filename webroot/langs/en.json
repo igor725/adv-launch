@@ -13,6 +13,7 @@
     "launcher": {
       "header": "Launcher settings",
       "bgmvol": "Background music volume:",
+      "emupath": "Emulator path:",
       "updch": "Update channel:",
       "updfr": {
         "label": "Update frequency:",
@@ -40,10 +41,11 @@
       },
       "troperk": "Trophy ERK:",
       "mastervol": "Master volume:",
+      "masterdevice": "Audio device:",
       "lang": "System language:",
       "fullscreen": "Enable fullscreen:",
+      "inbackends": "Gamepad backend configuration:",
       "keybinds": "Open keyboard bind settings",
-      "inbackends": "Gamepad backend configuration",
       "wkeybind": {
         "bindmessage": "Press key for {action}...",
         "alerts": {

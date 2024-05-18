@@ -10,6 +10,7 @@ const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/troph
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
 const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
+const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
 
 let win = null;
 let player = null;
@@ -352,9 +353,11 @@ app.whenReady().then(() => {
 
   ipcMain.handle('reqcfg', () => config.getFullConfig());
 
+  ipcMain.handle('reqadev', () => JSON.parse(execSync(LISTAUDIO_PATH, { cwd: emupath })));
+
   ipcMain.handle('opendir', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
-    if (canceled) return null;
+    if (canceled) throw 'cancelled';
     return filePaths[0];
   });
 
