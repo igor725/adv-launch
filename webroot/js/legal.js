@@ -4,6 +4,18 @@
 
   $('#close').on('click', () => window.close());
 
+  let timer = null;
+  licu.on('click', () => {
+    if (timer) return;
+    navigator.clipboard.writeText(lics.options[lics.selectedIndex].dataset.url).then(() => {
+      licu.innerText = 'Copied!';
+      timer = setTimeout(() => {
+        licu.innerText = 'Home page';
+        timer = null;
+      }, 1000);
+    });
+  });
+
   const updateContents = () => {
     const sel = lics.options[lics.selectedIndex];
     const xhr = new XMLHttpRequest();
