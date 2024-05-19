@@ -82,6 +82,7 @@ const walker = (wpath, ents, depth, maxdepth) => {
 
         if (paramsfostat.isFile()) {
           const sfo_data = readSFO(fs.readFileSync(paramsfopath));
+          if (!sfo_data) return;
           let icon = null;
           let troph = false;
 
