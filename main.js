@@ -353,7 +353,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('reqcfg', () => config.getFullConfig());
 
-  ipcMain.handle('reqadev', () => JSON.parse(execSync(LISTAUDIO_PATH, { cwd: emupath })));
+  ipcMain.handle('reqadev', () => JSON.parse(execSync(`"${LISTAUDIO_PATH}"`, { cwd: emupath })));
 
   ipcMain.handle('opendir', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
