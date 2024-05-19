@@ -1,6 +1,7 @@
 .terminal-wrapper {
   overflow: hidden;
   margin-bottom: 10px;
+  flex-grow: 1;
 }
 
 #terminal {

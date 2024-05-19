@@ -4,8 +4,10 @@ const path = require('node:path');
 module.exports.Config = class Config {
   #cfgfile = path.join(__dirname, '../config.json');
   #default = {
+    emu_path: path.join(__dirname, '../bin/emulator'),
     update_channel: 'release',
     update_freq: 'weekly',
+    inpadcolor: '#3B3E95',
     first_launch: true,
     github_token: '',
     bg_volume: 30,
@@ -30,7 +32,7 @@ module.exports.Config = class Config {
   #callbacks = [];
   #data = null;
 
-  constructor(cp) {
+  constructor() {
     try {
       this.#data = JSON.parse(fs.readFileSync(this.#cfgfile, { encoding: 'utf-8' }));
 
@@ -44,15 +46,16 @@ module.exports.Config = class Config {
       fs.writeFileSync(this.#cfgfile, jdata);
     }
 
-    if (cp !== null) {
-      this.#emuconfpath = {
-        controls: path.join(cp, '/controls.json'),
-        general: path.join(cp, '/general.json'),
-        audio: path.join(cp, '/audio.json'),
-        graphics: path.join(cp, '/graphics.json')
-      };
-      this.reloadEmulatorSettings();
-    }
+    const cp = path.join(this.getValue('emu_path'), '/config');
+
+    this.#emuconfpath = {
+      controls: path.join(cp, '/controls.json'),
+      general: path.join(cp, '/general.json'),
+      audio: path.join(cp, '/audio.json'),
+      graphics: path.join(cp, '/graphics.json')
+    };
+
+    this.reloadEmulatorSettings();
   };
 
   getValue = (name) => {
@@ -129,12 +132,18 @@ module.exports.Config = class Config {
     return [this.#emuconf, this.#data];
   };
 
+  resetValue = (key) => {
+    this.#data[key] = this.#default[key];
+  };
+
   runCallback = (facility, key, newval) => {
     const cbs = this.#callbacks;
     for (let i = 0; i < cbs.length; ++i) {
       const cb = cbs[i];
-      if (cb[0] === facility) cb[1](key, newval);
+      if (cb[0] === facility && cb[1](key, newval) === false) return false;
     }
+
+    return true;
   };
 
   addCallback = (facility, func) => {
@@ -144,18 +153,43 @@ module.exports.Config = class Config {
   updateMultipleKeys = (data) => {
     for (const [key, val] of Object.entries(data[1])) {
       if (this.#default[key] !== undefined) {
-        this.#data[key] = val;
-        this.#unsaved.launcher = true;
-        this.runCallback('launcher', key, val);
+        if (this.runCallback('launcher', key, val)) {
+          this.#data[key] = val;
+          this.#unsaved.launcher = true;
+        }
       }
     }
 
+    const updateValue = (dst_obj, src_obj, key) => {
+      if (typeof dst_obj[key] === 'object') {
+        const dst = dst_obj[key];
+        const src = src_obj[key];
+
+        if (Array.isArray(src)) {
+          if (!Array.isArray(dst)) throw new Error('Type mismatch!');
+          for (let i = 0; i < src.length; ++i) {
+            updateValue(dst, src, i);
+          }
+        } else {
+          if (Array.isArray(dst)) throw new Error('Type mismatch!');
+          for (const [okey] of Object.entries(src)) {
+            updateValue(dst, src, okey);
+          }
+        }
+        return;
+      }
+
+      dst_obj[key] = src_obj[key];
+    };
+
     for (const [facility, values] of Object.entries(data[0])) {
       const fac = this.#emuconf[facility];
-      Object.assign(fac, values);
-      this.#unsaved.emulator[facility] = true;
+
       for (const [key, value] of Object.entries(values)) {
-        this.runCallback(`emu.${facility}`, key, value);
+        if (this.runCallback(`emu.${facility}`, key, value)) {
+          this.#unsaved.emulator[facility] = true;
+          updateValue(fac, values, key, values);
+        }
       }
     }
 

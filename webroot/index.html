@@ -22,16 +22,19 @@
     <div id="titlebar">
       <div class="title">psOff advanced launcher</div>
       <div class="draggable"></div>
+      <div class="button tb-button legal fa-solid fa-scale-balanced"></div>
       <div class="button tb-button options fa-solid fa-gear"></div>
       <div class="button tb-button minimize fa-solid fa-window-minimize"></div>
       <div class="button tb-button close fa-solid fa-xmark"></div>
     </div>
 
-    <div id="bgimage"></div>
     <div id="maindata">
-      <input type="text" placeholder="Title ID or Title..." id="gamefilter" />
-      <div id="gamelist"></div>
-      <div class="sidewrapper">
+      <div class="sidebar">
+        <input type="text" placeholder="Title ID or Title..." id="gamefilter" />
+        <div id="gamelist"></div>
+      </div>
+
+      <div class="infowrapper">
         <div class="terminal-wrapper">
           <div id="terminal" title="Double click here to copy the terminal output"></div>
         </div>
@@ -59,12 +62,14 @@
         </div>
       </div>
     </div>
+
+    <div id="bgimage"></div>
   </div>
   <div id="trophieslist" data-hidden="1" style="display: none;"></div>
   <div id="warnmsg" data-active="0"></div>
 
   <script src="./js/lang.js"></script>
-  <script src="./js/main/warnmsg.js"></script>
+  <script src="./js/warnmsg.js"></script>
   <script src="./js/main/trophies.js"></script>
   <script src="./js/main/terminal.js"></script>
   <script src="./js/main/gamelist.js"></script>

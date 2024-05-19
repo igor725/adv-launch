@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html>
-<style>
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-  }
-</style>
 
 <head>
   <meta http-equiv="Content-Security-Policy"
@@ -32,6 +25,11 @@
         <input id="ghtok" data-cfgfacility="launcher" data-cfgkey="github_token" type="password" />
       </div>
       <div class="row">
+        <label for="emupath" eo-translator="settings.launcher.emupath"></label>
+        <input id="emupath" data-cfgfacility="launcher" data-cfgkey="emu_path" type="text" />
+        <input data-setpathto="emupath" style="flex: 0;" type="button" value="..." />
+      </div>
+      <div class="row">
         <label for="updch" eo-translator="settings.launcher.updch"></label>
         <select id="updch" data-cfgfacility="launcher" data-cfgtype="string" data-cfgchecker="github_token"
           data-cfgkey="update_channel">
@@ -54,8 +52,8 @@
       </div>
       <div class="row" style="display: flex;">
         <input id="gsd-path" style="flex: 1;" type="text" value="" />
-        <input id="gsd-dialog" type="button" value="..." />
-        <select id="gsd-depth">
+        <input data-setpathto="gsd-path" style="flex: 0;" type="button" value="..." />
+        <select style="flex: 0;" id="gsd-depth">
           <option>1</option>
           <option>2</option>
           <option>3</option>
@@ -63,10 +61,17 @@
           <option>5</option>
           <option>6</option>
         </select>
-        <button id="gsd-add" eo-translator="settings.launcher.gsd.buttons.add"></button>
-        <button id="gsd-remove" eo-translator="settings.launcher.gsd.buttons.remove"></button>
+        <button id="gsd-add" style="flex: 0;" eo-translator="settings.launcher.gsd.buttons.add"></button>
+        <button id="gsd-remove" style="flex: 0;" eo-translator="settings.launcher.gsd.buttons.remove"></button>
       </div>
       <div class="separator" eo-translator="settings.emulator.header"></div>
+      <div class="row" style="flex-direction: column;">
+        <label for="inusers" eo-translator="settings.emulator.inbackends"></label>
+        <div id="inusers"></div>
+      </div>
+      <div class="row">
+        <button id="ctlsett" style="flex: 1;" eo-translator="settings.emulator.keybinds"></button>
+      </div>
       <div class="row">
         <label for="currusr" eo-translator="settings.emulator.currusr.label"></label>
         <select id="currusr" data-cfgfacility="emu_general" data-cfgtype="int" data-cfgkey="userIndex" disabled>
@@ -76,6 +81,11 @@
       <div class="row">
         <label for="trophykey" eo-translator="settings.emulator.troperk"></label>
         <input id="trophykey" type="password" data-cfgfacility="emu_general" data-cfgkey="trophyKey" disabled />
+      </div>
+      <div class="row">
+        <label for="madevice" eo-translator="settings.emulator.masterdevice"></label>
+        <select data-cfgfacility="emu_audio" data-cfgkey="device" data-cfgtype="string" style="width: 100%;"
+          id="madevice"></select>
       </div>
       <div class="row">
         <label for="mavolume" eo-translator="settings.emulator.mastervol"></label>

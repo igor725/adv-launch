@@ -1,35 +1,21 @@
 #gamefilter {
-  grid-area: filter;
   transition: opacity 0.15s;
   background-color: #0000004c;
   padding-left: 10px;
   border: none;
   color: white;
-  opacity: 0.05;
+  min-height: 25px;
 }
 
 #gamelist {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  grid-area: list;
   gap: 10px;
   padding-top: 10px;
   padding-left: 10px;
   padding-bottom: 35px;
-  background-color: #0000004c;
   overflow-y: scroll;
-  overflow-x: hidden;
-  opacity: 0.05;
-  transition: opacity 0.15s;
-  height: 100%;
-}
-
-#gamefilter:hover,
-#gamefilter:has(+ #gamelist:hover),
-#gamefilter:hover+#gamelist,
-#gamelist:hover {
-  opacity: 1;
 }
 
 .gamebadge {

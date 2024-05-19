@@ -5,7 +5,10 @@ window._onLangReady = (() => {
     general: {},
     graphics: {},
     audio: {},
-    controls: {}
+    controls: {
+      keybinds: {},
+      pads: [{}, {}, {}, {}]
+    }
   }, {}];
 
   const _isSimilar = (v1, v2) => {
@@ -58,6 +61,10 @@ window._onLangReady = (() => {
 
   const getKey = (elem) => elem.dataset.cfgkey;
 
+  const getArrayIndex = (elem) => parseInt(elem.dataset.cfgarridx);
+
+  const getInnerObjKey = (elem) => elem.dataset.cfginkey;
+
   const getRangeScale = (elem) => elem.dataset.cfgscale ? parseFloat(elem.dataset.cfgscale) : 1.0;
 
   const getOptionValue = (type, elem) => {
@@ -109,18 +116,67 @@ window._onLangReady = (() => {
     $('#gsd').innerHTML = opts.join('');
   };
 
-  window.electronAPI.addEventListener('sett-values', (msg) => {
+  const aliases = {
+    kb: {
+      keyboard: true,
+      kbd: true,
+      kb: true
+    },
+    de: {
+      sdl: true,
+      gamepad: true
+    },
+    xi: {
+      xinput: true,
+      xbox: true
+    }
+  };
+
+  window.electronAPI.requestConfig().then(async (msg) => {
     saved_cfg = msg;
     refillScanDirs(saved_cfg);
 
+    await window.electronAPI.requestAudioDevices().then((list) => {
+      const htels = [];
+
+      for (let i = 0; i < list.length; ++i) {
+        htels.push(`<option data-cfgvalue="${list[i]}">${list[i]}</option>`);
+      }
+
+      $('#madevice').innerHTML = htels.join();
+    });
+
     {
       const uselect = $('select[data-cfgkey="userIndex"]');
+      const inusers = $('#inusers');
+
       const profiles = msg[0].general.profiles;
+      const pads = msg[0].controls.pads;
+
       if (profiles) {
-        const opts = [];
+        const opts = [], inbacks = [];
         for (let i = 0; i < 4; ++i) {
           opts.push(`<option data-cfgvalue="${i + 1}">${profiles[i].name}</option>`);
+          inbacks.push(`
+          <div>
+            <label>${profiles[i].name}</label>
+            <select
+              data-cfgfacility="emu_controls"
+              data-cfgnoselect="1"
+              data-cfgkey="pads"
+              data-cfghint="arrobj"
+              data-cfgarridx="${i}"
+              data-cfginkey="type"
+              data-cfgtype="string"
+              style="flex: 1"
+            >
+              <option data-cfgvalue="sdl" ${aliases.de[pads[i].type] ? 'selected' : ''}>SDL2</option>
+              <option data-cfgvalue="xinput" ${aliases.xi[pads[i].type] ? 'selected' : ''}>XInput</option>
+              <option data-cfgvalue="keyboard" ${aliases.kb[pads[i].type] ? 'selected' : ''}>Keyboard</option>
+            </select>
+          </div>`);
         }
+        inusers.innerHTML = inbacks.join('');
         uselect.innerHTML = opts.join('');
         uselect.disabled = '';
       }
@@ -177,23 +233,40 @@ window._onLangReady = (() => {
             break;
         }
         break;
+      case 'BUTTON':
+        if (target.getAttribute('id') === 'ctlsett') {
+          const cwin = window.open('./controller.html', '_blank', 'frame=false,width=900,height=625');
+          cwin._keybinds = [saved_cfg[0].controls.keybinds, modified_cfg[0].controls.keybinds];
+          cwin._updatepadcolor = (color) => modified_cfg[1].inpadcolor = color;
+          cwin._currpadcolor = modified_cfg[1].inpadcolor ?? saved_cfg[1].inpadcolor;
+        }
+        break;
     }
   }, true);
 
   wrapper.on('change', ({ target }) => {
+    const fac = getFacility(target, modified_cfg);
+    if (fac === null) return;
+
     switch (target.tagName) {
       case 'SELECT':
-        const fac = getFacility(target, modified_cfg);
-        if (fac === null) return;
-        const newvalue = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
-        if (!runSelectChecker(target, newvalue)) return;
-        fac[getKey(target)] = newvalue;
+        const key = getKey(target);
+        switch (target.dataset.cfghint) {
+          case 'arrobj': {
+            const idx = getArrayIndex(target);
+            const innkey = getInnerObjKey(target);
+            fac[key][idx][innkey] = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
+          } break;
+          default: {
+            const newvalue = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
+            if (!runSelectChecker(target, newvalue)) return;
+            fac[key] = newvalue;
+          } break;
+        }
         break;
       case 'INPUT':
         switch (target.getAttribute('type')) {
           case 'range':
-            const fac = getFacility(target, modified_cfg);
-            if (fac === null) return;
             fac[getKey(target)] = target.value * getRangeScale(target);
             $('#rangevalue').style.display = null;
             break;
@@ -235,6 +308,16 @@ window._onLangReady = (() => {
         break;
       case 'save':
         if (haveUnsaved()) {
+          let haskb = false;
+          for (let i = 0; i < 4; ++i) {
+            if (aliases.kb[modified_cfg[0].controls.pads[i].type]) {
+              if (haskb) {
+                if (!confirm(window.trAPI.get('settings.alerts.multiplekb'))) return;
+                break;
+              }
+              haskb = true;
+            }
+          }
           window.electronAPI.sendCommand('sett-update', modified_cfg);
           wrapper.dataset.ready = 0;
         }
@@ -242,9 +325,15 @@ window._onLangReady = (() => {
     }
   });
 
-  $('#gsd-dialog').on('click', () => {
-    window.electronAPI.selectFolder().then((path) => $('#gsd-path').value = path);
-  });
+  wrapper.on('click', ({ target }) => {
+    const elemid = target.dataset.setpathto;
+    if (!elemid) return;
+    window.electronAPI.selectFolder().then((path) => {
+      const elem = document.getElementById(elemid);
+      elem.value = path;
+      elem.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }, true);
 
   $('#gsd-add').on('click', () => {
     const path = $('#gsd-path').value;
@@ -280,6 +369,4 @@ window._onLangReady = (() => {
       svbtn.disabled = haveUnsaved() ? '' : 'disabled';
     }, 600);
   }
-
-  window.electronAPI.sendCommand('sett-request');
 });

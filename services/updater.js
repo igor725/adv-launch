@@ -219,11 +219,13 @@ const validateEmulatorPath = () => {
 const commandHandler = async (msg) => {
   try {
     switch (msg.act) {
-      case 'set-branch':
+      case 'set-path':
         verfile = path.join(msg.path, '/version.adv');
-        update_channel = msg.branch;
         emupath = msg.path;
         validateEmulatorPath();
+        break;
+      case 'set-branch':
+        update_channel = msg.branch;
         break;
 
       case 'set-token':

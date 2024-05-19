@@ -1,19 +1,29 @@
 #wrapper {
   display: flex;
   flex-direction: column;
-  width: 100%;
   height: 100%;
 }
 
 #maindata {
-  display: grid;
-  grid-template-columns: 28.31vw 1fr;
-  grid-template-rows: 25px 1fr;
-  grid-template-areas:
-    "filter info"
-    "list   info";
-  width: 100%;
-  height: 100%;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+#maindata .sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 28.31vw;
+  max-width: 28.31vw;
+  height: 100vh;
+  flex-grow: 1;
+  background-color: #0000004c;
+  transition: opacity 0.15s;
+  opacity: 0.05;
+}
+
+#maindata .sidebar:hover {
+  opacity: 1;
 }
 
 #bgimage {
@@ -37,10 +47,8 @@
   background-color: #9a9a9a;
 }
 
-.sidewrapper {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 64px;
-  grid-area: info;
-  overflow: hidden;
+.infowrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }

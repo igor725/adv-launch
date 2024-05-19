@@ -8,6 +8,8 @@ window._onLangReady = (() => {
       window.electronAPI.sendCommand('showsettings');
     } else if (tgc.contains('minimize')) {
       window.electronAPI.sendCommand('minimize');
+    } else if (tgc.contains('legal')) {
+      window.open('legal.html', '_blank', 'frame=no,minWidth=630,minHeight=380,maxWidth=630,maxHeight=380,width=630,height=380');
     }
   });
 
@@ -38,6 +40,14 @@ window._onLangReady = (() => {
       window.gamelistAPI.fetchGame(null, true);
     }
   });
+
+  window.electronAPI.addEventListener('warnmsg', (data) => window.warnAPI.send(data));
+
+  window.electronAPI.addEventListener('warnmsg-upd', (data) => window.warnAPI.update(data));
+
+  window.warnAPI.callback = (data) => {
+    if (data.event === 'click') window.electronAPI.sendCommand('warnresp', data)
+  };
 
   window.electronAPI.sendCommand('getgames');
 });

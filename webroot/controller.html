@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; frame-src 'self'; object-src 'self';">
+  <link rel="stylesheet" href="css/fa.min.css" />
+  <link rel="stylesheet" href="css/fa-solid.min.css" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/warnmsg.css" />
+  <link rel="stylesheet" href="css/settings/controller.css" />
+  <script src="js/vars.js"></script>
+</head>
+
+<body>
+  <div id="wrapper">
+    <div id="controller">
+      <div class="overlay"></div>
+    </div>
+    <div id="buttons">
+      <button data-action="save" disabled eo-translator="settings.emulator.wkeybind.buttons.save"></button>
+      <button data-action="reset" disabled eo-translator="settings.emulator.wkeybind.buttons.reset"></button>
+      <button data-action="exit" eo-translator="settings.emulator.wkeybind.buttons.exit"></button>
+    </div>
+  </div>
+  <div id="warnmsg" data-active="0"></div>
+  <canvas id="colorpick" width="200" height="200"></canvas>
+
+  <script src="./js/warnmsg.js"></script>
+  <script src="./js/settings/cpick.js" type="module"></script>
+  <script src="./js/settings/controller.js"></script>
+</body>
+
+</html>
