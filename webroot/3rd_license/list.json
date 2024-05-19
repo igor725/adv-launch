@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://github.com/igor725/adv-launch/",
+    "display": "psOff advanced launcher",
+    "file": "../LICENSE"
+  },
+  {
+    "url": "https://7-zip.org/",
+    "display": "7-Zip",
+    "file": "./3rd_license/7z-license.txt"
+  },
+  {
+    "url": "https://github.com/jbrems/color-wheel",
+    "display": "Color picker",
+    "file": "./3rd_license/colorpick-license.txt"
+  },
+  {
+    "url": "https://github.com/electron/forge",
+    "display": "Electron Forge",
+    "file": "./3rd_license/electron-forge-license.txt"
+  },
+  {
+    "url": "https://www.electronjs.org/",
+    "display": "Electron",
+    "file": "./3rd_license/electron-license.txt"
+  },
+  {
+    "url": "https://fontawesome.com/",
+    "display": "FontAwesome",
+    "file": "./3rd_license/fa-license.txt"
+  },
+  {
+    "url": "https://ffmpeg.org/",
+    "display": "FFmpeg",
+    "file": "./3rd_license/ffmpeg-license.txt"
+  },
+  {
+    "url": "https://github.com/eoussama/translator.js",
+    "display": "translator.js",
+    "file": "./3rd_license/translator-license.txt"
+  },
+  {
+    "url": "https://design.ubuntu.com/font",
+    "display": "Ubuntu Font",
+    "file": "./3rd_license/UFL.txt"
+  }
+]

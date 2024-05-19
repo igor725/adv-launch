@@ -234,7 +234,7 @@ const commandHandler = (channel, cmd, info) => {
       settwin.webContents.once('did-finish-load', () => settwin.send('set-lang', config.getSysLang()));
       break;
     case 'openfolder':
-      exec(`explorer "${info}"`);
+      spawn('explorer', [info]);
       break;
     case 'applypatch':
       updateGameSummary(info.gid, { patch: info.patch });
