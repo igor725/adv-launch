@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self'; script-src 'self'; font-src 'self';">
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/portable.css" />
+  <script src="js/vars.js"></script>
+</head>
+
+<body>
+  <div id="wrapper">
+    <h3>Do you want to run the Advanced Launcher in portable mode?</h3>
+    <h4>In non-portable mode the Advanced Launcher will save its <a title="Playtime, launcher settings etc.">data</a>*
+      to
+      <a>%LOCALAPPDATA%\psoff-advlaunch</a> folder.
+    </h4>
+    <div id="buttons">
+      <button data-portable="1">Portable mode</button>
+      <button data-portable="0">Non-portable mode</button>
+    </div>
+  </div>
+
+  <script src="js/portable.js"></script>
+</body>
+
+</html>
