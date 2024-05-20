@@ -3,4 +3,5 @@ node_modules/
 config.json
 bin/emulator/
 gameinfo/
+portable
 out/

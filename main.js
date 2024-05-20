@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
-const { spawn, exec, execSync } = require('node:child_process');
+const { spawn, exec } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
 const { Config } = require('./libs/settings.js');
@@ -11,30 +11,16 @@ const SCE_PIC_PATH = '/sce_sys/pic0.png';
 const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
+const PORTABLE_PATH = path.join(__dirname, '/portable');
 
-let win = null;
-let player = null;
-let settwin = null;
-let gameproc = null;
-let updateWorker = null;
+let win = undefined;
+let player = undefined;
+let config = undefined;
+let gipath = undefined;
+let settwin = undefined;
+let gameproc = undefined;
+let updateWorker = undefined;
 let binname = 'psoff.exe';
-
-const config = new Config();
-
-const emupath = config.getValue('emu_path');
-const gipath = path.join(__dirname, '/gameinfo');
-
-fs.mkdirSync(gipath, { recursive: true });
-
-try {
-  const testfile = path.join(emupath, '/test');
-  fs.mkdirSync(emupath, { recursive: true });
-  fs.writeFileSync(testfile, 'test');
-  fs.unlinkSync(testfile);
-} catch (e) {
-  console.error('Emulator directory is not writeable anymore, resetting to default one: ', e.toString());
-  config.resetValue('emu_path');
-}
 
 const converter = new Convert({
   newline: true
@@ -61,6 +47,7 @@ const _runDownloadingProcess = (retry = false) => {
 
 const loadTrophiesData = (gid) => {
   try {
+    const emupath = config.getValue('emu_path');
     const tfile = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`);
     const trophies = [];
     const count = tfile.readUint32LE(0);
@@ -120,7 +107,7 @@ const updateGameSummary = (gid, update, loadtrophies = false) => {
 
 const updateBinaryPath = (path, checkfirst = false) => {
   binname = path ?? binname;
-  exec(`"${binname}" -h`, { cwd: emupath }).on('close', (code) => {
+  exec(`"${binname}" -h`, { cwd: config.getValue('emu_path') }).on('close', (code) => {
     if (code === 0 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });
@@ -249,6 +236,7 @@ const commandHandler = (channel, cmd, info) => {
       const patch = getGameSummary(info, false).patch;
       if (patch) emuargs.push(`--update=${patch}`);
 
+      const emupath = config.getValue('emu_path');
       gameproc = spawn(path.join(emupath, binname), emuargs, { cwd: emupath });
       gameproc.stdout.on('data', terminalListener);
       gameproc.stderr.on('data', terminalListener);
@@ -348,12 +336,35 @@ const commandHandler = (channel, cmd, info) => {
   }
 };
 
-app.whenReady().then(() => {
+const main = (userdir = __dirname) => {
+  fs.mkdirSync(userdir, { recursive: true });
+  config = new Config(userdir);
+
+  const emupath = config.getValue('emu_path');
+
+  gipath = path.join(userdir, '/gameinfo');
+  fs.mkdirSync(gipath, { recursive: true });
+
+  try {
+    const testfile = path.join(emupath, '/test');
+    fs.mkdirSync(emupath, { recursive: true });
+    fs.writeFileSync(testfile, 'test');
+    fs.unlinkSync(testfile);
+  } catch (e) {
+    console.error('Emulator directory is not writeable anymore, resetting to default one: ', e.toString());
+    config.resetValue('emu_path');
+  }
+
   ipcMain.on('command', commandHandler);
 
   ipcMain.handle('reqcfg', () => config.getFullConfig());
 
-  ipcMain.handle('reqadev', () => JSON.parse(execSync(`"${LISTAUDIO_PATH}"`, { cwd: emupath })));
+  ipcMain.handle('reqadev', () => new Promise((resolve, reject) => {
+    exec(`"${LISTAUDIO_PATH}"`, { cwd: emupath }, (err, stdout) => {
+      if (err) return reject(err);
+      resolve(JSON.parse(stdout));
+    });
+  }));
 
   ipcMain.handle('opendir', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
@@ -574,4 +585,43 @@ app.whenReady().then(() => {
   });
 
   win.loadFile('webroot/index.html');
+};
+
+const guessLaunch = () => {
+  if (fs.readFileSync(PORTABLE_PATH).readUint8(0) === 1) { // portable
+    return main();
+  }
+
+  return main(path.join(process.env.LOCALAPPDATA, '/psoff-advlaunch/'));
+};
+
+app.whenReady().then(() => {
+  try {
+    guessLaunch();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      const portask = new BrowserWindow({
+        width: 550,
+        height: 154,
+        resizable: false,
+        frame: false,
+        webPreferences: {
+          allowRunningInsecureContent: false,
+          preload: path.join(__dirname, 'preload.js')
+        }
+      });
+
+      ipcMain.once('set-portable', (ev, value) => {
+        fs.writeFileSync(PORTABLE_PATH, value ? '\x01' : '\x00');
+      });
+
+      portask.on('closed', () => guessLaunch());
+
+      portask.loadFile('webroot/portable.html');
+      return;
+    }
+
+    // Rethrow if something else errored
+    throw e;
+  }
 });

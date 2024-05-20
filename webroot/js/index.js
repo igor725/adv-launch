@@ -9,7 +9,7 @@ window._onLangReady = (() => {
     } else if (tgc.contains('minimize')) {
       window.electronAPI.sendCommand('minimize');
     } else if (tgc.contains('legal')) {
-      window.open('legal.html', '_blank', 'frame=no,minWidth=630,minHeight=380,maxWidth=630,maxHeight=380,width=630,height=380');
+      window.open('legal.html', '_blank', 'frame=no,resizable=no,width=630,height=380');
     }
   });
 

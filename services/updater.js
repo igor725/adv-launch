@@ -245,7 +245,7 @@ const commandHandler = async (msg) => {
         validateEmulatorPath();
         await download(newverinfo.url, newverinfo.tag).then(({ fpath, version }) => {
           execSync('del *.dll *.exe', { cwd: emupath });
-          execSync(`"${path.join(emupath, '../7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
+          execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
           parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
           updateVersionFile(version);
           fs.unlinkSync(fpath);

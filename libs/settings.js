@@ -2,9 +2,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 module.exports.Config = class Config {
-  #cfgfile = path.join(__dirname, '../config.json');
+  #cfgfile = undefined;
   #default = {
-    emu_path: path.join(__dirname, '../bin/emulator'),
+    emu_path: undefined,
     update_channel: 'release',
     update_freq: 'weekly',
     inpadcolor: '#3B3E95',
@@ -32,7 +32,10 @@ module.exports.Config = class Config {
   #callbacks = [];
   #data = null;
 
-  constructor() {
+  constructor(userdir) {
+    this.#cfgfile = path.join(userdir, '/config.json');
+    this.#default.emu_path = path.join(userdir, '/bin/emulator');
+
     try {
       this.#data = JSON.parse(fs.readFileSync(this.#cfgfile, { encoding: 'utf-8' }));
 
