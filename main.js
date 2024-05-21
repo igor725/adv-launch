@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('node:child_process');
@@ -596,6 +596,18 @@ const guessLaunch = () => {
 };
 
 app.whenReady().then(() => {
+  const dfunc = () => console.warn('Reload shortcut is disabled');
+
+  app.on('browser-window-focus', () => {
+    globalShortcut.register('CommandOrControl+R', dfunc);
+    globalShortcut.register('F5', dfunc);
+  });
+
+  app.on('browser-window-blur', () => {
+    globalShortcut.unregister('CommandOrControl+R');
+    globalShortcut.unregister('F5');
+  });
+
   try {
     guessLaunch();
   } catch (e) {
