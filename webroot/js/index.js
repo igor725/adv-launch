@@ -49,5 +49,19 @@ window._onLangReady = (() => {
     if (data.event === 'click') window.electronAPI.sendCommand('warnresp', data)
   };
 
+  window.electronAPI.addEventListener('run-tutorial', () => window.tutorAPI.start());
+
+  window.on('keyup', ({ code }) => {
+    switch (code) {
+      case 'F1':
+        window.tutorAPI.start();
+        break;
+
+      default:
+        console.warn('Unbound key', code, 'pressed!');
+        break;
+    }
+  });
+
   window.electronAPI.sendCommand('getgames');
 });

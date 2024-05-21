@@ -313,7 +313,7 @@ const commandHandler = (channel, cmd, info) => {
           win.send('warnmsg', { hidden: true, id: 'first-launch' });
 
           if (info.resp === 1) {
-            commandHandler('command', 'showsettings');
+            win.send('run-tutorial');
           }
           break;
 

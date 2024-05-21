@@ -40,8 +40,8 @@
         }
       },
       "troperk": "Trophy ERK:",
-      "mastervol": "Master volume:",
       "masterdevice": "Audio device:",
+      "mastervol": "Master volume:",
       "lang": "System language:",
       "fullscreen": "Enable fullscreen:",
       "inbackends": "Gamepad backend configuration:",
@@ -92,7 +92,7 @@
       "run": "Run game"
     },
     "firstrun": {
-      "text": "Welcome to psOff advanced launcher! Do you want to open the launcher settings?",
+      "text": "Welcome to psOff advanced launcher! Do you want to start usage tutorial?",
       "nobtn": "No, just let me be",
       "yesbtn": "Yes, please"
     }
@@ -107,6 +107,32 @@
       "checkfail": "Failed to check updates for your psOff installation: {error}",
       "nonightly": "You have no GitHub token installed, nightly update check is impossible!"
     }
+  },
+  "tutorial": {
+    "welcome": "Welcome to psOff advanced launcher tutorial!\nHere you'll learn how to use this launcher.\nPress [Escape] to cancel the tutorial and [LMB]/[Enter]/[Space] to switch to next tutorial step.",
+    "filter": "This is a filter, you can type game's title or id to filter your games list.",
+    "list": "And this is the games list itself. Your games will appear there.\nHover the badge and click [LMB] on it to select the game and [RMB] to open game's context menu.",
+    "tropicon": "This icon indicates that the game has trophies that you can earn by playing it.",
+    "tbtn": "Here we have licenses, settings, minimize and close buttons respectively.",
+    "abtn": "The names of these two buttons speak for themselves.\nYou should press those only if you already selected the game from the games list.",
+    "trophybtn": "This is a trophies list button.\nIf you press it, the trophies popup will appear.",
+    "trophytrk": "If you don't have Trophy ERK installed, then the trophies list will be empty since we can't decrypt it.\nYou should dump said key from your PS4.",
+    "trophylst": "This is how the trophies list looks when the trophy key is installed.\nLet's move to Settings window now.",
+    "bgmvol": "The Settings window consists of two sub-categories: Launcher settings and Emulator settings.\nLet's start with the Launcher settings first.\nThis one configures the volume of background music playback. Said music will play only if the game has one.",
+    "ghtoken": "This setting is optional and used for Nightly updates only. If you want to receive releases only, then you can safely ignore it.",
+    "emupath": "Here you can specify the path to your emulator directory.\nIf you don't have emulator already installed then just leave this setting intact.\nThe \"...\" button will open the folder selection dialog.",
+    "updch": "This setting controls the updater service.\nYou can entirely disable it or change update channel between Nightly and Release.",
+    "updfr": "And this is update checker frequency controller.\nYou can adjust how often the launcher will check for the emulator updates.",
+    "gsd": "This is a list of all your game directories.\nYou can add or remove them using the controls below.",
+    "gsdbtn": "First field is the actual path to your directory with games.\nThe \"...\" button will open the folder selection dialog.\nDrop-down list with the numbers specifies the depth to which the folder will be scanned.",
+    "gbacntl": "Here you can configure backends for every gamepad and adjust hotkeys for keyboard backend.",
+    "currusr": "This setting determines which user will be reported to the game as the one who started it.",
+    "troperk": "This key is needed to decrypt the trophies file.\nIf the key is not entered or set to incorrect value, you will not be able to view the trophy list and see the trophy names ingame when you actually receive them.",
+    "masterdevice": "Here you cpecify the device that will be used to ouput the game's sound.",
+    "mastervol": "And this is the game's sound volume.",
+    "lang": "This setting specifies which user language will be set.\nIf the game does not support the specified language, the ingame text will be displayed in the default game's language.\nThis setting also affects the Launcher's language with the same behavior.",
+    "fullscreen": "This checkbox indicates in which state the emulator will be started.\nIf the checkbox is checked, the emulator will be runned in fullscreen mode.",
+    "end": "Congrats! You finished the tutorial. If you want to go through it again, just press [F1]. Enjoy!"
   },
   "trophies": {
     "hidden": "[HIDDEN]"
