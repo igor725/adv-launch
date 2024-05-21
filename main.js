@@ -599,11 +599,13 @@ app.whenReady().then(() => {
   const dfunc = () => console.warn('Reload shortcut is disabled');
 
   app.on('browser-window-focus', () => {
+    globalShortcut.register('CommandOrControl+Shift+R', dfunc);
     globalShortcut.register('CommandOrControl+R', dfunc);
     globalShortcut.register('F5', dfunc);
   });
 
   app.on('browser-window-blur', () => {
+    globalShortcut.unregister('CommandOrControl+Shift+R');
     globalShortcut.unregister('CommandOrControl+R');
     globalShortcut.unregister('F5');
   });
