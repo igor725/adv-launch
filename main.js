@@ -206,6 +206,7 @@ const commandHandler = (channel, cmd, info) => {
         parent: win,
         frame: false,
         resizable: false,
+        show: false,
         backgroundColor: '#252525',
         modal: true,
         width: 400,
@@ -214,6 +215,7 @@ const commandHandler = (channel, cmd, info) => {
           preload: path.join(__dirname, 'preload.js')
         }
       });
+      settwin.once('ready-to-show', () => settwin.show());
       settwin.on('closed', () => {
         settwin = null;
       });
@@ -438,6 +440,7 @@ const main = (userdir = __dirname) => {
     height: 580,
     minWidth: 1030,
     minHeight: 580,
+    show: false,
     frame: false,
     webPreferences: {
       allowRunningInsecureContent: false,
@@ -447,6 +450,8 @@ const main = (userdir = __dirname) => {
   });
 
   win.setAspectRatio(16 / 9);
+
+  win.once('ready-to-show', () => win.show());
 
   win.webContents.once('did-finish-load', () => {
     updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
@@ -607,6 +612,7 @@ app.whenReady().then(() => {
         width: 550,
         height: 154,
         resizable: false,
+        show: false,
         frame: false,
         webPreferences: {
           allowRunningInsecureContent: false,
@@ -618,6 +624,7 @@ app.whenReady().then(() => {
         fs.writeFileSync(PORTABLE_PATH, value ? '\x01' : '\x00');
       });
 
+      portask.once('ready-to-show', () => portask.show());
       portask.on('closed', () => guessLaunch());
 
       portask.loadFile('webroot/portable.html');
