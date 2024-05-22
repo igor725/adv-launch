@@ -496,7 +496,10 @@ const main = (userdir = __dirname) => {
       console.error('Failed to set trophy key: ', err.toString());
     }
 
-    win.send('set-lang', config.getSysLang());
+    const sendLang = () => win.send('set-lang', config.getSysLang());
+
+    sendLang();
+    ipcMain.on('reset-lang', () => sendLang());
     updateWorker.postMessage({ act: 'set-path', path: emupath });
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel') });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
@@ -596,20 +599,6 @@ const guessLaunch = () => {
 };
 
 app.whenReady().then(() => {
-  const dfunc = () => console.warn('Reload shortcut is disabled');
-
-  app.on('browser-window-focus', () => {
-    globalShortcut.register('CommandOrControl+Shift+R', dfunc);
-    globalShortcut.register('CommandOrControl+R', dfunc);
-    globalShortcut.register('F5', dfunc);
-  });
-
-  app.on('browser-window-blur', () => {
-    globalShortcut.unregister('CommandOrControl+Shift+R');
-    globalShortcut.unregister('CommandOrControl+R');
-    globalShortcut.unregister('F5');
-  });
-
   try {
     guessLaunch();
   } catch (e) {
