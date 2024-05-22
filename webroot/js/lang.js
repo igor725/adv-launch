@@ -87,7 +87,11 @@
     let int;
 
     int = setInterval(() => {
-      if (!window._onLangReady || dlang === -1) return;
+      if (!window._onLangReady) return;
+      if (dlang === -1) {
+        window.electronAPI.resetLang();
+        return;
+      }
       langready = true;
       clearInterval(int);
       window._onLangReady();

@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   requestAudioDevices: () => ipcRenderer.invoke('reqadev'),
   requestConfig: () => ipcRenderer.invoke('reqcfg'),
   selectFolder: () => ipcRenderer.invoke('opendir'),
-  setPortable: (state) => ipcRenderer.send('set-portable', state)
+  setPortable: (state) => ipcRenderer.send('set-portable', state),
+  resetLang: () => ipcRenderer.send('reset-lang')
 });

@@ -27,10 +27,6 @@ window._onLangReady = (() => {
     }
   }, true);
 
-  window.electronAPI.addEventListener('input', (state) => {
-    document.body.style.pointerEvents = state == false ? 'none' : null;
-  });
-
   window.electronAPI.addEventListener('ingame', (enabled) => {
     if (!window.gamelistAPI.getSelectedGame()) return;
     window.terminalAPI.setStatus(enabled);
@@ -48,6 +44,20 @@ window._onLangReady = (() => {
   window.warnAPI.callback = (data) => {
     if (data.event === 'click') window.electronAPI.sendCommand('warnresp', data)
   };
+
+  window.electronAPI.addEventListener('run-tutorial', () => window.tutorAPI.start());
+
+  window.on('keyup', ({ code }) => {
+    switch (code) {
+      case 'F1':
+        window.tutorAPI.start();
+        break;
+
+      default:
+        console.warn('Unbound key', code, 'pressed!');
+        break;
+    }
+  });
 
   window.electronAPI.sendCommand('getgames');
 });

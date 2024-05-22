@@ -11,6 +11,7 @@
 
   const savebtn = $('#buttons [data-action="save"]');
   const resetbtn = $('#buttons [data-action="reset"]');
+  const isOldVer = _keybinds[0]['controller.options'] === undefined;
 
   if (Object.keys(_keybinds[1]).length > 0) {
     savebtn.disabled = '';
@@ -219,7 +220,7 @@
               break;
             case 'key':
               const code = resolveSDLKey(data.code);
-              if (code) resolve({ action: data.id, code });
+              if (code) resolve({ action: isOldVer ? data.id.substr(data.id.indexOf('.') + 1) : data.id, code });
               break;
           }
         };

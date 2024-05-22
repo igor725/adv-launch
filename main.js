@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('node:child_process');
@@ -202,11 +202,12 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'showsettings':
       if (settwin != null) return;
-      win.send('input', false);
       settwin = new BrowserWindow({
         parent: win,
         frame: false,
         resizable: false,
+        backgroundColor: '#252525',
+        modal: true,
         width: 400,
         height: 400,
         webPreferences: {
@@ -214,7 +215,6 @@ const commandHandler = (channel, cmd, info) => {
         }
       });
       settwin.on('closed', () => {
-        win.send('input', true);
         settwin = null;
       });
       settwin.loadFile('webroot/settings.html');
@@ -313,7 +313,7 @@ const commandHandler = (channel, cmd, info) => {
           win.send('warnmsg', { hidden: true, id: 'first-launch' });
 
           if (info.resp === 1) {
-            commandHandler('command', 'showsettings');
+            win.send('run-tutorial');
           }
           break;
 
@@ -496,7 +496,10 @@ const main = (userdir = __dirname) => {
       console.error('Failed to set trophy key: ', err.toString());
     }
 
-    win.send('set-lang', config.getSysLang());
+    const sendLang = () => win.send('set-lang', config.getSysLang());
+
+    sendLang();
+    ipcMain.on('reset-lang', () => sendLang());
     updateWorker.postMessage({ act: 'set-path', path: emupath });
     updateWorker.postMessage({ act: 'set-branch', branch: config.getValue('update_channel') });
     updateWorker.postMessage({ act: 'set-freq', freq: config.getValue('update_freq') });
