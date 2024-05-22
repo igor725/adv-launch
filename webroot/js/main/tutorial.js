@@ -37,7 +37,8 @@
 
   const nextKeys = {
     'Space': true,
-    'Enter': true
+    'Enter': true,
+    'NumpadEnter': true
   };
 
   const tutorClick = (wrap) => new Promise((resolve) => {

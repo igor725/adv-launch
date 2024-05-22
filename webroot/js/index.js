@@ -27,10 +27,6 @@ window._onLangReady = (() => {
     }
   }, true);
 
-  window.electronAPI.addEventListener('input', (state) => {
-    document.body.style.pointerEvents = state == false ? 'none' : null;
-  });
-
   window.electronAPI.addEventListener('ingame', (enabled) => {
     if (!window.gamelistAPI.getSelectedGame()) return;
     window.terminalAPI.setStatus(enabled);

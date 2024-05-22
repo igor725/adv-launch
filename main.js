@@ -202,11 +202,12 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'showsettings':
       if (settwin != null) return;
-      win.send('input', false);
       settwin = new BrowserWindow({
         parent: win,
         frame: false,
         resizable: false,
+        backgroundColor: '#252525',
+        modal: true,
         width: 400,
         height: 400,
         webPreferences: {
@@ -214,7 +215,6 @@ const commandHandler = (channel, cmd, info) => {
         }
       });
       settwin.on('closed', () => {
-        win.send('input', true);
         settwin = null;
       });
       settwin.loadFile('webroot/settings.html');
