@@ -50,5 +50,7 @@
 .infowrapper {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   flex-grow: 1;
+  gap: 10px;
 }

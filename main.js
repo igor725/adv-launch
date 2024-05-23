@@ -20,6 +20,7 @@ let gipath = undefined;
 let settwin = undefined;
 let gameproc = undefined;
 let updateWorker = undefined;
+let compatWorker = undefined;
 let binname = 'psoff.exe';
 
 const converter = new Convert({
@@ -137,6 +138,7 @@ const commandHandler = (channel, cmd, info) => {
       }
       break;
     case 'getgamesum':
+      compatWorker.postMessage({ act: 'request', gid: info.gid });
       win.send('gamesum', getGameSummary(info));
 
       if (player != null) {
@@ -483,6 +485,7 @@ const main = (userdir = __dirname) => {
 
   win.webContents.once('did-finish-load', () => {
     updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
+    compatWorker = new Worker(path.join(__dirname, '/services/gametags.js'));
 
     updateWorker.on('message', (msg) => {
       if (win.isDestroyed()) return;
@@ -517,9 +520,18 @@ const main = (userdir = __dirname) => {
       }
     });
 
+    compatWorker.on('message', (msg) => {
+      switch (msg.resp) {
+        case 'gametags':
+          win.send('set-gtags', msg);
+          break;
+      }
+    });
+
     {
       let token;
       if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+      compatWorker.postMessage({ act: 'init', udir: userdir, token: token ?? undefined });
     }
 
     try {
