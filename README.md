@@ -41,7 +41,7 @@ This launcher supports multiple languages. The language of displaying text depen
 
 ### What should I do to add support for my language?
 
-Well, first of all you should go to `webroot/langs/`, clone `en.json` and rename it to your short language code. Now you can update the file contents and translate these strings to your language. When translation is done, open `js/lang.js` and look for `avail_langs` array, find the line with corresponding to your language name comment and change the `null` value to the actual short language code. Now you can test your changes and open some [PR](<https://github.com/igor725/adv-launch/pulls>) if everything's ok :)
+Well, first of all you should go to `webroot/langs/`, clone `en.json` and rename it to your short language code. Now you can update the file contents and translate these strings to your language. When translation is done, open `webroot/js/lang.js` and look for `avail_langs` array, find the line with corresponding to your language name comment and change the `null` value to the actual short language code. Now you can test your changes and open some [PR](<https://github.com/igor725/adv-launch/pulls>) if everything's ok :)
 
 ### I don't see my language name in avail_langs comments, what should I do?
 
@@ -49,4 +49,4 @@ Sadly, nothing. This is impossible to add new language since we stick to [PS4 su
 
 ## LICENSE
 
-The launcher released under MIT license, but some its parts are licensed under other licenses, see `bin/*-license.txt` for more info.
+The launcher released under MIT license, but some its parts are licensed under other licenses, see `webroot/3rd_license/*-license.txt` for more info.

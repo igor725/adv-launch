@@ -78,6 +78,7 @@
       gid: getGameTitleIdFromBadge(gbadge),
       gpath: getGamePathFromBadge(gbadge),
       gver: getGameVersionFromBadge(gbadge),
+      gtitle: getGameTitleFromBadge(gbadge),
       patches: []
     };
 

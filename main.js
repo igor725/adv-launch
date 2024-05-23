@@ -394,9 +394,37 @@ const main = (userdir = __dirname) => {
 
     const popupdata = [
       {
-        click: () => commandHandler('command', 'openfolder', data.path),
         type: 'normal',
-        label: 'Open game folder'
+        enabled: false,
+        label: data.gtitle
+      },
+      {
+        type: 'normal',
+        label: 'Open game folder',
+        click: () => commandHandler('command', 'openfolder', data.gpath)
+      },
+      {
+        type: 'normal',
+        label: 'Create desktop shortcut',
+        click: () => {
+          const scrpath = path.join(process.env.TEMP, '/psoff_link.vbs');
+          const arguments = [
+            `--file=""${data.gpath}\\eboot.bin""`
+          ];
+          if (currpatch) arguments.push(`--update=""${currpatch}""`);
+          fs.writeFileSync(scrpath, `
+            Set oWS = WScript.CreateObject("WScript.Shell")
+            strDesktop = oWS.SpecialFolders("Desktop")
+            Set oLink = oWS.CreateShortcut(strDesktop + "\\${data.gtitle.replace(/[/\\?%*:|"<>]/g, ' ')}.lnk")
+            oLink.TargetPath = "${config.getValue('emu_path')}\\${binname}"
+            oLink.WorkingDirectory = "${config.getValue('emu_path')}"
+            ' oLink.IconLocation = "${data.gpath}\\sce_sys\\icon0.png"
+            oLink.Arguments = "${arguments.join(' ')}"
+            oLink.Save
+          `);
+          const cp = exec(`cscript "${scrpath}"`);
+          cp.on('close', () => fs.unlinkSync(scrpath));
+        }
       },
       {
         type: 'submenu',
@@ -413,7 +441,7 @@ const main = (userdir = __dirname) => {
     ];
 
     for (const patch of data.patches) {
-      popupdata[1].submenu.push({
+      popupdata[3].submenu.push({
         click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: patch.path }),
         type: 'radio',
         label: patch.version,
