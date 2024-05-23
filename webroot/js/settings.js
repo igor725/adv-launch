@@ -1,5 +1,7 @@
 window._onLangReady = (() => {
   const wrapper = $('#wrapper');
+  const gsd = $('#gsd');
+
   let saved_cfg = null;
   let modified_cfg = [{
     general: {},
@@ -113,7 +115,7 @@ window._onLangReady = (() => {
       opts.push(`<option data-folder="${path}">${path} | depth: ${depth}</option>`);
     }
 
-    $('#gsd').innerHTML = opts.join('');
+    gsd.innerHTML = opts.join('');
   };
 
   const aliases = {
@@ -359,9 +361,11 @@ window._onLangReady = (() => {
     refillScanDirs(modified_cfg);
   });
 
-  $('#gsd').on('change', ({ target }) => {
+  gsd.on('change', ({ target }) => {
     $('#gsd-path').value = target.options[target.selectedIndex].dataset.folder;
   });
+
+  gsd.on('blur', () => gsd.selectedIndex = -1);
 
   {
     const svbtn = $('#buttons button[data-action="save"]');
