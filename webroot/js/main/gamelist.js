@@ -108,6 +108,15 @@
     selectedGame = gbadge.dataset.gid;
   }, true);
 
+  gamelist.on('dblclick', ({ target: gbadge }) => {
+    if (!isGameBadge(gbadge)) return;
+    window.electronAPI.sendCommand('rungame', {
+      path: getGamePathFromBadge(gbadge),
+      gid: getGameTitleFromBadge(gbadge),
+      dblclick: true
+    });
+  });
+
   gamelist.on('mouseover', ({ target: gbadge }) => {
     if (!isGameBadge(gbadge)) return;
     window.gamelistAPI.fetchGame(gbadge);

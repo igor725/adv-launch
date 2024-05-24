@@ -23,7 +23,7 @@ window._onLangReady = (() => {
     if (target.classList.contains('ofolder')) {
       window.electronAPI.sendCommand('openfolder', gpath);
     } else if (target.classList.contains('rgame')) {
-      window.electronAPI.sendCommand('rungame', { path: gpath, gid: gid });
+      window.electronAPI.sendCommand('rungame', { path: gpath, gid: gid, dblclick: false });
     }
   }, true);
 

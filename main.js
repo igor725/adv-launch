@@ -236,6 +236,16 @@ const commandHandler = (channel, cmd, info) => {
       updateGameSummary(info.gid, { patch: info.patch });
       break;
     case 'rungame':
+      if (info.dblclick && !config.getValue('dblcl_run')) {
+        if (config.getValue('dblcl_ask')) {
+          win.send('warnmsg', {
+            hidden: false, type: 'text', id: 'dbl-warn',
+            text: '{$tr:main.actions.dblrun}', buttons: ['{$tr:buttons.no}', '{$tr:buttons.ye}']
+          });
+        }
+        return;
+      }
+
       if (gameproc != null) {
         genericWarnMsg('{$tr:main.actions.alrun}', true);
         return;
@@ -315,6 +325,11 @@ const commandHandler = (channel, cmd, info) => {
           } else if (info.resp === 1) {
             app.quit();
           }
+          break;
+
+        case 'dbl-warn':
+          win.send('warnmsg', { hidden: true, id: 'dbl-warn' });
+          config.updateMultipleKeys([{}, { dblcl_run: info.resp === 1, dblcl_ask: false }]);
           break;
 
         case 'first-launch':

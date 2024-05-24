@@ -23,6 +23,7 @@
           "monthly": "Monthly"
         }
       },
+      "doubleclick": "Doubleclick will run the game",
       "gsd": {
         "label": "Game scan directories:",
         "buttons": {
@@ -72,7 +73,8 @@
       "alrun": "You should close your previous game first!",
       "nogame": "You should select the game first!",
       "gerror": "psOff process returned the error: {error}",
-      "reqrst": "One or more changed settings requires restart!"
+      "reqrst": "One or more changed settings requires restart!",
+      "dblrun": "Do you want the launcher to run the game on doubleclick?"
     },
     "gamesummary": {
       "lastrun": "Last run:",
