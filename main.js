@@ -35,6 +35,7 @@ const scanGameDir = (scanpath, depth) => {
   const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
   dirworker.on('message', (msg) => {
     if (win.isDestroyed()) return;
+    if (compatWorker && !msg.ispatch) compatWorker.postMessage({ act: 'request_status', gid: msg.id });
     win.send('add-game', msg);
   });
   dirworker.on('exit', () => dirworker.unref());
@@ -226,6 +227,10 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'openfolder':
       spawn('explorer', [info]);
+      break;
+    case 'openissue':
+      if (info > 0)
+        exec(`start https://github.com/SysRay/psOff_compatibility/issues/${info}`);
       break;
     case 'applypatch':
       updateGameSummary(info.gid, { patch: info.patch });
@@ -524,6 +529,9 @@ const main = (userdir = __dirname) => {
       switch (msg.resp) {
         case 'gametags':
           win.send('set-gtags', msg);
+          break;
+        case 'gamestatus':
+          win.send('set-gstatus', msg);
           break;
       }
     });

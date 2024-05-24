@@ -60,3 +60,13 @@
   right: 0;
   top: 0;
 }
+
+.gamebadge .gb-info .gbi-status {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  position: absolute;
+  font-size: small;
+  pointer-events: all;
+  left: 0;
+  top: 0;
+}

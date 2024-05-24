@@ -8,8 +8,11 @@
   justify-content: safe center;
   align-items: safe center;
   background-color: #0000007e;
+  cursor: pointer;
   overflow-x: auto;
   overflow-y: hidden;
+  padding-top: 5px;
+  padding-bottom: 5px;
   padding-left: 10px;
   border-radius: 4px;
   margin: 10px;

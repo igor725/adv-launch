@@ -6,6 +6,14 @@ const { parentPort } = require('node:worker_threads');
 let atoken = undefined;
 let homedir = undefined;
 let compatdata = undefined;
+let initerror = false;
+
+const statusIndex = {
+  'status-nothing': 0,
+  'status-intro': 1,
+  'status-ingame': 2,
+  'status-playable': 3
+};
 
 const ptimer = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
@@ -87,7 +95,7 @@ const downloadWholeDataBase = async () => {
     labels: []
   };
 
-  downloader(data, 1).then(() => {
+  await downloader(data, 1).then(() => {
     try {
       fs.writeFileSync(dbpath, JSON.stringify(data));
     } catch (e) {
@@ -107,6 +115,21 @@ const downloadWholeDataBase = async () => {
   return data;
 };
 
+const waitForList = () =>
+  new Promise((resolve, reject) => {
+    let int;
+
+    int = setInterval(() => {
+      if (compatdata) {
+        clearInterval(int);
+        resolve();
+      } else if (initerror) {
+        clearInterval(int);
+        reject();
+      }
+    }, 100);
+  });
+
 const commandHandler = async (msg) => {
   try {
     switch (msg.act) {
@@ -117,11 +140,19 @@ const commandHandler = async (msg) => {
         downloadWholeDataBase().then((data) => {
           compatdata = data;
         }).catch((err) => {
+          initerror = true;
           console.error('[GAMETAGS] Failed to initialize database: ', err.toString());
         });
       } break;
 
       case 'request': {
+        try {
+          await waitForList();
+        } catch (e) {
+          parentPort.postMessage({ resp: 'gametags', gid: msg.gid, iid: 0, html: '' });
+          return;
+        }
+
         let htcode = undefined;
 
         const gissue = compatdata.games.find((game) => game.gid.toUpperCase() === msg.gid.toUpperCase());
@@ -140,6 +171,32 @@ const commandHandler = async (msg) => {
           parentPort.postMessage({ resp: 'gametags', gid: msg.gid, iid: gissue.id, html: htcode.join('') });
         else
           parentPort.postMessage({ resp: 'gametags', gid: msg.gid, iid: 0, html: '' });
+      } break;
+
+      case 'request_status': {
+        try {
+          await waitForList();
+        } catch (e) {
+          parentPort.postMessage({ resp: 'gamestatus', gid: msg.gid, status: -1 });
+          return;
+        }
+
+        const gissue = compatdata.games.find((game) => game.gid.toUpperCase() === msg.gid.toUpperCase());
+
+        if (gissue) {
+          const labels = gissue.labels;
+          for (let i = 0; i < labels.length; ++i) {
+            const { name } = compatdata.labels[labels[i]];
+
+            if (name.startsWith('status-')) {
+              parentPort.postMessage({ resp: 'gamestatus', gid: msg.gid, status: statusIndex[name] });
+              return;
+            }
+          }
+        }
+
+        parentPort.postMessage({ resp: 'gamestatus', gid: msg.gid, status: -1 });
+
       } break;
 
       default: {

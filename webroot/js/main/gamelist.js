@@ -10,6 +10,9 @@
   const getGamePathFromBadge = (target) => target.dataset.gpath;
   const getGameVersionFromBadge = (target) => target.dataset.gver;
 
+  const statusColors = ['#e74c3c', '#e08a1e', '#f9b32f', '#1ebc61'];
+  const statusTitle = ['Nothing', 'Intro', 'Ingame', 'Playable'];
+
   const formatTime = (ms) => {
     const seconds = Math.floor(Math.abs(ms / 1000));
 
@@ -127,7 +130,20 @@
     }
   });
 
-  const paths = {};
+  window.electronAPI.addEventListener('set-gstatus', (msg) => {
+    if (msg.status < 0) return;
+
+    const gamebadge = gamelist.$(`.gamebadge[data-gid="${msg.gid}"]`);
+    if (gamebadge !== null && gamebadge.$('.gbi-status') === null) {
+      const node = document.createElement('div');
+      node.classList = 'gbi-status fa-solid fa-circle';
+      node.title = statusTitle[msg.status];
+      node.style.color = statusColors[msg.status];
+      gamebadge.$('.gb-info').appendChild(node);
+    }
+  });
+
+  const gids = {};
 
   window.electronAPI.addEventListener('add-game', (msg) => {
     if (msg.ispatch) {
@@ -146,8 +162,8 @@
       return;
     }
 
-    if (paths[msg.path]) return;
-    paths[msg.path] = true;
+    if (gids[msg.id]) return;
+    gids[msg.id] = true;
 
     const rootel = document.createElement('div');
     rootel.classList = 'gamebadge';
