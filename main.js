@@ -329,7 +329,7 @@ const commandHandler = (channel, cmd, info) => {
 
         case 'dbl-warn':
           win.send('warnmsg', { hidden: true, id: 'dbl-warn' });
-          config.updateMultipleKeys([{}, { dblcl_run: info.resp === 1, dblcl_ask: false }]);
+          config.updateMultipleKeys([{}, { dblcl_run: info.resp === 0, dblcl_ask: false }]);
           break;
 
         case 'first-launch':
