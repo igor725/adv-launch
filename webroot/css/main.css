@@ -14,9 +14,6 @@
 #maindata .sidebar {
   display: flex;
   flex-direction: column;
-  min-width: 28.31vw;
-  max-width: 28.31vw;
-  flex-grow: 1;
   background-color: #0000004c;
   transition: opacity 0.15s;
   opacity: 0.05;

@@ -101,6 +101,9 @@
     if (selectedGame != null) {
       window.gamelistAPI.getSelectedGame().classList.remove('selected');
     }
+    const gstatus = gbadge.$('.gbi-status');
+    if (gstatus) gamelist.style.setProperty('--selection-color', gstatus.style.color);
+    else gamelist.style.setProperty('--selection-color', null);
     gbadge.classList.add('selected');
     selectedGame = gbadge.dataset.gid;
   }, true);
@@ -128,6 +131,10 @@
       if (!isGameBadge(elem)) return;
       elem.style.display = filter === '' ? null : (getGameTitleIdFromBadge(elem).toLowerCase().indexOf(filter) === -1 && getGameTitleFromBadge(elem).toLowerCase().indexOf(filter) === -1) ? 'none' : null;
     }
+  });
+
+  window.electronAPI.addEventListener('set-glcols', (value) => {
+    gamelist.style.minWidth = gamelist.style.maxWidth = `${16 + (value * 138)}px`;
   });
 
   window.electronAPI.addEventListener('set-gstatus', (msg) => {

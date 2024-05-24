@@ -6,6 +6,17 @@
   height: 25px;
 }
 
+#titlebar.fullscreen {
+  transition: height 150ms ease;
+  height: 2px;
+  opacity: 0;
+}
+
+#titlebar.fullscreen:hover {
+  opacity: 1;
+  height: 25px;
+}
+
 #titlebar .draggable {
   -webkit-app-region: drag;
   height: 25px;

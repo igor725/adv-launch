@@ -488,6 +488,12 @@ const main = (userdir = __dirname) => {
 
   win.once('ready-to-show', () => win.show());
 
+  let currcols = 2;
+  win.on('resize', (ev) => {
+    const newcols = Math.floor(win.getSize()[0] / 500);
+    if (newcols != currcols) win.send('set-glcols', currcols = newcols);
+  });
+
   win.webContents.once('did-finish-load', () => {
     updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
     compatWorker = new Worker(path.join(__dirname, '/services/gametags.js'));
