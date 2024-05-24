@@ -240,7 +240,7 @@ const commandHandler = (channel, cmd, info) => {
         if (config.getValue('dblcl_ask')) {
           win.send('warnmsg', {
             hidden: false, type: 'text', id: 'dbl-warn',
-            text: '{$tr:main.actions.dblrun}', buttons: ['{$tr:buttons.no}', '{$tr:buttons.ye}']
+            text: '{$tr:main.actions.dblrun}', buttons: ['{$tr:buttons.ye}', '{$tr:buttons.no}']
           });
         }
         return;
