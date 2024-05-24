@@ -161,6 +161,11 @@
 
   const gids = {};
 
+  window.electronAPI.addEventListener('clear-glist', () => {
+    gamelist.innerHTML = '';
+    Object.keys(gids).forEach(key => delete gids[key]);
+  });
+
   window.electronAPI.addEventListener('add-game', (msg) => {
     if (msg.ispatch) {
       const gamebadge = gamelist.$(`.gamebadge[data-gid="${msg.id}"]`);

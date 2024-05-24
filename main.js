@@ -34,8 +34,9 @@ const terminalListener = (msg) => {
 const scanGameDir = (scanpath, depth) => {
   const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
   dirworker.on('message', (msg) => {
-    if (win.isDestroyed()) return;
-    if (compatWorker && !msg.ispatch) compatWorker.postMessage({ act: 'request_status', gid: msg.id });
+    if (win.isDestroyed()) return dirworker.terminate();
+    if (compatWorker && !msg.ispatch)
+      compatWorker.postMessage({ act: 'request_status', gid: msg.id });
     win.send('add-game', msg);
   });
   dirworker.on('exit', () => dirworker.unref());
@@ -135,6 +136,7 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'getgames':
       for (const [path, depth] of config.getScanDirectories()) {
+        if (typeof depth !== 'number') continue;
         scanGameDir(path, depth);
       }
       break;
@@ -580,7 +582,7 @@ const main = (userdir = __dirname) => {
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
-  let updaterchanged = false, shouldreload = false, reqrestart = false;
+  let updaterchanged = false, shouldreload = false, reqrestart = false, gdirchanged = false;
 
   config.addCallback('emu.general', (key, value) => {
     switch (key) {
@@ -602,7 +604,7 @@ const main = (userdir = __dirname) => {
   config.addCallback('launcher', (key, value) => {
     switch (key) {
       case 'scan_dirs':
-        commandHandler('command', 'getgames');
+        gdirchanged = true;
         return;
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
@@ -656,6 +658,12 @@ const main = (userdir = __dirname) => {
 
     if (reqrestart) {
       genericWarnMsg('{$tr:main.actions.reqrst}');
+    }
+
+    if (gdirchanged) {
+      win.send('clear-glist');
+      commandHandler('command', 'getgames');
+      gdirchanged = false;
     }
 
     config.save();
