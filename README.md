@@ -26,6 +26,27 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 + Gamepad control support
 + Custom themes
 
+## System requirements
+
+> [!WARNING]
+> Please keep in mind that these requirements for the Launcher only!
+> You're supposed to add up the Launcher RAM+VRAM requirements
+> to the emulator ones to get the actual recommended values.
+
+Recommended:
+* OS: >= Windows 10
+* CPU: 1.4GHz, SSE3 capable
+* GPU: 512MB VRAM, DirectX 11 capable
+* RAM: 1.2GB
+
+> [!NOTE]
+> RAM requirement depends on the size of your game library!
+> The recommended RAM size above assumes that you have
+> at least ~500 PS4 titles in your possesion.
+> The Launcher keeps in memory all the icons for your games
+> and trophy information (if available) for currently
+> selected game.
+
 ## How can I download it?
 
 Glad you asked! Just hit the [Actions](<https://github.com/igor725/adv-launch/actions?query=branch%3Amain>) button and download the latest available build.
