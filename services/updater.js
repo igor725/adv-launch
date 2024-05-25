@@ -198,11 +198,11 @@ const download = async (url, version, headers = undefined) => {
       });
 
       resp.on('end', () => {
-        tempfile.on('close', () => resolve({ fpath, version }));
+        tempfile.on('finish', () => resolve({ fpath, version }));
         tempfile.end();
       });
     }).on('error', (err) => {
-      tempfile.on('close', () => {
+      tempfile.on('finish', () => {
         fs.unlinkSync(fpath);
         reject(err);
       })
