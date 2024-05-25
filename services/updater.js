@@ -198,15 +198,15 @@ const download = async (url, version, headers = undefined) => {
       });
 
       resp.on('end', () => {
-        tempfile.end(() => {
-          resolve({ fpath, version });
-        });
+        tempfile.on('close', () => resolve({ fpath, version }));
+        tempfile.end();
       });
     }).on('error', (err) => {
-      tempfile.end(() => {
+      tempfile.on('close', () => {
         fs.unlinkSync(fpath);
         reject(err);
-      });
+      })
+      tempfile.end();
     });
   });
 };
