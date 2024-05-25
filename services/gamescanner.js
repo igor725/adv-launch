@@ -91,7 +91,7 @@ const walker = (wpath, ents, depth, maxdepth) => {
           } catch (e) { }
 
           try {
-            troph = fs.lstatSync(path.join(syspath, '/trophy/trophy00.trp')).isFile();
+            troph = fs.readdirSync(path.join(syspath, '/trophy/')).filter(fn => fn.endsWith('.trp')).length > 0;
           } catch (e) {
             troph = false;
           }

@@ -26,6 +26,27 @@ This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay
 + Gamepad control support
 + Custom themes
 
+## System requirements
+
+> [!WARNING]
+> Please keep in mind that these requirements for the Launcher only!
+> You're supposed to add up the Launcher RAM+VRAM requirements
+> to the emulator ones to get the actual recommended values.
+
+Recommended:
+* OS: >= Windows 10
+* CPU: 1.4GHz, SSE3 capable
+* GPU: 512MB VRAM, DirectX 11 capable
+* RAM: 1.2GB
+
+> [!NOTE]
+> RAM requirement depends on the size of your game library!
+> The recommended RAM size above assumes that you have
+> at least ~500 PS4 titles in your possesion.
+> The Launcher keeps in memory all the icons for your games
+> and trophy information (if available) for currently
+> selected game.
+
 ## How can I download it?
 
 Glad you asked! Just hit the [Actions](<https://github.com/igor725/adv-launch/actions?query=branch%3Amain>) button and download the latest available build.
@@ -41,7 +62,7 @@ This launcher supports multiple languages. The language of displaying text depen
 
 ### What should I do to add support for my language?
 
-Well, first of all you should go to `webroot/langs/`, clone `en.json` and rename it to your short language code. Now you can update the file contents and translate these strings to your language. When translation is done, open `js/lang.js` and look for `avail_langs` array, find the line with corresponding to your language name comment and change the `null` value to the actual short language code. Now you can test your changes and open some [PR](<https://github.com/igor725/adv-launch/pulls>) if everything's ok :)
+Well, first of all you should go to `webroot/langs/`, clone `en.json` and rename it to your short language code. Now you can update the file contents and translate these strings to your language. When translation is done, open `webroot/js/lang.js` and look for `avail_langs` array, find the line with corresponding to your language name comment and change the `null` value to the actual short language code. Now you can test your changes and open some [PR](<https://github.com/igor725/adv-launch/pulls>) if everything's ok :)
 
 ### I don't see my language name in avail_langs comments, what should I do?
 
@@ -49,4 +70,4 @@ Sadly, nothing. This is impossible to add new language since we stick to [PS4 su
 
 ## LICENSE
 
-The launcher released under MIT license, but some its parts are licensed under other licenses, see `bin/*-license.txt` for more info.
+The launcher released under MIT license, but some its parts are licensed under other licenses, see `webroot/3rd_license/*-license.txt` for more info.

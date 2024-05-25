@@ -1,5 +1,7 @@
 window._onLangReady = (() => {
   const wrapper = $('#wrapper');
+  const gsd = $('#gsd');
+
   let saved_cfg = null;
   let modified_cfg = [{
     general: {},
@@ -110,10 +112,11 @@ window._onLangReady = (() => {
     const opts = [];
 
     for (const [path, depth] of Object.entries(dirs)) {
+      if (typeof depth !== 'number') continue;
       opts.push(`<option data-folder="${path}">${path} | depth: ${depth}</option>`);
     }
 
-    $('#gsd').innerHTML = opts.join('');
+    gsd.innerHTML = opts.join('');
   };
 
   const aliases = {
@@ -355,13 +358,22 @@ window._onLangReady = (() => {
       modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
     }
 
-    delete modified_cfg[1].scan_dirs[path];
+    /**
+     * If we want _isSimilar to return valid result then this object
+     * should not change its size and loose keys, so delete is not an
+     * option there. Making object's value undefined has no side effects
+     * as it seems. JSON will not save undefined keys, but it's still there
+     * for _isSimilar.
+    */
+    modified_cfg[1].scan_dirs[path] = undefined;
     refillScanDirs(modified_cfg);
   });
 
-  $('#gsd').on('change', ({ target }) => {
+  gsd.on('change', ({ target }) => {
     $('#gsd-path').value = target.options[target.selectedIndex].dataset.folder;
   });
+
+  gsd.on('blur', () => gsd.selectedIndex = -1);
 
   {
     const svbtn = $('#buttons button[data-action="save"]');

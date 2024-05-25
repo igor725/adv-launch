@@ -9,6 +9,8 @@ module.exports.Config = class Config {
     update_freq: 'weekly',
     inpadcolor: '#3B3E95',
     first_launch: true,
+    dblcl_run: false,
+    dblcl_ask: true,
     github_token: '',
     bg_volume: 30,
     scan_dirs: {}

@@ -8,7 +8,7 @@ const { Config } = require('./libs/settings.js');
 const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
 
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
-const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
+const SCE_TROPHY_PATH = '/sce_sys/trophy/';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
 const PORTABLE_PATH = path.join(__dirname, '/portable');
@@ -20,6 +20,7 @@ let gipath = undefined;
 let settwin = undefined;
 let gameproc = undefined;
 let updateWorker = undefined;
+let compatWorker = undefined;
 let binname = 'psoff.exe';
 
 const converter = new Convert({
@@ -33,7 +34,9 @@ const terminalListener = (msg) => {
 const scanGameDir = (scanpath, depth) => {
   const dirworker = new Worker(path.join(__dirname, '/services/gamescanner.js'));
   dirworker.on('message', (msg) => {
-    if (win.isDestroyed()) return;
+    if (win.isDestroyed()) return dirworker.terminate();
+    if (compatWorker && !msg.ispatch)
+      compatWorker.postMessage({ act: 'request_status', gid: msg.id });
     win.send('add-game', msg);
   });
   dirworker.on('exit', () => dirworker.unref());
@@ -133,10 +136,12 @@ const commandHandler = (channel, cmd, info) => {
       break;
     case 'getgames':
       for (const [path, depth] of config.getScanDirectories()) {
+        if (typeof depth !== 'number') continue;
         scanGameDir(path, depth);
       }
       break;
     case 'getgamesum':
+      compatWorker.postMessage({ act: 'request', gid: info.gid });
       win.send('gamesum', getGameSummary(info));
 
       if (player != null) {
@@ -225,10 +230,24 @@ const commandHandler = (channel, cmd, info) => {
     case 'openfolder':
       spawn('explorer', [info]);
       break;
+    case 'openissue':
+      if (info > 0)
+        exec(`start https://github.com/SysRay/psOff_compatibility/issues/${info}`);
+      break;
     case 'applypatch':
       updateGameSummary(info.gid, { patch: info.patch });
       break;
     case 'rungame':
+      if (info.dblclick && !config.getValue('dblcl_run')) {
+        if (config.getValue('dblcl_ask')) {
+          win.send('warnmsg', {
+            hidden: false, type: 'text', id: 'dbl-warn',
+            text: '{$tr:main.actions.dblrun}', buttons: ['{$tr:buttons.ye}', '{$tr:buttons.no}']
+          });
+        }
+        return;
+      }
+
       if (gameproc != null) {
         genericWarnMsg('{$tr:main.actions.alrun}', true);
         return;
@@ -310,6 +329,11 @@ const commandHandler = (channel, cmd, info) => {
           }
           break;
 
+        case 'dbl-warn':
+          win.send('warnmsg', { hidden: true, id: 'dbl-warn' });
+          config.updateMultipleKeys([{}, { dblcl_run: info.resp === 0, dblcl_ask: false }]);
+          break;
+
         case 'first-launch':
           config.markLaunch();
           win.send('warnmsg', { hidden: true, id: 'first-launch' });
@@ -374,19 +398,57 @@ const main = (userdir = __dirname) => {
     return filePaths[0];
   });
 
-  ipcMain.handle('opentrp', async (event, paths) => {
-    let tropxml = null;
-    try {
-      tropxml = new Trophies(path.join(paths[0], SCE_TROPHY_PATH), -1);
-    } catch (err) {
-      if (paths[1]) tropxml = new Trophies(path.join(paths[1], SCE_TROPHY_PATH), -1);
-      else throw err;
-    }
+  const npcache = {};
+  const npcachepath = path.join(userdir, '/npcache.json');
+
+  try {
+    Object.assign(npcache, JSON.parse(fs.readFileSync(npcachepath)));
+  } catch (e) {
+    console.error('Failed to load NPCOMMID cache:', e.toString());
+  }
+
+  const trpReader = (trpath) => {
+    const tropxml = new Trophies(trpath, npcache[trpath] ?? -1);
     let tfile = tropxml.findFile(`trop_${String(config.getSysLang()).padStart(2, '0')}.esfm`);
     if (tfile === null && (tfile = tropxml.findFile('trop.esfm')) == null) return null;
     const data = new TrophyDataReader(tfile);
+    if (!npcache[trpath]) {
+      npcache[trpath] = tropxml.getNetCommID();
+      try {
+        fs.writeFileSync(npcachepath, JSON.stringify(npcache));
+      } catch (e) {
+        console.error('Failed to save NPCOMMID cache:', e.toString());
+      }
+    }
     data.addImages(tropxml);
     return data.array;
+  };
+
+  ipcMain.handle('opentrp', (event, paths) => {
+    const files = {};
+
+    for (let i = paths.length - 1; i >= 0; --i) {
+      try {
+        const apath = path.join(paths[i], SCE_TROPHY_PATH);
+        fs.readdirSync(apath).forEach((name) => files[name] = path.join(apath, name));
+      } catch (e) {
+        console.error('Failed to readdir: ', e.toString());
+      }
+    }
+
+    const values = Object.values(files);
+
+    if (values.length > 1) {
+      const id = `partial-trophy-${Date.now()}`;
+
+      ipcMain.once(`${id}-ready`, () => {
+        values.forEach((trpath, idx) => win.send(id, { trophies: trpReader(trpath), index: idx }));
+      });
+
+      return { multiple: true, count: values.length, id };
+    }
+
+    return trpReader(values[0]);
   });
 
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {
@@ -394,9 +456,37 @@ const main = (userdir = __dirname) => {
 
     const popupdata = [
       {
-        click: () => commandHandler('command', 'openfolder', data.path),
         type: 'normal',
-        label: 'Open game folder'
+        enabled: false,
+        label: data.gtitle
+      },
+      {
+        type: 'normal',
+        label: 'Open game folder',
+        click: () => commandHandler('command', 'openfolder', data.gpath)
+      },
+      {
+        type: 'normal',
+        label: 'Create desktop shortcut',
+        click: () => {
+          const scrpath = path.join(process.env.TEMP, '/psoff_link.vbs');
+          const arguments = [
+            `--file=""${data.gpath}\\eboot.bin""`
+          ];
+          if (currpatch) arguments.push(`--update=""${currpatch}""`);
+          fs.writeFileSync(scrpath, `
+            Set oWS = WScript.CreateObject("WScript.Shell")
+            strDesktop = oWS.SpecialFolders("Desktop")
+            Set oLink = oWS.CreateShortcut(strDesktop + "\\${data.gtitle.replace(/[/\\?%*:|"<>]/g, ' ')}.lnk")
+            oLink.TargetPath = "${config.getValue('emu_path')}\\${binname}"
+            oLink.WorkingDirectory = "${config.getValue('emu_path')}"
+            ' oLink.IconLocation = "${data.gpath}\\sce_sys\\icon0.png"
+            oLink.Arguments = "${arguments.join(' ')}"
+            oLink.Save
+          `);
+          const cp = exec(`cscript "${scrpath}"`);
+          cp.on('close', () => fs.unlinkSync(scrpath));
+        }
       },
       {
         type: 'submenu',
@@ -413,7 +503,7 @@ const main = (userdir = __dirname) => {
     ];
 
     for (const patch of data.patches) {
-      popupdata[1].submenu.push({
+      popupdata[3].submenu.push({
         click: () => commandHandler('command', 'applypatch', { gid: data.gid, patch: patch.path }),
         type: 'radio',
         label: patch.version,
@@ -453,8 +543,15 @@ const main = (userdir = __dirname) => {
 
   win.once('ready-to-show', () => win.show());
 
+  let currcols = 2;
+  win.on('resize', (ev) => {
+    const newcols = Math.floor(win.getSize()[0] / 500);
+    if (newcols != currcols) win.send('set-glcols', currcols = newcols);
+  });
+
   win.webContents.once('did-finish-load', () => {
     updateWorker = new Worker(path.join(__dirname, '/services/updater.js'));
+    compatWorker = new Worker(path.join(__dirname, '/services/gametags.js'));
 
     updateWorker.on('message', (msg) => {
       if (win.isDestroyed()) return;
@@ -489,9 +586,21 @@ const main = (userdir = __dirname) => {
       }
     });
 
+    compatWorker.on('message', (msg) => {
+      switch (msg.resp) {
+        case 'gametags':
+          win.send('set-gtags', msg);
+          break;
+        case 'gamestatus':
+          win.send('set-gstatus', msg);
+          break;
+      }
+    });
+
     {
       let token;
       if (token = config.getValue('github_token')) updateWorker.postMessage({ act: 'set-token', token: token });
+      compatWorker.postMessage({ act: 'init', udir: userdir, token: token ?? undefined });
     }
 
     try {
@@ -511,7 +620,7 @@ const main = (userdir = __dirname) => {
     updateWorker.postMessage({ act: 'run-check', force: false });
   });
 
-  let updaterchanged = false, shouldreload = false, reqrestart = false;
+  let updaterchanged = false, shouldreload = false, reqrestart = false, gdirchanged = false;
 
   config.addCallback('emu.general', (key, value) => {
     switch (key) {
@@ -533,7 +642,7 @@ const main = (userdir = __dirname) => {
   config.addCallback('launcher', (key, value) => {
     switch (key) {
       case 'scan_dirs':
-        commandHandler('command', 'getgames');
+        gdirchanged = true;
         return;
       case 'github_token':
         updateWorker.postMessage({ act: 'set-token', token: value });
@@ -587,6 +696,12 @@ const main = (userdir = __dirname) => {
 
     if (reqrestart) {
       genericWarnMsg('{$tr:main.actions.reqrst}');
+    }
+
+    if (gdirchanged) {
+      win.send('clear-glist');
+      commandHandler('command', 'getgames');
+      gdirchanged = false;
     }
 
     config.save();

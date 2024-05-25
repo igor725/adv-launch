@@ -107,6 +107,7 @@ class TrophyFile {
 };
 
 module.exports.TrophyDataReader = class TrophyDataReader {
+  #gname = null;
   #trops = [];
 
   constructor(tf) {
@@ -182,6 +183,10 @@ module.exports.Trophies = class Trophies {
 
     this.entries_num = buf.readUint32BE(16);
     if (buf.readUint32BE(20) !== Trophies.#entry_size) throw new Error('Invalid entry size');
+  }
+
+  getNetCommID() {
+    return this.#tsc.getNetCommID();
   }
 
   resetNetCommID() {

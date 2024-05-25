@@ -23,6 +23,7 @@
           "monthly": "Monthly"
         }
       },
+      "doubleclick": "Doubleclick will run the game",
       "gsd": {
         "label": "Game scan directories:",
         "buttons": {
@@ -72,7 +73,8 @@
       "alrun": "You should close your previous game first!",
       "nogame": "You should select the game first!",
       "gerror": "psOff process returned the error: {error}",
-      "reqrst": "One or more changed settings requires restart!"
+      "reqrst": "One or more changed settings requires restart!",
+      "dblrun": "Do you want the launcher to run the game on doubleclick?"
     },
     "gamesummary": {
       "lastrun": "Last run:",
@@ -117,7 +119,8 @@
     "abtn": "The names of these two buttons speak for themselves.\nYou should press those only if you already selected the game from the games list.",
     "trophybtn": "This is a trophies list button.\nIf you press it, the trophies popup will appear.",
     "trophytrk": "If you don't have Trophy ERK installed, then the trophies list will be empty since we can't decrypt it.\nYou should dump said key from your PS4.",
-    "trophylst": "This is how the trophies list looks when the trophy key is installed.\nLet's move to Settings window now.",
+    "trophylst": "This is how the trophies list looks when the trophy key is installed.",
+    "console": "This is the terminal window.\nThis thing will appear immediately\nafter you run the game.\nIts content could be useful\nfor the game reports.\nYou can copy the whole thing\nby doubleclicking [RMB].\nLet's move to Settings window now.",
     "bgmvol": "The Settings window consists of two sub-categories: Launcher settings and Emulator settings.\nLet's start with the Launcher settings first.\nThis one configures the volume of background music playback. Said music will play only if the game has one.",
     "ghtoken": "This setting is optional and used for Nightly updates only. If you want to receive releases only, then you can safely ignore it.",
     "emupath": "Here you can specify the path to your emulator directory.\nIf you don't have emulator already installed then just leave this setting intact.\nThe \"...\" button will open the folder selection dialog.",

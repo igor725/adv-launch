@@ -8,15 +8,12 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  flex-grow: 1;
 }
 
 #maindata .sidebar {
   display: flex;
   flex-direction: column;
-  min-width: 28.31vw;
-  max-width: 28.31vw;
-  height: 100vh;
-  flex-grow: 1;
   background-color: #0000004c;
   transition: opacity 0.15s;
   opacity: 0.05;
@@ -30,10 +27,11 @@
   position: absolute;
   background-repeat: no-repeat;
   background-size: contain;
+  background-image: url(../img/nobg.png);
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: background 0.23s linear;
+  transition: background 500ms linear;
 }
 
 .button {
@@ -50,5 +48,7 @@
 .infowrapper {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   flex-grow: 1;
+  gap: 10px;
 }

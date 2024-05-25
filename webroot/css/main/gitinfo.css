@@ -1,0 +1,42 @@
+.gitwrapper {
+  display: flex;
+  overflow: hidden;
+  min-height: 50px;
+  justify-content: safe center;
+  align-items: safe center;
+  transform: translateY(0);
+  transition: transform 150ms ease;
+}
+
+#gitinfo {
+  display: flex;
+  background-color: #0000007e;
+  cursor: pointer;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 4px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 4px;
+  margin: 10px;
+  height: 40px;
+  width: fit-content;
+}
+
+.gitwrapper:has(#gitinfo:empty) {
+  transform: translateY(-60px);
+  min-height: 0;
+  min-width: 0;
+  max-height: 0;
+}
+
+.gitbadge {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 4px;
+  color: black;
+  white-space: nowrap;
+}

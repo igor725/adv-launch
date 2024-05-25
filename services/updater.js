@@ -4,11 +4,11 @@ const https = require('follow-redirects').https;
 const path = require('node:path');
 const { parentPort } = require('node:worker_threads');
 
-let update_channel = null;
-let atoken = null;
-let emupath = null;
-let verfile = null;
-let freq = null;
+let update_channel = undefined;
+let atoken = undefined;
+let emupath = undefined;
+let verfile = undefined;
+let freq = undefined;
 
 const newverinfo = {
   url: '',
@@ -41,12 +41,12 @@ const searchBinary = () => {
 
 const addDefaultHeaders = (headers) => {
   const defheaders = { 'User-Agent': 'ADVL psOff/1.0' };
-  if (atoken !== null) defheaders.Authorization = `Bearer ${atoken}`;
+  if (atoken) defheaders.Authorization = `Bearer ${atoken}`;
   return Object.assign(defheaders, headers);
 };
 
 const sendExecutable = (binpath, currver) => {
-  if (binpath === null) {
+  if (!binpath) {
     parentPort.postMessage({ resp: 'nobinary', latest: newverinfo.tag });
     return;
   } else if (newverinfo.tag !== '') {
@@ -64,7 +64,7 @@ const loadJSON = (url, headers = undefined) =>
       let data = '';
 
       if (resp.headers['content-type'].indexOf('application/json') == -1) {
-        resp.destroy('Not a josn response');
+        resp.destroy('Not a json response');
         return;
       }
 
@@ -86,11 +86,11 @@ const triggerCheck = async (force) => {
   let currver = 'v.0.0';
   newverinfo.url = newverinfo.tag = '';
 
-  if (binpath !== null) {
+  if (binpath) {
     try {
       const vinfo = JSON.parse(fs.readFileSync(verfile));
 
-      if (force == false && freq !== null) {
+      if (force == false && freq) {
         let next = 0;
 
         switch (freq) {
@@ -138,7 +138,7 @@ const triggerCheck = async (force) => {
         }
       } break;
       case 'nightly': {
-        if (atoken === null) {
+        if (!atoken) {
           parentPort.postMessage({ resp: 'notoken', executable: path.basename(binpath) });
           return;
         }
@@ -198,15 +198,19 @@ const download = async (url, version, headers = undefined) => {
       });
 
       resp.on('end', () => {
-        tempfile.end(() => {
-          resolve({ fpath, version });
+        tempfile.on('finish', () => {
+          tempfile.close(() => resolve({ fpath, version }));
         });
+        tempfile.end();
       });
     }).on('error', (err) => {
-      tempfile.end(() => {
-        fs.unlinkSync(fpath);
-        reject(err);
-      });
+      tempfile.on('finish', () => {
+        tempfile.close(() => {
+          fs.unlinkSync(fpath);
+          reject(err);
+        });
+      })
+      tempfile.end();
     });
   });
 };
@@ -244,11 +248,29 @@ const commandHandler = async (msg) => {
       case 'download':
         validateEmulatorPath();
         await download(newverinfo.url, newverinfo.tag).then(({ fpath, version }) => {
-          execSync('del *.dll *.exe', { cwd: emupath });
-          execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
-          parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-          updateVersionFile(version);
-          fs.unlinkSync(fpath);
+          let attempt = 0;
+          let int;
+
+          int = setInterval(() => {
+            ++attempt;
+            try {
+              execSync('del *.dll *.exe', { cwd: emupath });
+              execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
+              parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
+            } catch (e) {
+              if (attempt > 9) {
+                clearInterval(int);
+                parentPort.postMessage({ resp: 'error', text: e.toString() });
+              }
+              console.log('Attempt', attempt, 'failed: ', e.toString());
+              return;
+            }
+
+            updateVersionFile(version);
+            fs.unlinkSync(fpath);
+            clearInterval(int);
+          }, 700);
+
         });
         break;
 

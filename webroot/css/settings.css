@@ -53,10 +53,6 @@ select {
   border-bottom: 1px solid #303030;
 }
 
-#gsd {
-  width: 100%;
-}
-
 #wait-spinner {
   display: flex;
   align-items: center;

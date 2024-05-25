@@ -14,8 +14,10 @@
     { action: 'hint', clip: { sx: 58.58, ex: 69.06, sy: 93.10, ey: 100 }, text: 'trophybtn', teycx: true, tx: 63.86, ty: 93.10 },
     { action: 'bgimg', image: 'screen2_a' },
     { action: 'hint', clip: { sx: 44.03, ex: 82.74, sy: 37.07, ey: 92.07 }, text: 'trophytrk', teycx: true, tx: 63.86, ty: 37.07 },
-    { action: 'bgimg', image: 'screen2_c' },
+    { action: 'bgimg', image: 'screen2_b' },
     { action: 'hint', clip: { sx: 44.42, ex: 83.12, sy: 37.06, ey: 92.07 }, text: 'trophylst', teycx: true, tx: 63.86, ty: 37.07 },
+    { action: 'bgimg', image: 'screen2_c' },
+    { action: 'hint', clip: { sx: 29.29, ex: 98.93, sy: 6.03, ey: 89.48 }, text: 'console', teycy: true, tx: 0.53, ty: 47.76 },
     { action: 'bgimg', image: 'screen3' },
     { action: 'hint', clip: { sx: 31.23, ex: 67.21, sy: 23.27, ey: 26.72 }, text: 'bgmvol', tcx: true, tx: 50 },
     { action: 'hint', clip: { sx: 31.23, ex: 67.21, sy: 27.75, ey: 31.20 }, text: 'ghtoken', tcx: true, tx: 50 },
@@ -88,6 +90,7 @@
         if (step.tc) text.style.transform = 'translate(-50%, -50%)';
         else if (step.tcx) text.style.transform = 'translateX(-50%)';
         else if (step.tey) text.style.transform = 'translateY(-100%)';
+        else if (step.teycy) text.style.transform = 'translateY(-50%)';
         else if (step.teycx) text.style.transform = 'translate(-50%, -100%)';
         else text.style.transform = null;
 

@@ -10,6 +10,9 @@
   const getGamePathFromBadge = (target) => target.dataset.gpath;
   const getGameVersionFromBadge = (target) => target.dataset.gver;
 
+  const statusColors = ['#e74c3c', '#e08a1e', '#f9b32f', '#1ebc61'];
+  const statusTitle = ['Nothing', 'Intro', 'Ingame', 'Playable'];
+
   const formatTime = (ms) => {
     const seconds = Math.floor(Math.abs(ms / 1000));
 
@@ -78,6 +81,7 @@
       gid: getGameTitleIdFromBadge(gbadge),
       gpath: getGamePathFromBadge(gbadge),
       gver: getGameVersionFromBadge(gbadge),
+      gtitle: getGameTitleFromBadge(gbadge),
       patches: []
     };
 
@@ -97,9 +101,21 @@
     if (selectedGame != null) {
       window.gamelistAPI.getSelectedGame().classList.remove('selected');
     }
+    const gstatus = gbadge.$('.gbi-status');
+    if (gstatus) gamelist.style.setProperty('--selection-color', gstatus.style.color);
+    else gamelist.style.setProperty('--selection-color', null);
     gbadge.classList.add('selected');
     selectedGame = gbadge.dataset.gid;
   }, true);
+
+  gamelist.on('dblclick', ({ target: gbadge }) => {
+    if (!isGameBadge(gbadge)) return;
+    window.electronAPI.sendCommand('rungame', {
+      path: getGamePathFromBadge(gbadge),
+      gid: getGameTitleFromBadge(gbadge),
+      dblclick: true
+    });
+  });
 
   gamelist.on('mouseover', ({ target: gbadge }) => {
     if (!isGameBadge(gbadge)) return;
@@ -126,7 +142,29 @@
     }
   });
 
-  const paths = {};
+  window.electronAPI.addEventListener('set-glcols', (value) => {
+    gamelist.style.minWidth = gamelist.style.maxWidth = `${16 + (value * 138)}px`;
+  });
+
+  window.electronAPI.addEventListener('set-gstatus', (msg) => {
+    if (msg.status < 0) return;
+
+    const gamebadge = gamelist.$(`.gamebadge[data-gid="${msg.gid}"]`);
+    if (gamebadge !== null && gamebadge.$('.gbi-status') === null) {
+      const node = document.createElement('div');
+      node.classList = 'gbi-status fa-solid fa-circle';
+      node.title = statusTitle[msg.status];
+      node.style.color = statusColors[msg.status];
+      gamebadge.$('.gb-info').appendChild(node);
+    }
+  });
+
+  const gids = {};
+
+  window.electronAPI.addEventListener('clear-glist', () => {
+    gamelist.innerHTML = '';
+    Object.keys(gids).forEach(key => delete gids[key]);
+  });
 
   window.electronAPI.addEventListener('add-game', (msg) => {
     if (msg.ispatch) {
@@ -145,8 +183,8 @@
       return;
     }
 
-    if (paths[msg.path]) return;
-    paths[msg.path] = true;
+    if (gids[msg.id]) return;
+    gids[msg.id] = true;
 
     const rootel = document.createElement('div');
     rootel.classList = 'gamebadge';
@@ -185,9 +223,10 @@
 
   window.electronAPI.addEventListener('set-bg-image', (image) => {
     if (image == null) {
-      bgimage.style.backgroundImage = '';
+      bgimage.style.backgroundImage = null;
       return;
     }
+
     bgimage.style.backgroundImage = `url(data:image/png;base64,${image})`;
   });
 

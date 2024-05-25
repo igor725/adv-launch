@@ -14,9 +14,13 @@
   gap: 10px;
   padding-top: 10px;
   padding-left: 10px;
-  padding-bottom: 35px;
+  padding-bottom: 10px;
+  min-width: 292px;
+  max-width: 292px;
   overflow-x: hidden;
   overflow-y: scroll;
+
+  --selection-color: blue;
 }
 
 .gamebadge {
@@ -30,7 +34,7 @@
 }
 
 .gamebadge.selected {
-  border: 4px blue solid;
+  border: 4px var(--selection-color) solid;
 }
 
 .gamebadge .gb-info {
@@ -47,16 +51,33 @@
 }
 
 .gamebadge .gb-info .gbi-name {
+  display: -webkit-box;
   position: absolute;
   bottom: 0;
   background-color: #0000004c;
   width: 100%;
+  max-height: 3em;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  padding-left: 4px;
+  word-wrap: break-word;
+  overflow: hidden;
 }
 
 .gamebadge .gb-info .gbi-trophy {
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: black;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 4px;
+  top: 4px;
+}
+
+.gamebadge .gb-info .gbi-status {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  position: absolute;
+  font-size: small;
+  pointer-events: all;
+  left: 4px;
+  top: 4px;
 }
