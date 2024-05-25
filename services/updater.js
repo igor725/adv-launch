@@ -244,11 +244,27 @@ const commandHandler = async (msg) => {
       case 'download':
         validateEmulatorPath();
         await download(newverinfo.url, newverinfo.tag).then(({ fpath, version }) => {
-          execSync('del *.dll *.exe', { cwd: emupath });
-          execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
-          parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-          updateVersionFile(version);
-          fs.unlinkSync(fpath);
+          let attempt = 0;
+          let int;
+
+          int = setInterval(() => {
+            ++attempt;
+            try {
+              execSync('del *.dll *.exe', { cwd: emupath });
+              execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
+              parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
+              updateVersionFile(version);
+              fs.unlinkSync(fpath);
+              clearInterval(int);
+            } catch (e) {
+              if (attempt > 9) {
+                clearInterval(int);
+                throw e;
+              }
+              console.log('Attempt', attempt, 'failed: ', e.toString());
+            }
+          }, 700);
+
         });
         break;
 
