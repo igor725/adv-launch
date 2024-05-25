@@ -223,9 +223,10 @@
 
   window.electronAPI.addEventListener('set-bg-image', (image) => {
     if (image == null) {
-      bgimage.style.backgroundImage = '';
+      bgimage.style.backgroundImage = null;
       return;
     }
+
     bgimage.style.backgroundImage = `url(data:image/png;base64,${image})`;
   });
 

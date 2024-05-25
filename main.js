@@ -8,7 +8,7 @@ const { Config } = require('./libs/settings.js');
 const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
 
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
-const SCE_TROPHY_PATH = '/sce_sys/trophy/trophy00.trp';
+const SCE_TROPHY_PATH = '/sce_sys/trophy/';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
 const PORTABLE_PATH = path.join(__dirname, '/portable');
@@ -398,19 +398,57 @@ const main = (userdir = __dirname) => {
     return filePaths[0];
   });
 
-  ipcMain.handle('opentrp', (event, paths) => {
-    let tropxml = null;
-    try {
-      tropxml = new Trophies(path.join(paths[0], SCE_TROPHY_PATH), -1);
-    } catch (err) {
-      if (paths[1]) tropxml = new Trophies(path.join(paths[1], SCE_TROPHY_PATH), -1);
-      else throw err;
-    }
+  const npcache = {};
+  const npcachepath = path.join(userdir, '/npcache.json');
+
+  try {
+    Object.assign(npcache, JSON.parse(fs.readFileSync(npcachepath)));
+  } catch (e) {
+    console.error('Failed to load NPCOMMID cache:', e.toString());
+  }
+
+  const trpReader = (trpath) => {
+    const tropxml = new Trophies(trpath, npcache[trpath] ?? -1);
     let tfile = tropxml.findFile(`trop_${String(config.getSysLang()).padStart(2, '0')}.esfm`);
     if (tfile === null && (tfile = tropxml.findFile('trop.esfm')) == null) return null;
     const data = new TrophyDataReader(tfile);
+    if (!npcache[trpath]) {
+      npcache[trpath] = tropxml.getNetCommID();
+      try {
+        fs.writeFileSync(npcachepath, JSON.stringify(npcache));
+      } catch (e) {
+        console.error('Failed to save NPCOMMID cache:', e.toString());
+      }
+    }
     data.addImages(tropxml);
     return data.array;
+  };
+
+  ipcMain.handle('opentrp', (event, paths) => {
+    const files = {};
+
+    for (let i = paths.length - 1; i >= 0; --i) {
+      try {
+        const apath = path.join(paths[i], SCE_TROPHY_PATH);
+        fs.readdirSync(apath).forEach((name) => files[name] = path.join(apath, name));
+      } catch (e) {
+        console.error('Failed to readdir: ', e.toString());
+      }
+    }
+
+    const values = Object.values(files);
+
+    if (values.length > 1) {
+      const id = `partial-trophy-${Date.now()}`;
+
+      ipcMain.once(`${id}-ready`, () => {
+        values.forEach((trpath, idx) => win.send(id, { trophies: trpReader(trpath), index: idx }));
+      });
+
+      return { multiple: true, count: values.length, id };
+    }
+
+    return trpReader(values[0]);
   });
 
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {

@@ -55,6 +55,37 @@
   bottom: 45px;
 }
 
+#trophieslist>.multiple {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+#trophieslist>.multiple>.mult-list {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  gap: 2px;
+  width: 100%;
+}
+
+#trophieslist>.multiple>.mult-list>.mult-btn {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  height: 25px;
+}
+
+#trophieslist>.multiple>.mult-list>.mult-btn:hover {
+  background-color: #4b4b4bd7;
+}
+
+#trophieslist>.multiple>.mult-content {
+  width: 100%;
+  flex-grow: 1;
+}
+
 #trophieslist div.row {
   display: flex;
   align-items: center;

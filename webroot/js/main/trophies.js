@@ -4,15 +4,55 @@
 
   let unlockstyle = null;
 
+  const generateHTML = (data, index) => {
+    const elems = [];
+
+    if (index !== undefined) elems.push(`<div${index > 0 ? ' style="display: none;"' : ''}>`);
+
+    for (let i = 0; i < data.length; ++i) {
+      const ctrop = data[i];
+      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
+    }
+
+    if (index !== undefined) elems.push('</div>');
+
+    return elems;
+  };
+
+  trlist.on('click', ({ target }) => {
+    if (!target.classList.contains('mult-btn')) return;
+    const cidx = parseInt(target.dataset.id);
+    trlist.$$('.multiple>.mult-content>div').forEach((elem, idx) => {
+      elem.style.display = cidx === idx ? null : 'none';
+    });
+  });
+
   window.trophyAPI = {
     updateTrophies: (data) => {
-      const elems = [];
-      for (let i = 0; i < data.length; ++i) {
-        const ctrop = data[i];
-        elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
+      if (data.multiple === true) {
+        let tropcnt = 0, dataleft = data.count;
+
+        trlist.innerHTML = '<div class="multiple"><div class="mult-list"></div><div class="mult-content"></div></div>';
+
+        setTimeout(() => {
+          const receiver = (data) => {
+            trlist.$('.multiple>.mult-list').innerHTML += `<div class="mult-btn" data-id="${data.index}">Game ${data.index}</div>`;
+            trlist.$('.multiple>.mult-content').innerHTML += generateHTML(data.trophies, data.index).join('');
+
+            tropcnt += data.trophies.length;
+            ltrops.children[3].innerText = tropcnt;
+
+            if (--dataleft === 0) window.electronAPI.removeAllListeners(data.id);
+          };
+
+          window.electronAPI.addEventListener(data.id, receiver);
+
+          window.electronAPI.multiTrophiesReady(data.id);
+        }, 0);
+      } else {
+        trlist.innerHTML = generateHTML(data).join('');
+        ltrops.children[3].innerText = data.length;
       }
-      trlist.innerHTML = elems.join('');
-      ltrops.children[3].innerText = data.length;
     },
     setError: (err) => {
       trlist.innerHTML = `<p style="width: 100%; height: 100%; display: flex; align-items: center; text-align:center;">${err}</p>`;
