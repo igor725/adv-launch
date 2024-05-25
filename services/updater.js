@@ -253,16 +253,18 @@ const commandHandler = async (msg) => {
               execSync('del *.dll *.exe', { cwd: emupath });
               execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
               parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-              updateVersionFile(version);
-              fs.unlinkSync(fpath);
-              clearInterval(int);
             } catch (e) {
               if (attempt > 9) {
                 clearInterval(int);
-                throw e;
+                parentPort.postMessage({ resp: 'error', text: e.toString() });
               }
               console.log('Attempt', attempt, 'failed: ', e.toString());
+              return;
             }
+
+            updateVersionFile(version);
+            fs.unlinkSync(fpath);
+            clearInterval(int);
           }, 700);
 
         });
