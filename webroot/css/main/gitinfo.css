@@ -4,6 +4,8 @@
   min-height: 50px;
   justify-content: safe center;
   align-items: safe center;
+  transform: translateY(0);
+  transition: transform 150ms ease;
 }
 
 #gitinfo {
@@ -24,10 +26,15 @@
 }
 
 .gitwrapper:has(#gitinfo:empty) {
-  display: none;
+  transform: translateY(-60px);
+  min-height: 0;
+  min-width: 0;
+  max-height: 0;
 }
 
 .gitbadge {
+  display: flex;
+  align-items: center;
   border-radius: 8px;
   padding: 4px;
   color: black;

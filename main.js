@@ -398,7 +398,7 @@ const main = (userdir = __dirname) => {
     return filePaths[0];
   });
 
-  ipcMain.handle('opentrp', async (event, paths) => {
+  ipcMain.handle('opentrp', (event, paths) => {
     let tropxml = null;
     try {
       tropxml = new Trophies(path.join(paths[0], SCE_TROPHY_PATH), -1);

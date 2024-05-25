@@ -44,7 +44,7 @@
   position: absolute;
   background-color: #0000007e;
   bottom: -320px;
-  transition: bottom 250ms;
+  transition: bottom 150ms;
   overflow-y: auto;
   overflow-x: hidden;
   width: 400px;
