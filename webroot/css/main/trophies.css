@@ -1,0 +1,117 @@
+#trophieslist {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background-color: #0000007e;
+  bottom: -320px;
+  transition: bottom 150ms;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 400px;
+  height: 320px;
+}
+
+#trophieslist[data-hidden="0"] {
+  bottom: 45px;
+}
+
+#trophieslist>.multiple {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+#trophieslist>.multiple>.mult-list {
+  display: flex;
+  padding: 4px;
+  gap: 2px;
+  width: 100%;
+}
+
+#trophieslist>.multiple>.mult-list>a {
+  text-align: center;
+  text-wrap: nowrap;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+#trophieslist>.multiple>.mult-list>.mult-btn {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  height: 25px;
+}
+
+#trophieslist>.multiple>.mult-list>.mult-btn:hover {
+  background-color: #4b4b4bd7;
+}
+
+#trophieslist>.multiple>.mult-content {
+  width: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+#trophieslist div.row {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-grow: 1;
+  width: 100%;
+  min-height: 90px;
+  border-bottom: 1px solid white;
+  padding-left: 5px;
+}
+
+#trophieslist div.row img {
+  -webkit-user-drag: none;
+  width: 64px;
+  height: 64px;
+}
+
+#trophieslist div.row div.info {
+  padding-left: 10px;
+  width: 100%;
+}
+
+#trophieslist div.row p.name {
+  font-weight: bold;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+#trophieslist div.row p.name .fa-trophy {
+  margin-left: 10px;
+}
+
+#trophieslist div.row p.name .grade-P {
+  color: rgb(191, 191, 191);
+}
+
+#trophieslist div.row p.name .grade-G {
+  color: rgb(228, 194, 78);
+}
+
+#trophieslist div.row p.name .grade-S {
+  color: rgb(150, 164, 182);
+}
+
+#trophieslist div.row p.name .grade-B {
+  color: rgb(199, 124, 48);
+}
+
+#trophieslist div.row p.detail {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#trophieslist div.row p.detail.hidden {
+  transition: filter 150ms ease;
+  filter: blur(4px);
+}
+
+#trophieslist[data-showspoilers="1"] div.row p.detail.hidden {
+  filter: unset;
+}

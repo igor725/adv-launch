@@ -107,7 +107,7 @@ class TrophyFile {
 };
 
 module.exports.TrophyDataReader = class TrophyDataReader {
-  #gname = null;
+  #gname = 'Unnamed game';
   #trops = [];
 
   constructor(tf) {
@@ -118,7 +118,14 @@ module.exports.TrophyDataReader = class TrophyDataReader {
 
       if (trophyroot) {
         trophyroot.elements.forEach((el) => {
-          if (el.name !== 'trophy') return;
+          if (el.name !== 'trophy') {
+            if (el.name === 'title-name') {
+              try { // Just to be safe
+                this.#gname = el.elements[0].text;
+              } catch (e) { }
+            }
+            return;
+          }
 
           const trophy = {
             id: parseInt(el.attributes.id),
@@ -162,6 +169,10 @@ module.exports.TrophyDataReader = class TrophyDataReader {
 
   get length() {
     return this.#trops.length;
+  }
+
+  get name() {
+    return this.#gname;
   }
 
   toString() {

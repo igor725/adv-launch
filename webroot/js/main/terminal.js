@@ -5,6 +5,10 @@
     setStatus: (enabled) => {
       terminal.style.opacity = enabled ? 1 : null;
       if (enabled) terminal.innerHTML = '';
+    },
+    clear: () => {
+      terminal.style.opacity = null;
+      terminal.innerHTML = '';
     }
   };
 

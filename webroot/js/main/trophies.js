@@ -3,6 +3,8 @@
   const ltrops = $('#gamesummary .ltrops');
 
   let unlockstyle = null;
+  let gamecnt = 0, cgameid = 0;
+  const names = [];
 
   const generateHTML = (data, index) => {
     const elems = [];
@@ -11,7 +13,7 @@
 
     for (let i = 0; i < data.length; ++i) {
       const ctrop = data[i];
-      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
+      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail${ctrop.hidden ? ' hidden' : ''}">${ctrop.detail}</p></div></div>`);
     }
 
     if (index !== undefined) elems.push('</div>');
@@ -21,9 +23,11 @@
 
   trlist.on('click', ({ target }) => {
     if (!target.classList.contains('mult-btn')) return;
-    const cidx = parseInt(target.dataset.id);
+    cgameid = (cgameid + parseInt(target.dataset.direction)) % gamecnt;
+    if (cgameid < 0) cgameid += gamecnt;
+    trlist.$('.multiple>.mult-list>a').innerText = names[cgameid];
     trlist.$$('.multiple>.mult-content>div').forEach((elem, idx) => {
-      elem.style.display = cidx === idx ? null : 'none';
+      elem.style.display = cgameid === idx ? null : 'none';
     });
   });
 
@@ -31,18 +35,33 @@
     updateTrophies: (data) => {
       if (data.multiple === true) {
         let tropcnt = 0, dataleft = data.count;
+        gamecnt = data.count, cgameid = 0;
+        names.length = 0;
 
-        trlist.innerHTML = '<div class="multiple"><div class="mult-list"></div><div class="mult-content"></div></div>';
+        trlist.innerHTML = `
+        <div class="multiple">
+          <div class="mult-list">
+            <div class="fa-solid fa-left-long mult-btn" data-direction="-1"></div>
+            <a></a>
+            <div class="fa-solid fa-right-long mult-btn" data-direction="1"></div>
+          </div>
+          <div class="mult-content">
+          </div>
+        </div>`;
 
         setTimeout(() => {
           const receiver = (data) => {
-            trlist.$('.multiple>.mult-list').innerHTML += `<div class="mult-btn" data-id="${data.index}">Game ${data.index}</div>`;
+
+            names[data.index] = data.title;
             trlist.$('.multiple>.mult-content').innerHTML += generateHTML(data.trophies, data.index).join('');
 
             tropcnt += data.trophies.length;
             ltrops.children[3].innerText = tropcnt;
 
-            if (--dataleft === 0) window.electronAPI.removeAllListeners(data.id);
+            if (--dataleft === 0) {
+              trlist.$('.multiple>.mult-list>a').innerText = names[0];
+              window.electronAPI.removeAllListeners(data.id);
+            }
           };
 
           window.electronAPI.addEventListener(data.id, receiver);
@@ -108,9 +127,14 @@
     if (trlist.dataset.hidden !== '1') toggle();
   }
 
-  window.on('keyup', (ev) => {
-    if (ev.code === 'Escape') hideList();
+  window.on('keyup', ({ code }) => {
+    if (code === 'Escape') hideList();
+    else if (code === 'Insert') trlist.dataset.showspoilers = 0;
   }, true);
+
+  window.on('keydown', ({ code }) => {
+    if (code === 'Insert') trlist.dataset.showspoilers = 1;
+  });
 
   window.on('click', ({ target }) => {
     if (target === ltrops || ltrops.contains(target)) toggle();
