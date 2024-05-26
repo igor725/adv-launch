@@ -7,14 +7,12 @@
       const wrap = $('#wrapper');
 
       if (data.hidden) {
-        wrap.style.overflow = null;
-        wrap.style.filter = null;
+        wrap.dataset.ready = 1;
         warn.dataset.active = 0;
         return;
       }
 
-      wrap.style.overflow = 'hidden';
-      wrap.style.filter = 'blur(10px)';
+      wrap.dataset.ready = 0;
       warn.dataset.wid = data.id;
       warn.dataset.wtype = data.type;
       warn.dataset.active = 1;

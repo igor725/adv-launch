@@ -1,9 +1,9 @@
 #gamefilter {
-  transition: opacity 0.15s;
-  background-color: #0000004c;
+  transition: opacity var(--anim-default-transition-speed) var(--anim-default-transition-func);
+  background-color: var(--elem-bg-color);
   padding-left: 10px;
   border: none;
-  color: white;
+  color: var(--text-color);
   min-height: 25px;
 }
 
@@ -20,14 +20,14 @@
   overflow-x: hidden;
   overflow-y: scroll;
 
-  --selection-color: blue;
+  --selection-color: var(--gl-selection-color);
 }
 
 .gamebadge {
   width: 128px;
   height: 128px;
   border-radius: 6px;
-  background-color: #4646464c;
+  background-color: var(--gl-badge-color);
   margin: 0;
   background-repeat: no-repeat;
   background-size: contain;
@@ -42,7 +42,7 @@
   opacity: 0;
   width: 100%;
   height: 100%;
-  transition: opacity 0.15s;
+  transition: opacity var(--anim-default-transition-speed) var(--anim-default-transition-func);
   pointer-events: none;
 }
 
@@ -54,7 +54,7 @@
   display: -webkit-box;
   position: absolute;
   bottom: 0;
-  background-color: #0000004c;
+  background-color: var(--elem-bg-color);
   width: 100%;
   max-height: 3em;
   -webkit-line-clamp: 3;
@@ -66,7 +66,7 @@
 
 .gamebadge .gb-info .gbi-trophy {
   -webkit-text-stroke-width: 1px;
-  -webkit-text-stroke-color: black;
+  -webkit-text-stroke-color: var(--gl-badge-stroke);
   position: absolute;
   right: 4px;
   top: 4px;
@@ -74,7 +74,7 @@
 
 .gamebadge .gb-info .gbi-status {
   -webkit-text-stroke-width: 1px;
-  -webkit-text-stroke-color: black;
+  -webkit-text-stroke-color: var(--gl-badge-stroke);
   position: absolute;
   font-size: small;
   pointer-events: all;

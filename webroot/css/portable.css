@@ -3,7 +3,7 @@
 }
 
 h4 a {
-  color: green;
+  color: var(--text-select-color);
 }
 
 #buttons {

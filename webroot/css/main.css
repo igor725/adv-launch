@@ -14,8 +14,8 @@
 #maindata .sidebar {
   display: flex;
   flex-direction: column;
-  background-color: #0000004c;
-  transition: opacity 0.15s;
+  background-color: var(--elem-bg-color);
+  transition: opacity var(--anim-default-transition-speed) var(--anim-default-transition-func);
   opacity: 0.02;
 }
 
@@ -31,7 +31,7 @@
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: background 500ms linear;
+  transition: background var(--bgimg-transition-speed) var(--anim-default-transition-func);
 }
 
 .button {
@@ -39,10 +39,11 @@
   border-radius: 4px;
   text-align: center;
   vertical-align: middle;
+  transition: background-color var(--bgimg-transition-speed) var(--anim-default-transition-func);
 }
 
 .button:hover {
-  background-color: #9a9a9a;
+  background-color: var(--button-hover-color);
 }
 
 .infowrapper {
