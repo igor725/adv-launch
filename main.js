@@ -12,6 +12,7 @@ const SCE_TROPHY_PATH = '/sce_sys/trophy/';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
 const PORTABLE_PATH = path.join(__dirname, '/portable');
+const TROPINFO_REGEXP = /tropinfo\.(\d)+\-(\d+)/;
 
 let win = undefined;
 let player = undefined;
@@ -52,10 +53,9 @@ const loadTrophiesData = (gid) => {
   try {
     const emupath = config.getValue('emu_path');
     const uid = config.getInitialUser();
-    const regexp = /tropinfo\.(\d)+\-(\d+)/;
     const trinfpath = `${emupath}/GAMEFILES/${gid}/`;
     const files = fs.readdirSync(trinfpath).filter((name) => {
-      const m = name.match(regexp);
+      const m = name.match(TROPINFO_REGEXP);
       return m && parseInt(m[1]) === uid
     });
 
@@ -70,7 +70,7 @@ const loadTrophiesData = (gid) => {
         trophies.push([tfile.readUint32LE(offset), tfile.readBigUint64LE(offset + 4)]);
       }
 
-      contexts.push({ label: parseInt(name.match(regexp)[2]), trophies });
+      contexts.push({ label: parseInt(name.match(TROPINFO_REGEXP)[2]), trophies });
     });
 
     return contexts;
