@@ -106,6 +106,7 @@
     else gamelist.style.setProperty('--selection-color', null);
     gbadge.classList.add('selected');
     selectedGame = gbadge.dataset.gid;
+    window.terminalAPI.clear();
   }, true);
 
   gamelist.on('dblclick', ({ target: gbadge }) => {
