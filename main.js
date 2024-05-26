@@ -51,15 +51,29 @@ const _runDownloadingProcess = (retry = false) => {
 const loadTrophiesData = (gid) => {
   try {
     const emupath = config.getValue('emu_path');
-    const tfile = fs.readFileSync(`${emupath}/GAMEFILES/${gid}/tropinfo.${config.getInitialUser()}`);
-    const trophies = [];
-    const count = tfile.readUint32LE(0);
-    for (let i = 0; i < count; ++i) {
-      const offset = 4 + (i * 12);
-      trophies.push([tfile.readUint32LE(offset), tfile.readBigUint64LE(offset + 4)]);
-    }
+    const uid = config.getInitialUser();
+    const regexp = /tropinfo\.(\d)+\-(\d+)/;
+    const trinfpath = `${emupath}/GAMEFILES/${gid}/`;
+    const files = fs.readdirSync(trinfpath).filter((name) => {
+      const m = name.match(regexp);
+      return m && parseInt(m[1]) === uid
+    });
 
-    return trophies;
+    const contexts = [];
+
+    files.forEach((name) => {
+      const tfile = fs.readFileSync(path.join(trinfpath, name));
+      const trophies = [];
+      const count = tfile.readUint32LE(0);
+      for (let i = 0; i < count; ++i) {
+        const offset = 4 + (i * 12);
+        trophies.push([tfile.readUint32LE(offset), tfile.readBigUint64LE(offset + 4)]);
+      }
+
+      contexts.push({ label: parseInt(name.match(regexp)[2]), trophies });
+    });
+
+    return contexts;
   } catch (e) {
     console.error(`Failed to load trophies info for ${gid}: ${e.toString()}`);
   }

@@ -11,7 +11,7 @@
 
     for (let i = 0; i < data.length; ++i) {
       const ctrop = data[i];
-      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
+      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
     }
 
     if (index !== undefined) elems.push('</div>');
@@ -50,7 +50,7 @@
           window.electronAPI.multiTrophiesReady(data.id);
         }, 0);
       } else {
-        trlist.innerHTML = generateHTML(data).join('');
+        trlist.innerHTML = generateHTML(data, 0).join('');
         ltrops.children[3].innerText = data.length;
       }
     },
@@ -64,12 +64,16 @@
       }
 
       const stgen = [];
-      for (let i = 0; i < data.length; ++i) {
-        stgen.push(`.tropid-${data[i][0]} { color: green; }`);
-      }
-      unlockstyle.textContent = stgen.join('');
 
-      ltrops.children[1].innerText = data.length;
+      for (let i = 0; i < data.length; ++i) {
+        const { label, trophies } = data[i];
+        for (let i = 0; i < trophies.length; ++i) {
+          stgen.push(`.tropid-${trophies[i][0]}-${label} { color: green; }`);
+        }
+      }
+
+      unlockstyle.textContent = stgen.join('');
+      ltrops.children[1].innerText = stgen.length;
     },
     setStatus: (enabled) => {
       ltrops.dataset.hidden = enabled ? 0 : 1;
