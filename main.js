@@ -561,8 +561,9 @@ const main = (userdir = __dirname) => {
   win.once('ready-to-show', () => win.show());
 
   let currcols = 2;
-  win.on('resize', (ev) => {
-    const newcols = Math.floor(win.getSize()[0] / 500);
+  const startsize = win.getSize()[0];
+  win.on('resize', () => {
+    const newcols = 2 + Math.floor((win.getSize()[0] - startsize) / 145);
     if (newcols != currcols) win.send('set-glcols', currcols = newcols);
   });
 

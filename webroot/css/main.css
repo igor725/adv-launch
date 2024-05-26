@@ -16,7 +16,7 @@
   flex-direction: column;
   background-color: #0000004c;
   transition: opacity 0.15s;
-  opacity: 0.05;
+  opacity: 0.02;
 }
 
 #maindata .sidebar:hover {
