@@ -12,7 +12,7 @@ const SCE_TROPHY_PATH = '/sce_sys/trophy/';
 const SCE_BGA_PATH = '/sce_sys/snd0.at9';
 const LISTAUDIO_PATH = path.join(__dirname, '/bin/listaudio.exe');
 const PORTABLE_PATH = path.join(__dirname, '/portable');
-const TROPINFO_REGEXP = /tropinfo\.(\d)+\-(\d+)/;
+const TROPINFO_REGEXP = /^tropinfo\.(\d)+\-(\d+)$/;
 
 let win = undefined;
 let player = undefined;
