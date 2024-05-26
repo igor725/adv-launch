@@ -435,7 +435,7 @@ const main = (userdir = __dirname) => {
       }
     }
     data.addImages(tropxml);
-    return data.array;
+    return data;
   };
 
   ipcMain.handle('opentrp', (event, paths) => {
@@ -456,13 +456,16 @@ const main = (userdir = __dirname) => {
       const id = `partial-trophy-${Date.now()}`;
 
       ipcMain.once(`${id}-ready`, () => {
-        values.forEach((trpath, idx) => win.send(id, { trophies: trpReader(trpath), index: idx }));
+        values.forEach((trpath, idx) => {
+          const { array, name } = trpReader(trpath);
+          win.send(id, { trophies: array, title: name, index: idx });
+        });
       });
 
       return { multiple: true, count: values.length, id };
     }
 
-    return trpReader(values[0]);
+    return trpReader(values[0]).array;
   });
 
   ipcMain.handle('gamecontext', (event, data) => new Promise((resolve, reject) => {

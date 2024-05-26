@@ -3,6 +3,8 @@
   const ltrops = $('#gamesummary .ltrops');
 
   let unlockstyle = null;
+  let gamecnt = 0, cgameid = 0;
+  const names = [];
 
   const generateHTML = (data, index) => {
     const elems = [];
@@ -21,9 +23,11 @@
 
   trlist.on('click', ({ target }) => {
     if (!target.classList.contains('mult-btn')) return;
-    const cidx = parseInt(target.dataset.id);
+    cgameid = (cgameid + parseInt(target.dataset.direction)) % gamecnt;
+    if (cgameid < 0) cgameid += gamecnt;
+    trlist.$('.multiple>.mult-list>a').innerText = names[cgameid];
     trlist.$$('.multiple>.mult-content>div').forEach((elem, idx) => {
-      elem.style.display = cidx === idx ? null : 'none';
+      elem.style.display = cgameid === idx ? null : 'none';
     });
   });
 
@@ -31,18 +35,33 @@
     updateTrophies: (data) => {
       if (data.multiple === true) {
         let tropcnt = 0, dataleft = data.count;
+        gamecnt = data.count, cgameid = 0;
+        names.length = 0;
 
-        trlist.innerHTML = '<div class="multiple"><div class="mult-list"></div><div class="mult-content"></div></div>';
+        trlist.innerHTML = `
+        <div class="multiple">
+          <div class="mult-list">
+            <div class="fa-solid fa-left-long mult-btn" data-direction="-1"></div>
+            <a></a>
+            <div class="fa-solid fa-right-long mult-btn" data-direction="1"></div>
+          </div>
+          <div class="mult-content">
+          </div>
+        </div>`;
 
         setTimeout(() => {
           const receiver = (data) => {
-            trlist.$('.multiple>.mult-list').innerHTML += `<div class="mult-btn" data-id="${data.index}">Game ${data.index}</div>`;
+
+            names[data.index] = data.title;
             trlist.$('.multiple>.mult-content').innerHTML += generateHTML(data.trophies, data.index).join('');
 
             tropcnt += data.trophies.length;
             ltrops.children[3].innerText = tropcnt;
 
-            if (--dataleft === 0) window.electronAPI.removeAllListeners(data.id);
+            if (--dataleft === 0) {
+              trlist.$('.multiple>.mult-list>a').innerText = names[0];
+              window.electronAPI.removeAllListeners(data.id);
+            }
           };
 
           window.electronAPI.addEventListener(data.id, receiver);
