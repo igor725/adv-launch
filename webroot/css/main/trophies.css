@@ -106,3 +106,12 @@
   margin-bottom: 0px;
   margin-top: 0px;
 }
+
+#trophieslist div.row p.detail.hidden {
+  transition: filter 150ms ease;
+  filter: blur(4px);
+}
+
+#trophieslist[data-showspoilers="1"] div.row p.detail.hidden {
+  filter: unset;
+}

@@ -52,10 +52,6 @@ window._onLangReady = (() => {
       case 'F1':
         window.tutorAPI.start();
         break;
-
-      default:
-        console.warn('Unbound key', code, 'pressed!');
-        break;
     }
   });
 

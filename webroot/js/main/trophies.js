@@ -13,7 +13,7 @@
 
     for (let i = 0; i < data.length; ++i) {
       const ctrop = data[i];
-      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail">${ctrop.hidden ? window.trAPI.get('trophies.hidden') : ctrop.detail}</p></div></div>`);
+      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail${ctrop.hidden ? ' hidden' : ''}">${ctrop.detail}</p></div></div>`);
     }
 
     if (index !== undefined) elems.push('</div>');
@@ -127,9 +127,14 @@
     if (trlist.dataset.hidden !== '1') toggle();
   }
 
-  window.on('keyup', (ev) => {
-    if (ev.code === 'Escape') hideList();
+  window.on('keyup', ({ code }) => {
+    if (code === 'Escape') hideList();
+    else if (code === 'Insert') trlist.dataset.showspoilers = 0;
   }, true);
+
+  window.on('keydown', ({ code }) => {
+    if (code === 'Insert') trlist.dataset.showspoilers = 1;
+  });
 
   window.on('click', ({ target }) => {
     if (target === ltrops || ltrops.contains(target)) toggle();

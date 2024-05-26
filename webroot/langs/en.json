@@ -136,8 +136,5 @@
     "lang": "This setting specifies which user language will be set.\nIf the game does not support the specified language, the ingame text will be displayed in the default game's language.\nThis setting also affects the Launcher's language with the same behavior.",
     "fullscreen": "This checkbox indicates in which state the emulator will be started.\nIf the checkbox is checked, the emulator will be runned in fullscreen mode.",
     "end": "Congrats! You finished the tutorial. If you want to go through it again, just press [F1]. Enjoy!"
-  },
-  "trophies": {
-    "hidden": "[HIDDEN]"
   }
 }
