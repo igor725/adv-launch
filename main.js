@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const Convert = require('ansi-to-html');
 const { Worker } = require('node:worker_threads');
 const { spawn, exec } = require('node:child_process');
