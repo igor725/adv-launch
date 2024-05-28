@@ -221,7 +221,7 @@ const validateEmulatorPath = () => {
   if (!fs.lstatSync(emupath).isDirectory()) throw new Error('Emulator path is not a directory!');
 };
 
-const tryUnpackArchive = (data) => {
+const tryUnpackArchive = (data) => new Promise((resolve, reject) => {
   const { fpath, version } = data;
   lastarch = data;
 
@@ -237,7 +237,7 @@ const tryUnpackArchive = (data) => {
     } catch (e) {
       if (attempt > 9) {
         clearInterval(int);
-        parentPort.postMessage({ resp: 'error', text: e.toString() });
+        reject(e);
       }
       console.log('Attempt', attempt, 'failed: ', e.toString());
       return;
@@ -247,8 +247,9 @@ const tryUnpackArchive = (data) => {
     updateVersionFile(version);
     fs.unlinkSync(fpath);
     clearInterval(int);
+    resolve();
   }, 700);
-};
+});
 
 const commandHandler = async (msg) => {
   try {
@@ -277,15 +278,13 @@ const commandHandler = async (msg) => {
 
       case 'download':
         validateEmulatorPath();
-        await download(newverinfo.url, newverinfo.tag).then((data) => {
-          tryUnpackArchive(data);
-        });
+        await download(newverinfo.url, newverinfo.tag).then((data) => tryUnpackArchive(data));
         break;
 
       case 'retry':
         try {
           if (lastarch !== undefined) {
-            tryUnpackArchive(lastarch);
+            await tryUnpackArchive(lastarch);
             return;
           }
         } catch (e) {
