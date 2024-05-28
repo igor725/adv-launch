@@ -1,13 +1,13 @@
 #titlebar {
   display: flex;
   flex-direction: row;
-  background-color: #2a2a2a;
+  background-color: var(--titlebar-bg-color);
   width: 100%;
   height: 25px;
 }
 
 #titlebar.fullscreen {
-  transition: height 150ms ease;
+  transition: height var(--anim-default-transition-speed) var(--anim-default-transition-func);
   height: 2px;
   opacity: 0;
 }
@@ -37,5 +37,5 @@
 }
 
 .tb-button.close:hover {
-  background-color: #813a3a;
+  background-color: var(--titlebar-bclose-hover);
 }

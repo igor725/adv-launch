@@ -5,12 +5,12 @@
   justify-content: safe center;
   align-items: safe center;
   transform: translateY(0);
-  transition: transform 150ms ease;
+  transition: transform var(--anim-default-transition-speed) var(--anim-default-transition-func);
 }
 
 #gitinfo {
   display: flex;
-  background-color: #0000007e;
+  background-color: var(--elem-bg-color);
   cursor: pointer;
   overflow-x: auto;
   overflow-y: hidden;
@@ -37,6 +37,6 @@
   align-items: center;
   border-radius: 8px;
   padding: 4px;
-  color: black;
+  color: var(--git-badge-text);
   white-space: nowrap;
 }

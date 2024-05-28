@@ -1,0 +1,70 @@
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url('../fonts/UbuntuMono-Regular.ttf');
+}
+
+:root {
+  /* Shared */
+  --font-default: 'Ubuntu Mono';
+  --body-color: #252525;
+  --elem-bg-color: #0000004c;
+  --text-color: white;
+  --button-hover-color: #9a9a9a7c;
+  --anim-default-transition-speed: 150ms;
+  --anim-default-transition-func: ease;
+  --scrollbar-handle-color: #0f0f0f;
+  --scrollbar-back-color: #00000000;
+  --spinner-color: #6a8dc5;
+
+  /* Default HTML elements */
+  --isb-bg-color: #353535;
+  --isb-border-color: #494949;
+  --isb-disabled-text-color: #979797;
+  --isb-hover-bg-color: #4b4b4b;
+  --range-bg-color: #505050;
+  --range-slider-color: #818181;
+  --range-slider-hover-color: #b1b1b1;
+  --range-slider-shadow-color: #686868;
+
+  /* Title bar */
+
+  --titlebar-bg-color: #2a2a2a;
+  --titlebar-bclose-hover: #813a3a;
+
+  /* Backgound image */
+  --bgimg-transition-speed: 500ms;
+
+  /* Game list */
+
+  --gl-selection-color: blue;
+  --gl-badge-color: #4646464c;
+  --gl-badge-stroke: black;
+
+  /* GitHub integration */
+  --git-badge-text: black;
+
+  /* Terminal */
+
+  --term-bg-color: black;
+
+  /* Trophies */
+
+  /**
+   * Trophy grade colors were borrowed from psOff overlay:
+   * https://github.com/SysRay/psOff_public/blob/6d58b63/core/videoout/overlay/imhelper.h#L5
+   */
+  --trophy-grade-bronze: rgb(199, 124, 48);
+  --trophy-grade-silver: rgb(150, 164, 182);
+  --trophy-grade-gold: rgb(228, 194, 78);
+  --trophy-grade-platinum: rgb(191, 191, 191);
+
+  --trophy-list-border: white;
+
+  /* Tutorial */
+  --tutor-bg-color: #000000c2;
+  --tutor-hint-text-color: #000;
+  --tutor-hint-bg-color: #c2c2c2c9;
+
+  /* Portable window */
+  --text-select-color: green;
+}

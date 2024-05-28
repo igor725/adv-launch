@@ -9,7 +9,7 @@
   width: 100%;
   height: 100%;
   z-index: 999;
-  background-color: #0000004c;
+  background-color: var(--elem-bg-color);
 }
 
 #warnmsg[data-active="0"] {

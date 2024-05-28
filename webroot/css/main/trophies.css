@@ -4,7 +4,7 @@
   position: absolute;
   background-color: #0000007e;
   bottom: -320px;
-  transition: bottom 150ms;
+  transition: bottom var(--anim-default-transition-speed) var(--anim-default-transition-func);
   overflow-y: auto;
   overflow-x: hidden;
   width: 400px;
@@ -45,7 +45,7 @@
 }
 
 #trophieslist>.multiple>.mult-list>.mult-btn:hover {
-  background-color: #4b4b4bd7;
+  background-color: var(--button-hover-color);
 }
 
 #trophieslist>.multiple>.mult-content {
@@ -61,7 +61,7 @@
   flex-grow: 1;
   width: 100%;
   min-height: 90px;
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid var(--trophy-list-border);
   padding-left: 5px;
 }
 
@@ -87,19 +87,19 @@
 }
 
 #trophieslist div.row p.name .grade-P {
-  color: rgb(191, 191, 191);
+  color: var(--trophy-grade-platinum);
 }
 
 #trophieslist div.row p.name .grade-G {
-  color: rgb(228, 194, 78);
+  color: var(--trophy-grade-gold);
 }
 
 #trophieslist div.row p.name .grade-S {
-  color: rgb(150, 164, 182);
+  color: var(--trophy-grade-silver);
 }
 
 #trophieslist div.row p.name .grade-B {
-  color: rgb(199, 124, 48);
+  color: var(--trophy-grade-bronze);
 }
 
 #trophieslist div.row p.detail {
@@ -108,7 +108,7 @@
 }
 
 #trophieslist div.row p.detail.hidden {
-  transition: filter 150ms ease;
+  transition: filter var(--anim-default-transition-speed) var(--anim-default-transition-func);
   filter: blur(4px);
 }
 

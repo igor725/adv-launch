@@ -11,9 +11,9 @@
 
 #terminal {
   opacity: 0.05;
-  transition: opacity 0.15s;
+  transition: opacity var(--anim-default-transition-speed) var(--anim-default-transition-func);
 
-  background-color: #000;
+  background-color: var(--term-bg-color);
   border-radius: 4px;
   padding: 10px 10px 10px 10px;
   overflow-y: scroll;
