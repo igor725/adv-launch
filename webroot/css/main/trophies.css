@@ -107,11 +107,11 @@
   margin-top: 0px;
 }
 
-#trophieslist div.row p.detail.hidden {
+#trophieslist div.row .hidden {
   transition: filter var(--anim-default-transition-speed) var(--anim-default-transition-func);
-  filter: blur(4px);
+  filter: blur(6px);
 }
 
-#trophieslist[data-showspoilers="1"] div.row p.detail.hidden {
+#trophieslist[data-showspoilers="1"] div.row .hidden {
   filter: unset;
 }

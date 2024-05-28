@@ -13,7 +13,8 @@
 
     for (let i = 0; i < data.length; ++i) {
       const ctrop = data[i];
-      elems.push(`<div class="row"><img src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}">${ctrop.name}<i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail${ctrop.hidden ? ' hidden' : ''}">${ctrop.detail}</p></div></div>`);
+      const hclass = ctrop.hidden ? ' hidden' : '';
+      elems.push(`<div class="row"><img class="${hclass}" src="${ctrop.icon}" /><div class="info"><p class="name tropid-${ctrop.id}-${index}"><i class="${hclass}">${ctrop.name}</i><i class="fa-solid fa-trophy grade-${ctrop.grade}"></i></p><p class="detail${hclass}">${ctrop.detail}</p></div></div>`);
     }
 
     if (index !== undefined) elems.push('</div>');
