@@ -8,6 +8,7 @@ let update_channel = undefined;
 let atoken = undefined;
 let emupath = undefined;
 let verfile = undefined;
+let lastarch = undefined;
 let freq = undefined;
 
 const newverinfo = {
@@ -220,6 +221,35 @@ const validateEmulatorPath = () => {
   if (!fs.lstatSync(emupath).isDirectory()) throw new Error('Emulator path is not a directory!');
 };
 
+const tryUnpackArchive = (data) => {
+  const { fpath, version } = data;
+  lastarch = data;
+
+  let attempt = 0;
+  let int;
+
+  int = setInterval(() => {
+    ++attempt;
+    try {
+      execSync('del *.dll *.exe', { cwd: emupath });
+      execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
+      parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
+    } catch (e) {
+      if (attempt > 9) {
+        clearInterval(int);
+        parentPort.postMessage({ resp: 'error', text: e.toString() });
+      }
+      console.log('Attempt', attempt, 'failed: ', e.toString());
+      return;
+    }
+
+    lastarch = undefined;
+    updateVersionFile(version);
+    fs.unlinkSync(fpath);
+    clearInterval(int);
+  }, 700);
+};
+
 const commandHandler = async (msg) => {
   try {
     switch (msg.act) {
@@ -247,34 +277,20 @@ const commandHandler = async (msg) => {
 
       case 'download':
         validateEmulatorPath();
-        await download(newverinfo.url, newverinfo.tag).then(({ fpath, version }) => {
-          let attempt = 0;
-          let int;
-
-          int = setInterval(() => {
-            ++attempt;
-            try {
-              execSync('del *.dll *.exe', { cwd: emupath });
-              execSync(`"${path.join(__dirname, '../bin/7z.exe')}" x -y -aoa -o"${emupath}" "${fpath}"`);
-              parentPort.postMessage({ resp: 'done', executable: path.basename(searchBinary()) });
-            } catch (e) {
-              if (attempt > 9) {
-                clearInterval(int);
-                parentPort.postMessage({ resp: 'error', text: e.toString() });
-              }
-              console.log('Attempt', attempt, 'failed: ', e.toString());
-              return;
-            }
-
-            updateVersionFile(version);
-            fs.unlinkSync(fpath);
-            clearInterval(int);
-          }, 700);
-
+        await download(newverinfo.url, newverinfo.tag).then((data) => {
+          tryUnpackArchive(data);
         });
         break;
 
       case 'retry':
+        try {
+          if (lastarch !== undefined) {
+            tryUnpackArchive(lastarch);
+            return;
+          }
+        } catch (e) {
+          console.log('[UPDATER] Failed to unpack latest downloaded archive: ', e.toString());
+        }
         if (!newverinfo.tag || !newverinfo.url) {
           await commandHandler({ act: 'run-check' });
         } else {
