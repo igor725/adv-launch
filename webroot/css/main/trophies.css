@@ -65,53 +65,53 @@
   padding-left: 5px;
 }
 
-#trophieslist div.row img {
+#trophieslist div.row>img {
   -webkit-user-drag: none;
   width: 64px;
   height: 64px;
 }
 
-#trophieslist div.row div.info {
+#trophieslist div.row>div.info {
   padding-left: 10px;
   width: 100%;
 }
 
-#trophieslist div.row p.name {
+#trophieslist div.row>div.info>p.name {
   font-weight: bold;
   margin-top: 2px;
   margin-bottom: 8px;
 }
 
-#trophieslist div.row p.name .fa-trophy {
+#trophieslist div.row>div.info>p.name>i.fa-trophy {
   margin-left: 10px;
 }
 
-#trophieslist div.row p.name .grade-P {
+#trophieslist div.row>div.info>p.name>i.grade-P {
   color: var(--trophy-grade-platinum);
 }
 
-#trophieslist div.row p.name .grade-G {
+#trophieslist div.row>div.info>p.name>i.grade-G {
   color: var(--trophy-grade-gold);
 }
 
-#trophieslist div.row p.name .grade-S {
+#trophieslist div.row>div.info>p.name>i.grade-S {
   color: var(--trophy-grade-silver);
 }
 
-#trophieslist div.row p.name .grade-B {
+#trophieslist div.row>div.info>p.name>i.grade-B {
   color: var(--trophy-grade-bronze);
 }
 
-#trophieslist div.row p.detail {
+#trophieslist div.row>div.info>p.detail {
   margin-bottom: 0px;
   margin-top: 0px;
 }
 
-#trophieslist div.row p.detail.hidden {
+#trophieslist div.row .hidden {
   transition: filter var(--anim-default-transition-speed) var(--anim-default-transition-func);
-  filter: blur(4px);
+  filter: blur(6px);
 }
 
-#trophieslist[data-showspoilers="1"] div.row p.detail.hidden {
+#trophieslist[data-showspoilers="1"] div.row .hidden {
   filter: unset;
 }
