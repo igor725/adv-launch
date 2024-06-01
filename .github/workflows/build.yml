@@ -21,3 +21,9 @@ jobs:
         with:
           name: psOff-adv-launch
           path: out/adv-launch-win32-x64/*
+
+      - name: Upload delta
+        uses: actions/upload-artifact@v4
+        with:
+          name: psOff-adv-launch_delta
+          path: out/adv-launch-win32-x64/resources/*

@@ -444,7 +444,7 @@ const main = (userdir = __dirname) => {
     for (let i = paths.length - 1; i >= 0; --i) {
       try {
         const apath = path.join(paths[i], SCE_TROPHY_PATH);
-        fs.readdirSync(apath).forEach((name) => files[name] = path.join(apath, name));
+        fs.readdirSync(apath).filter((name) => name.endsWith('.trp')).forEach((name) => files[name] = path.join(apath, name));
       } catch (e) {
         console.error('Failed to readdir: ', e.toString());
       }
