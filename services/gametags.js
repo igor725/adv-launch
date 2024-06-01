@@ -83,7 +83,7 @@ const downloadWholeDataBase = async () => {
 
   try {
     const stat = fs.statSync(dbpath);
-    if (Date.now() - stat.mtimeMs < 604800000 /* Cache the compat list for one week */) {
+    if (Date.now() - stat.mtimeMs < 86400000 /* Cache the compat list for one day */) {
       return JSON.parse(fs.readFileSync(dbpath));
     }
   } catch (e) {
