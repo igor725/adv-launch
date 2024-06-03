@@ -8,6 +8,7 @@ module.exports.Config = class Config {
     update_channel: 'release',
     update_freq: 'weekly',
     inpadcolor: '#3B3E95',
+    discord_rpc: true,
     first_launch: true,
     dblcl_run: false,
     dblcl_ask: true,

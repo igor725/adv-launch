@@ -8,6 +8,7 @@ const STATES = [
 ];
 
 module.exports.DRPC = class DRPC {
+  #enabled = false;
   #status = {
     state: '   ',
     details: STATES[0],
@@ -19,14 +20,16 @@ module.exports.DRPC = class DRPC {
     instance: false
   };
 
-  constructor() {
+  constructor(enabled = false) {
     this.#status.startTimestamp = Date.now();
+    this.#enabled = enabled;
 
     rpcClient.on('ready', () => {
       this.renderStatus();
 
       setInterval(() => {
-        this.renderStatus();
+        if (this.#enabled)
+          this.renderStatus();
       }, 15e3);
     });
 
@@ -42,4 +45,19 @@ module.exports.DRPC = class DRPC {
   };
 
   renderStatus = async () => rpcClient.setActivity(this.#status);
+
+  set state(b) {
+    if (b === false) {
+      this.#enabled = false;
+      rpcClient.clearActivity();
+      return;
+    }
+
+    this.#enabled = true;
+    this.renderStatus();
+  }
+
+  get state() {
+    return this.#enabled;
+  }
 };

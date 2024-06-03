@@ -24,8 +24,7 @@ let gameproc = undefined;
 let updateWorker = undefined;
 let compatWorker = undefined;
 let binname = 'psoff.exe';
-
-const discordRPC = new DRPC();
+let discordRPC;
 
 const converter = new Convert({
   newline: true
@@ -384,6 +383,7 @@ const commandHandler = (channel, cmd, info) => {
 const main = (userdir = __dirname) => {
   fs.mkdirSync(userdir, { recursive: true });
   config = new Config(userdir);
+  discordRPC = new DRPC(config.getValue('discord_rpc'));
 
   const emupath = config.getValue('emu_path');
 
@@ -664,6 +664,9 @@ const main = (userdir = __dirname) => {
 
   config.addCallback('launcher', (key, value) => {
     switch (key) {
+      case 'discord_rpc':
+        discordRPC.state = value;
+        return;
       case 'scan_dirs':
         gdirchanged = true;
         return;

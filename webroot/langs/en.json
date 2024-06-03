@@ -24,6 +24,7 @@
         }
       },
       "doubleclick": "Doubleclick will run the game",
+      "drpc": "Enable Discord Rich Presence",
       "gsd": {
         "label": "Game scan directories:",
         "buttons": {

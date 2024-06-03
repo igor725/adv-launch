@@ -24,6 +24,7 @@
         }
       },
       "doubleclick": "Двойное нажатие запускает игру",
+      "drpc": "Включить Discord Rich Presence",
       "gsd": {
         "label": "Папки с играми:",
         "buttons": {
