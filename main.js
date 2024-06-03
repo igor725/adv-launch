@@ -6,6 +6,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { Config } = require('./libs/settings.js');
 const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
+const { DRPC } = require('./libs/rpc.js');
 
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
 const SCE_TROPHY_PATH = '/sce_sys/trophy/';
@@ -23,6 +24,8 @@ let gameproc = undefined;
 let updateWorker = undefined;
 let compatWorker = undefined;
 let binname = 'psoff.exe';
+
+const discordRPC = new DRPC();
 
 const converter = new Convert({
   newline: true
@@ -277,6 +280,7 @@ const commandHandler = (channel, cmd, info) => {
       gameproc.stderr.on('data', terminalListener);
       gameproc._gameID = info.gid;
       gameproc._startTime = Date.now();
+      discordRPC.setGame(info.gtitle);
 
       gameproc.on('error', (err) => {
         genericWarnMsg('{$tr:main.actions.gerror}', true, { error: err.toString() });
@@ -289,6 +293,7 @@ const commandHandler = (channel, cmd, info) => {
         win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }, true));
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
+        discordRPC.setGame();
         gameproc = null;
       });
       break;
@@ -525,7 +530,7 @@ const main = (userdir = __dirname) => {
         type: 'radio',
         label: patch.version,
         checked: currpatch === patch.path
-      })
+      });
     }
 
     try {
