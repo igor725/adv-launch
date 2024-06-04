@@ -24,7 +24,7 @@ let gameproc = undefined;
 let updateWorker = undefined;
 let compatWorker = undefined;
 let binname = undefined;
-let discordRPC;
+let discordRPC = undefined;
 
 const converter = new Convert({
   newline: true
