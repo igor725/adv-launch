@@ -6,6 +6,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { Config } = require('./libs/settings.js');
 const { Trophies, TrophySharedConfig, TrophyDataReader } = require('./libs/trophies.js');
+const { DRPC } = require('./libs/rpc.js');
 
 const SCE_PIC_PATH = '/sce_sys/pic0.png';
 const SCE_TROPHY_PATH = '/sce_sys/trophy/';
@@ -22,7 +23,8 @@ let settwin = undefined;
 let gameproc = undefined;
 let updateWorker = undefined;
 let compatWorker = undefined;
-let binname = 'psoff.exe';
+let binname = undefined;
+let discordRPC = undefined;
 
 const converter = new Convert({
   newline: true
@@ -123,8 +125,8 @@ const updateGameSummary = (gid, update, loadtrophies = false) => {
 };
 
 const updateBinaryPath = (path, checkfirst = false) => {
-  binname = path ?? binname;
-  exec(`"${binname}" -h`, { cwd: config.getValue('emu_path') }).on('close', (code) => {
+  if (!path) throw new Error('Empty emulator path!');
+  exec(`"${binname = path}" -h`, { cwd: config.getValue('emu_path') }).on('close', (code) => {
     if (code === 0 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });
@@ -277,6 +279,7 @@ const commandHandler = (channel, cmd, info) => {
       gameproc.stderr.on('data', terminalListener);
       gameproc._gameID = info.gid;
       gameproc._startTime = Date.now();
+      discordRPC.setGame(info.gtitle);
 
       gameproc.on('error', (err) => {
         genericWarnMsg('{$tr:main.actions.gerror}', true, { error: err.toString() });
@@ -289,6 +292,7 @@ const commandHandler = (channel, cmd, info) => {
         win.send('gamesum', updateGameSummary(gameproc._gameID, { lastrun: gameproc._startTime }, true));
         win.send('term-data', converter.toHtml(`Process exited with code ${code}`));
         win.send('ingame', false);
+        discordRPC.setGame();
         gameproc = null;
       });
       break;
@@ -379,6 +383,7 @@ const commandHandler = (channel, cmd, info) => {
 const main = (userdir = __dirname) => {
   fs.mkdirSync(userdir, { recursive: true });
   config = new Config(userdir);
+  discordRPC = new DRPC(config.getValue('discord_rpc'));
 
   const emupath = config.getValue('emu_path');
 
@@ -525,7 +530,7 @@ const main = (userdir = __dirname) => {
         type: 'radio',
         label: patch.version,
         checked: currpatch === patch.path
-      })
+      });
     }
 
     try {
@@ -659,6 +664,9 @@ const main = (userdir = __dirname) => {
 
   config.addCallback('launcher', (key, value) => {
     switch (key) {
+      case 'discord_rpc':
+        discordRPC.state = value;
+        return;
       case 'scan_dirs':
         gdirchanged = true;
         return;

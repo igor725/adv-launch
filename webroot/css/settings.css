@@ -62,4 +62,12 @@ select {
 #inusers {
   display: flex;
   flex-direction: row;
+  gap: 5px;
+}
+
+#inusers>.user {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  gap: 2px;
 }

@@ -50,6 +50,10 @@
         <label for="dblcl" eo-translator="settings.launcher.doubleclick"></label>
         <input type="checkbox" data-cfgfacility="launcher" data-cfgkey="dblcl_run" />
       </div>
+      <div class="row">
+        <label for="drpc" eo-translator="settings.launcher.drpc"></label>
+        <input id="drpc" data-cfgfacility="launcher" data-cfgkey="discord_rpc" type="checkbox" />
+      </div>
       <label for="gsd" eo-translator="settings.launcher.gsd.label"></label>
       <div class="row">
         <select id="gsd" size="4"></select>
@@ -69,6 +73,10 @@
         <button id="gsd-remove" style="flex: 0;" eo-translator="settings.launcher.gsd.buttons.remove"></button>
       </div>
       <div class="separator" eo-translator="settings.emulator.header"></div>
+      <div class="row">
+        <label for="ousers" eo-translator="settings.emulator.ousers"></label>
+        <input id="ousers" data-cfgfacility="emu_general" data-cfgkey="onlineUsers" type="range" min="1" max="4" />
+      </div>
       <div class="row" style="flex-direction: column;">
         <label for="inusers" eo-translator="settings.emulator.inbackends"></label>
         <div id="inusers"></div>

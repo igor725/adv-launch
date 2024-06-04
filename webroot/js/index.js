@@ -18,12 +18,12 @@ window._onLangReady = (() => {
     const sg = window.gamelistAPI.getSelectedGame();
     if (sg == null) return alert(window.trAPI.get('main.actions.nogame'));
 
-    const { gpath, gid } = sg.dataset;
+    const { gpath, gid, gtitle } = sg.dataset;
 
     if (target.classList.contains('ofolder')) {
       window.electronAPI.sendCommand('openfolder', gpath);
     } else if (target.classList.contains('rgame')) {
-      window.electronAPI.sendCommand('rungame', { path: gpath, gid: gid, dblclick: false });
+      window.electronAPI.sendCommand('rungame', { path: gpath, dblclick: false, gid, gtitle });
     }
   }, true);
 

@@ -5,7 +5,7 @@
 
   const getGameBadgeById = (id) => $(`.gamebadge[data-gid="${id}"]`);
   const isGameBadge = (target) => target.classList.contains('gamebadge');
-  const getGameTitleFromBadge = (target) => target.$('.gbi-name').innerText;
+  const getGameTitleFromBadge = (target) => target.dataset.gtitle;
   const getGameTitleIdFromBadge = (target) => target.dataset.gid;
   const getGamePathFromBadge = (target) => target.dataset.gpath;
   const getGameVersionFromBadge = (target) => target.dataset.gver;
@@ -60,7 +60,7 @@
         const possible_paths = [];
         if (gipatch) possible_paths.push(gipatch);
         possible_paths.push(gpath);
-        window.electronAPI.sendCommand('getgamesum', { gpath: possible_paths, gid: gid });
+        window.electronAPI.sendCommand('getgamesum', { gpath: possible_paths, gid });
         if (gtroph) {
           window.electronAPI.readTrophies(possible_paths).then((data) => {
             window.trophyAPI.updateTrophies(data);
@@ -113,7 +113,8 @@
     if (!isGameBadge(gbadge)) return;
     window.electronAPI.sendCommand('rungame', {
       path: getGamePathFromBadge(gbadge),
-      gid: getGameTitleFromBadge(gbadge),
+      gid: getGameTitleIdFromBadge(gbadge),
+      gtitle: getGameTitleFromBadge(gbadge),
       dblclick: true
     });
   });
@@ -192,6 +193,7 @@
     rootel.dataset.gid = msg.id;
     rootel.dataset.gver = msg.version;
     rootel.dataset.gpath = msg.path;
+    rootel.dataset.gtitle = msg.title;
     rootel._patches = [];
 
     if (msg.icon)
