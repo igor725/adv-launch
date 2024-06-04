@@ -23,7 +23,7 @@ let settwin = undefined;
 let gameproc = undefined;
 let updateWorker = undefined;
 let compatWorker = undefined;
-let binname = 'psoff.exe';
+let binname = undefined;
 let discordRPC;
 
 const converter = new Convert({
@@ -125,8 +125,8 @@ const updateGameSummary = (gid, update, loadtrophies = false) => {
 };
 
 const updateBinaryPath = (path, checkfirst = false) => {
-  binname = path ?? binname;
-  exec(`"${binname}" -h`, { cwd: config.getValue('emu_path') }).on('close', (code) => {
+  if (!path) throw new Error('Empty emulator path!');
+  exec(`"${binname = path}" -h`, { cwd: config.getValue('emu_path') }).on('close', (code) => {
     if (code === 0 || code === 4294967295) config.reloadEmulatorSettings();
     else throw new Error('Failed to make a test emulator run!');
   });

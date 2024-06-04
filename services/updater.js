@@ -32,11 +32,6 @@ const searchBinary = () => {
     if (fs.lstatSync(binpath).isFile()) return binpath;
   } catch (e) { }
 
-  try { // Deprecated name, this check will be deleted after v.0.5 gets released
-    binpath = path.join(emupath, '/emulator.exe');
-    if (fs.lstatSync(binpath).isFile()) return binpath;
-  } catch (e) { }
-
   return null;
 };
 
