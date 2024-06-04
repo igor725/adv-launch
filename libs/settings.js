@@ -185,6 +185,7 @@ module.exports.Config = class Config {
         return;
       }
 
+      if (src_obj[key] === null) return;
       dst_obj[key] = src_obj[key];
     };
 

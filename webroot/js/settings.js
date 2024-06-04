@@ -6,7 +6,7 @@ window._onLangReady = (() => {
   let modified_cfg = [{
     general: {},
     graphics: {},
-    audio: {},
+    audio: { padspeakers: [] },
     controls: {
       keybinds: {},
       pads: [{}, {}, {}, {}]
@@ -119,22 +119,6 @@ window._onLangReady = (() => {
     gsd.innerHTML = opts.join('');
   };
 
-  const aliases = {
-    kb: {
-      keyboard: true,
-      kbd: true,
-      kb: true
-    },
-    de: {
-      sdl: true,
-      gamepad: true
-    },
-    xi: {
-      xinput: true,
-      xbox: true
-    }
-  };
-
   window.electronAPI.requestConfig().then(async (msg) => {
     saved_cfg = msg;
     refillScanDirs(saved_cfg);
@@ -161,22 +145,27 @@ window._onLangReady = (() => {
         for (let i = 0; i < 4; ++i) {
           opts.push(`<option data-cfgvalue="${i + 1}">${profiles[i].name}</option>`);
           inbacks.push(`
-          <div>
+          <div class="user">
             <label>${profiles[i].name}</label>
             <select
               data-cfgfacility="emu_controls"
-              data-cfgnoselect="1"
               data-cfgkey="pads"
               data-cfghint="arrobj"
               data-cfgarridx="${i}"
               data-cfginkey="type"
               data-cfgtype="string"
-              style="flex: 1"
             >
-              <option data-cfgvalue="sdl" ${aliases.de[pads[i].type] ? 'selected' : ''}>SDL2</option>
-              <option data-cfgvalue="xinput" ${aliases.xi[pads[i].type] ? 'selected' : ''}>XInput</option>
-              <option data-cfgvalue="keyboard" ${aliases.kb[pads[i].type] ? 'selected' : ''}>Keyboard</option>
+              <option data-cfgvalue="sdl"}>SDL2</option>
+              <option data-cfgvalue="xinput"}>XInput</option>
+              <option data-cfgvalue="keyboard"}>Keyboard</option>
             </select>
+            <select
+              data-cfgfacility="emu_audio"
+              data-cfgkey="padspeakers"
+              data-cfghint="arr"
+              data-cfgarridx="${i}"
+              data-cfgtype="string"
+            >${$('#madevice').innerHTML}</select>
           </div>`);
         }
         inusers.innerHTML = inbacks.join('');
@@ -213,12 +202,35 @@ window._onLangReady = (() => {
           break;
 
         case 'SELECT':
-          if (elem.dataset.cfgnoselect === '1') continue;
-          for (let i = 0; i < elem.options.length; ++i) {
-            if (getOptionValue(elem.dataset.cfgtype, elem.options[i]) == fac[key]) {
-              elem.selectedIndex = i;
-              break;
-            }
+          switch (elem.dataset.cfghint) {
+            case 'arrobj': {
+              const idx = getArrayIndex(elem);
+              const innkey = getInnerObjKey(elem);
+              for (let i = 0; i < elem.options.length; ++i) {
+                if (getOptionValue(elem.dataset.cfgtype, elem.options[i]) === fac[key][idx][innkey]) {
+                  elem.selectedIndex = i;
+                  break;
+                }
+              }
+            } break;
+            case 'arr': {
+              const idx = getArrayIndex(elem);
+              for (let i = 0; i < elem.options.length; ++i) {
+                if (getOptionValue(elem.dataset.cfgtype, elem.options[i]) == fac[key][idx]) {
+                  elem.selectedIndex = i;
+                  break;
+                }
+              }
+            } break;
+
+            default: {
+              for (let i = 0; i < elem.options.length; ++i) {
+                if (getOptionValue(elem.dataset.cfgtype, elem.options[i]) == fac[key]) {
+                  elem.selectedIndex = i;
+                  break;
+                }
+              }
+            } break;
           }
           break;
       }
@@ -259,6 +271,10 @@ window._onLangReady = (() => {
             const idx = getArrayIndex(target);
             const innkey = getInnerObjKey(target);
             fac[key][idx][innkey] = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
+          } break;
+          case 'arr': {
+            const idx = getArrayIndex(target);
+            fac[key][idx] = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
           } break;
           default: {
             const newvalue = getOptionValue(target.dataset.cfgtype, target.options[target.selectedIndex]);
@@ -312,13 +328,19 @@ window._onLangReady = (() => {
       case 'save':
         if (haveUnsaved()) {
           let haskb = false;
+          const spks = modified_cfg[0].audio.padspeakers;
+
           for (let i = 0; i < 4; ++i) {
-            if (aliases.kb[modified_cfg[0].controls.pads[i].type]) {
+            if (modified_cfg[0].controls.pads[i].type === 'keyboard') {
               if (haskb) {
                 if (!confirm(window.trAPI.get('settings.alerts.multiplekb'))) return;
                 break;
               }
               haskb = true;
+            }
+
+            if (spks.length > 0 && spks[i] === undefined) {
+              modified_cfg[0].audio.padspeakers[i] = null;
             }
           }
           window.electronAPI.sendCommand('sett-update', modified_cfg);

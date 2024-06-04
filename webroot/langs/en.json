@@ -35,6 +35,7 @@
     },
     "emulator": {
       "header": "Emulator settings",
+      "ousers": "Connected controllers count:",
       "currusr": {
         "label": "Current user:",
         "opt": {
