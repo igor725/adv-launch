@@ -139,7 +139,7 @@ const triggerCheck = async (force) => {
           return;
         }
 
-        const resp = await loadJSON('https://api.github.com/repos/SysRay/psOff_public/actions/runs?per_page=1&branch=features&status=completed');
+        const resp = await loadJSON('https://api.github.com/repos/SysRay/psOff_public/actions/runs?per_page=1&branch=features&status=success');
         if (resp.total_count > 0) {
           const run = resp.workflow_runs[0];
           const newver = run.id;
@@ -172,6 +172,8 @@ const download = async (url, version, headers = undefined) => {
       }
 
       return download(art.archive_download_url, version, headers);
+    } else if (resp.total_count === 0) {
+      throw new Error('No artifacts were generated for this run!');
     }
 
     throw new Error(`REST /artifacts failed: ${resp.message}`);
