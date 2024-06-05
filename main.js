@@ -373,6 +373,9 @@ const commandHandler = (channel, cmd, info) => {
       config.updateMultipleKeys(info);
       settwin.close();
       break;
+    case 'sett-forceupg':
+      updateWorker.postMessage({ act: 'run-check', force: true, notify: true });
+      break;
 
     default:
       console.error('Unhandled command: ', cmd);
@@ -582,6 +585,10 @@ const main = (userdir = __dirname) => {
       switch (msg.resp) {
         case 'nobinary':
           win.send('warnmsg', { hidden: false, type: 'text', id: 'upd-nobin', text: '{$tr:updater.warns.noemu}', trparams: msg, buttons: ['{$tr:buttons.ye}', '{$tr:buttons.ig}', '{$tr:buttons.cl}'] });
+          break;
+
+        case 'noupd':
+          genericWarnMsg('{$tr:updater.warns.noupd}', true);
           break;
 
         case 'progress':

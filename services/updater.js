@@ -76,7 +76,9 @@ const loadJSON = (url, headers = undefined) =>
     });
   });
 
-const triggerCheck = async (force) => {
+const noupdNotify = () => parentPort.postMessage({ resp: 'noupd' });
+
+const triggerCheck = async ({ force, notify }) => {
   const binpath = searchBinary();
 
   let currver = 'v.0.0';
@@ -128,7 +130,7 @@ const triggerCheck = async (force) => {
             } else {
               throw new Error('No assets in the latest release!');
             }
-          }
+          } else if (notify) noupdNotify();
         } else {
           throw new Error(`REST /releases failed: ${resp.message}`);
         }
@@ -139,7 +141,7 @@ const triggerCheck = async (force) => {
           return;
         }
 
-        const resp = await loadJSON('https://api.github.com/repos/SysRay/psOff_public/actions/runs?per_page=1&branch=features&status=completed');
+        const resp = await loadJSON('https://api.github.com/repos/SysRay/psOff_public/actions/runs?per_page=1&branch=features&status=success');
         if (resp.total_count > 0) {
           const run = resp.workflow_runs[0];
           const newver = run.id;
@@ -147,7 +149,7 @@ const triggerCheck = async (force) => {
           if (newver != currver) {
             newverinfo.url = '_' + run.artifacts_url;
             newverinfo.tag = newver.toString();
-          }
+          } else if (notify) noupdNotify();
         } else {
           throw new Error(`REST /actions failed: ${resp.message}`);
         }
@@ -172,6 +174,8 @@ const download = async (url, version, headers = undefined) => {
       }
 
       return download(art.archive_download_url, version, headers);
+    } else if (resp.total_count === 0) {
+      throw new Error('No artifacts were generated for this run!');
     }
 
     throw new Error(`REST /artifacts failed: ${resp.message}`);
@@ -268,7 +272,7 @@ const commandHandler = async (msg) => {
 
       case 'run-check':
         validateEmulatorPath();
-        await triggerCheck(msg.force);
+        await triggerCheck(msg);
         break;
 
       case 'download':

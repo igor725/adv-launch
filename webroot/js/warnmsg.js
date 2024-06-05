@@ -7,6 +7,7 @@
       const wrap = $('#wrapper');
 
       if (data.hidden) {
+        if (data.id !== warn.dataset.wid) return;
         wrap.dataset.ready = 1;
         warn.dataset.active = 0;
         return;
