@@ -23,6 +23,7 @@
           "monthly": "Monthly"
         }
       },
+      "updforce": "Force update check",
       "doubleclick": "Doubleclick will run the game",
       "drpc": "Enable Discord Rich Presence",
       "gsd": {
@@ -105,7 +106,8 @@
     "warns": {
       "newver": "New version of psOff emulator is available! Do you want to download it? (Installed: {currver}, New: {newver})",
       "noemu": "Looks like you have no psOff emulator installed. Would you like the launcher to download the latest release ({latest})?",
-      "downproc": "Downloading the emulator binaries, hang tight..."
+      "downproc": "Downloading the emulator binaries, hang tight...",
+      "noupd": "You're already using the latest emulator version!"
     },
     "errors": {
       "checkfail": "Failed to check updates for your psOff installation: {error}",

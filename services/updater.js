@@ -76,7 +76,9 @@ const loadJSON = (url, headers = undefined) =>
     });
   });
 
-const triggerCheck = async (force) => {
+const noupdNotify = () => parentPort.postMessage({ resp: 'noupd' });
+
+const triggerCheck = async ({ force, notify }) => {
   const binpath = searchBinary();
 
   let currver = 'v.0.0';
@@ -128,7 +130,7 @@ const triggerCheck = async (force) => {
             } else {
               throw new Error('No assets in the latest release!');
             }
-          }
+          } else if (notify) noupdNotify();
         } else {
           throw new Error(`REST /releases failed: ${resp.message}`);
         }
@@ -147,7 +149,7 @@ const triggerCheck = async (force) => {
           if (newver != currver) {
             newverinfo.url = '_' + run.artifacts_url;
             newverinfo.tag = newver.toString();
-          }
+          } else if (notify) noupdNotify();
         } else {
           throw new Error(`REST /actions failed: ${resp.message}`);
         }
@@ -270,7 +272,7 @@ const commandHandler = async (msg) => {
 
       case 'run-check':
         validateEmulatorPath();
-        await triggerCheck(msg.force);
+        await triggerCheck(msg);
         break;
 
       case 'download':

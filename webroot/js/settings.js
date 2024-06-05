@@ -351,45 +351,55 @@ window._onLangReady = (() => {
   });
 
   wrapper.on('click', ({ target }) => {
-    const elemid = target.dataset.setpathto;
-    if (!elemid) return;
-    window.electronAPI.selectFolder().then((path) => {
-      const elem = document.getElementById(elemid);
-      elem.value = path;
-      elem.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    switch (target.id) {
+      case 'gsd-add': {
+        const path = $('#gsd-path').value;
+        if (!path) return;
+
+        if (modified_cfg[1].scan_dirs === undefined) {
+          modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
+        }
+
+        modified_cfg[1].scan_dirs[path] = ($('#gsd-depth').selectedIndex + 1);
+        refillScanDirs(modified_cfg);
+      } break;
+
+      case 'gsd-remove': {
+        const path = $('#gsd-path').value;
+        if (!path) return;
+
+        if (modified_cfg[1].scan_dirs === undefined) {
+          modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
+        }
+
+        /**
+         * If we want _isSimilar to return valid result then this object
+         * should not change its size and loose keys, so delete is not an
+         * option there. Making object's value undefined has no side effects
+         * as it seems. JSON will not save undefined keys, but it's still there
+         * for _isSimilar.
+        */
+        modified_cfg[1].scan_dirs[path] = undefined;
+        refillScanDirs(modified_cfg);
+      } break;
+
+      case 'forceupd': {
+        window.electronAPI.sendCommand('sett-forceupg');
+        window.close();
+      } break;
+
+      default: {
+        const elemid = target.dataset.setpathto;
+        if (!elemid) return;
+        window.electronAPI.selectFolder().then((path) => {
+          const elem = document.getElementById(elemid);
+          elem.value = path;
+          elem.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      } break;
+    }
+
   }, true);
-
-  $('#gsd-add').on('click', () => {
-    const path = $('#gsd-path').value;
-    if (!path) return;
-
-    if (modified_cfg[1].scan_dirs === undefined) {
-      modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
-    }
-
-    modified_cfg[1].scan_dirs[path] = ($('#gsd-depth').selectedIndex + 1);
-    refillScanDirs(modified_cfg);
-  });
-
-  $('#gsd-remove').on('click', () => {
-    const path = $('#gsd-path').value;
-    if (!path) return;
-
-    if (modified_cfg[1].scan_dirs === undefined) {
-      modified_cfg[1].scan_dirs = Object.assign({}, saved_cfg[1].scan_dirs);
-    }
-
-    /**
-     * If we want _isSimilar to return valid result then this object
-     * should not change its size and loose keys, so delete is not an
-     * option there. Making object's value undefined has no side effects
-     * as it seems. JSON will not save undefined keys, but it's still there
-     * for _isSimilar.
-    */
-    modified_cfg[1].scan_dirs[path] = undefined;
-    refillScanDirs(modified_cfg);
-  });
 
   gsd.on('change', ({ target }) => {
     $('#gsd-path').value = target.options[target.selectedIndex].dataset.folder;
