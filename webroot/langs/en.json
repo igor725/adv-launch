@@ -80,11 +80,14 @@
       "dblrun": "Do you want the launcher to run the game on doubleclick?"
     },
     "gamesummary": {
-      "lastrun": "Last run:",
+      "lastrun": {
+        "label": "Last run:",
+        "null": "never"
+      },
       "playtime": {
         "label": "Playtime:",
         "duration": {
-          "null": "Unplayed",
+          "null": "unplayed",
           "seconds": "{value} sec.",
           "minutes": "{value} min.",
           "hours": "{value} hr."

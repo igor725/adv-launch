@@ -238,7 +238,7 @@
     const lplay = gsummary.$('.lplay p:nth-child(2)');
     window.trophyAPI.updateAchieved(data.trophies);
     if (data.patch) getGameBadgeById(data.gid).dataset.gipatch = data.patch;
-    lrun.innerText = data.lastrun === -1 ? 'Never' : (new Date(data.lastrun)).toLocaleDateString();
+    lrun.innerText = data.lastrun === -1 ? window.trAPI.get('main.gamesummary.lastrun.null') : (new Date(data.lastrun)).toLocaleDateString();
     lplay.innerText = formatTime(data.playtime);
     gsummary.style.opacity = 1;
   });

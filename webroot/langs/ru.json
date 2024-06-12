@@ -67,11 +67,14 @@
       "reqrst": "Некоторые измененные настройки требуют перезагрузки лаунчера!"
     },
     "gamesummary": {
-      "lastrun": "Запуск:",
+      "lastrun": {
+        "label": "Запуск:",
+        "null": "никогда"
+      },
       "playtime": {
         "label": "Наиграно:",
         "duration": {
-          "null": "Unplayed",
+          "null": "нисколько",
           "seconds": "{value} сек.",
           "minutes": "{value} мин.",
           "hours": "{value} ч."

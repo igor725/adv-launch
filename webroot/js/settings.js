@@ -73,8 +73,7 @@ window._onLangReady = (() => {
     switch (type) {
       case 'string': return elem.dataset.cfgvalue;
       case 'int': return parseInt(elem.dataset.cfgvalue);
-      default:
-        return null;
+      default: return null;
     }
   }
 
