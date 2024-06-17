@@ -17,7 +17,8 @@
 }
 
 #warnmsg p {
-  margin-bottom: 15px;
+  margin: 0;
+  padding: 15px;
 }
 
 #warnmsg progress {

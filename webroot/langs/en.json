@@ -76,6 +76,7 @@
       "alrun": "You should close your previous game first!",
       "nogame": "You should select the game first!",
       "gerror": "psOff process returned the error: {error}",
+      "execerror": "Failed to find emulator binary in specified path! Please, open Settings window and press \"Force update check\" button.",
       "reqrst": "One or more changed settings requires restart!",
       "dblrun": "Do you want the launcher to run the game on doubleclick?"
     },
