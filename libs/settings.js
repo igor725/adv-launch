@@ -54,6 +54,8 @@ module.exports.Config = class Config {
 
     const cp = path.join(this.getValue('emu_path'), '/config');
 
+    fs.mkdirSync(cp, { recursive: true });
+
     this.#emuconfpath = {
       controls: path.join(cp, '/controls.json'),
       general: path.join(cp, '/general.json'),

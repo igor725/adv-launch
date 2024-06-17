@@ -268,18 +268,22 @@ const commandHandler = (channel, cmd, info) => {
         genericWarnMsg('{$tr:main.actions.alrun}', true);
         return;
       }
-      win.send('ingame', true);
       const emuargs = [`--file=${info.path}\\eboot.bin`];
       const patch = getGameSummary(info, false).patch;
       if (patch) emuargs.push(`--update=${patch}`);
 
       const emupath = config.getValue('emu_path');
+      if (!binname) {
+        genericWarnMsg('{$tr:main.actions.execerror}');
+        return;
+      }
       gameproc = spawn(path.join(emupath, binname), emuargs, { cwd: emupath });
       gameproc.stdout.on('data', terminalListener);
       gameproc.stderr.on('data', terminalListener);
       gameproc._gameID = info.gid;
       gameproc._startTime = Date.now();
       discordRPC.setGame(info.gtitle);
+      win.send('ingame', true);
 
       gameproc.on('error', (err) => {
         genericWarnMsg('{$tr:main.actions.gerror}', true, { error: err.toString() });

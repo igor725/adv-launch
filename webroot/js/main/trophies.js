@@ -28,6 +28,7 @@
     if (cgameid < 0) cgameid += gamecnt;
     trlist.$('.multiple>.mult-list>a').innerText = names[cgameid];
     trlist.$$('.multiple>.mult-content>div').forEach((elem, idx) => {
+      elem.scrollTo(0, 0); // todo Address bug: sometimes scroll won't reset 0, no matter what
       elem.style.display = cgameid === idx ? null : 'none';
     });
   });
