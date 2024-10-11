@@ -1,5 +1,14 @@
 # psOff advanced launcher
 
+> [!WARNING]
+> This launcher will never be updated again!
+> Since psOff_public is now archive repo, there's no need
+> in this launcher. Ray and me now working on emulator
+> privately. We're in the middle of complete rework as of
+> Oct. 11th. The new emulator requires no launcher, since
+> user interface is integrated in emulator itself.
+> Learn more [here](https://github.com/SysRay/psOff_compatibility/).
+
 This is a launcher for [psOff, PlayStation 4 emulator](https://github.com/SysRay/psOff_public/) written in JS using Electron framework.
 
 <details>
